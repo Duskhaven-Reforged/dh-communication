@@ -1,1 +1,3 @@
-console.log("Hello from dh-communication AddOn!")
+import { testing } from "./testing";
+
+testing()
