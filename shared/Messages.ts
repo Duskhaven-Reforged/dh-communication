@@ -1,12 +1,61 @@
+export enum  ClientCallbackOperations
+{
+    GET_TALENTS                     = 0,
+    LEARN_TALENT                    = 1,
+    UNLEARN_TALENT                  = 2,
+    RESPEC_TALENTS                  = 3,
+    RESPEC_TALENTS_ERROR            = 4,
+    UPDATE_SPEC                     = 5,
+    ACTIVATE_SPEC                   = 6,
+    PRESTIGE                        = 7,
+    TALENT_TREE_LAYOUT              = 8,
+    PROMPT_CHAR_SPEC                = 9,
+    UPDATE_SPEC_ERROR               = 10,
+    ACTIVATE_SPEC_ERROR             = 11,
+    LEARN_TALENT_ERROR              = 12,
+    BUY_ITEM_ERROR                  = 13,
+    UNLEARN_TALENT_ERROR            = 14,
+    GET_TALENT_ERROR                = 15,
+    BUY_ITEMS                       = 16,
+    GET_ITEM_FROM_COLLECTION        = 17,
+    GET_PLAYER_COLLECTION           = 18,
+    GET_SHOP_LAYOUT                 = 19,
+    HOLIDAYS                        = 20,
+    GET_CHARACTER_SPECS             = 21,
+    PRESTIGE_ERROR                  = 22,
+    ACTIVATE_CLASS_SPEC             = 23,
+    ACTIVATE_CLASS_SPEC_ERROR       = 24,
+    GET_TOOLTIPS                    = 25,
+    FORGET_TOOLTIP                  = 26,
+    
+    // m+
+    MYTHIC_GET_WEEKLY_REWARD        = 101,
+    MYTHIC_GET_MAP_STATS            = 102,
+    MYTHIC_GET_AFFIXES_LIST         = 103,
+    MYTHIC_SET_AFFIXES_AND_START    = 104,
+    MYTHIC_KEY_COMPLETED            = 105, // send confirmation that key has ended
+    MYTHIC_OPEN_WINDOW              = 106,
+    MYTHIC_UPDATE_TIMER             = 107,
+    MYTHIC_UPDATE_DEATHS            = 108,
+    MYTHIC_UPDATE_CRITERIA          = 109,
+
+    // loadouts
+    LOADOUT_ERROR                   = 120,
+    GET_LOADOUTS                    = 121,
+    SAVE_LOADOUT                    = 122,
+    DELETE_LOADOUT                  = 123,
+};
+
 //dont reuse IDs
-export const testingBasicMessageID = 50;
-export class testingBasicMessage {
+export class ClientCallbackPayload {
     //all vars here
-    message: string = "";
+    message: string = ""
+    op: number = ClientCallbackOperations.GET_TALENTS
 
     //constructor, self explanatory
-    constructor(message: string) {
+    constructor(opcode: number, message: string) {
         this.message = message;
+        this.op = opcode;
     }
 
     //parsing the packet
@@ -16,35 +65,9 @@ export class testingBasicMessage {
     //writing the packet
     write(): TSPacketWrite {
         //you can default the size to 0, it will find it's own size. sometimes string brick this. i default to 2000 whenever it acts up
-        let packet = CreateCustomPacket(testingBasicMessageID, 0);
+        let packet = CreateCustomPacket(this.op, 0);
         packet.WriteString(this.message);
         return packet;
     }
 }
 
-//you need to have size to know how much data is in there, similar to how m2 store their information in ABlocks
-export const testingArrayMessageID = 51;
-export class testingArrayMessage {
-    size: uint32 = 0;
-    info: TSArray<float> = [];
-    constructor(size: uint32, info: TSArray<float>) {
-        this.size = size;
-        this.info = info;
-    }
-    read(read: TSPacketRead): void {
-        this.info.pop();
-        this.size = read.ReadUInt32();
-        for (let i = 0; i < this.size; i++) {
-            let data = read.ReadFloat();
-            this.info.push(data);
-        }
-    }
-    write(): TSPacketWrite {
-        let packet = CreateCustomPacket(testingArrayMessageID, 0);
-        packet.WriteUInt32(this.size);
-        for (let i = 0; i < this.size; i++) {
-            packet.WriteFloat(this.info[i]);
-        }
-        return packet;
-    }
-}

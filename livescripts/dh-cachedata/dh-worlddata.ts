@@ -5,7 +5,7 @@ export let wTreeMetaData: TSDictionary<uint32, DHTreeMetaData> = CreateDictionar
 export let wSpecNodeToSpell: TSDictionary<uint32, TSDictionary<uint8, uint32>> = CreateDictionary<uint32, TSDictionary<uint8, uint32>>({})
 export let wClassNodeToSpell: TSDictionary<uint32, TSDictionary<uint8, uint32>> = CreateDictionary<uint32, TSDictionary<uint8, uint32>>({})
 export let wPointTypeToTabs: TSDictionary<uint8, TSArray<uint32>> = CreateDictionary<uint8, TSArray<uint32>>({})
-export let wClassRaceTabMap: TSDictionary<uint32, TSDictionary<uint32, TSArray<uint32>>> = CreateDictionary<uint32, TSDictionary<uint32, TSArray<uint32>>>({})
+export let wRaceClassTabMap: TSDictionary<uint32, TSDictionary<uint32, TSArray<uint32>>> = CreateDictionary<uint32, TSDictionary<uint32, TSArray<uint32>>>({})
 export let wClassLevelSpells: TSDictionary<uint8, TSDictionary<uint32, TSDictionary<uint8, TSArray<uint32>>>> = CreateDictionary<uint8, TSDictionary<uint32, TSDictionary<uint8, TSArray<uint32>>>>({})
 export let wSpellLearnAdditionalSpells: TSDictionary<uint32, TSArray<uint32>> = CreateDictionary<uint32, TSArray<uint32>>({})
 export let wClassFirstSpec: TSDictionary<uint32, uint32> = CreateDictionary<uint32, uint32>({})
@@ -105,7 +105,7 @@ class CustomTalentTabs {
                 wClassNodeToClassTree[tab.Classmask] = tab.Id;
             }
 
-            wClassRaceTabMap.forEach((race, classMap) => {
+            wRaceClassTabMap.forEach((race, classMap) => {
                 let rBit = (tab.Racemask & (1 << (race - 1)))
 
                 if (tab.Racemask !== 0 && rBit === 0)
@@ -114,7 +114,7 @@ class CustomTalentTabs {
                 classMap.forEach((wClass, tabs) => {
                     let cBit = (tab.Classmask & (1 << (wClass - 1)))
                     if (cBit !== 0 || tab.Classmask === 0) {
-                        wClassRaceTabMap[race][wClass].push(tab.Id)
+                        wRaceClassTabMap[race][wClass].push(tab.Id)
                         wPointTypeToTabs[tab.TalentType].push(tab.Id)
                     }
                 })

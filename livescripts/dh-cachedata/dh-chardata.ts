@@ -3,7 +3,7 @@ import { wTalentTrees } from "./dh-worlddata";
 
 export let cActions: TSDictionary<uint64, TSDictionary<uint8, TSDictionary<uint8, CharacterSpecAction>>> = CreateDictionary<uint64, TSDictionary<uint8, TSDictionary<uint8, CharacterSpecAction>>>({})
 export let cCharPoints: TSDictionary<uint64 /*owner*/, TSDictionary<uint16/*pointType*/, TSDictionary<uint8/*spec*/, DHCharacterPoint>>> = CreateDictionary<uint64, TSDictionary<uint16, TSDictionary<uint8, DHCharacterPoint>>>({})
-export let cMaxPointDefalts: TSDictionary<uint16, DHCharacterPoint> = CreateDictionary<uint16, DHCharacterPoint>({})
+export let cMaxPointDefaults: TSDictionary<uint16, DHCharacterPoint> = CreateDictionary<uint16, DHCharacterPoint>({})
 export let cSpecs: TSDictionary<uint64 /*owner*/, TSDictionary<uint8/*spec*/, DHPlayerSpec>> = CreateDictionary<uint64, TSDictionary<uint8, DHPlayerSpec>>({})
 export let cActiveSpecs: TSDictionary<uint64, uint32> = CreateDictionary<uint64, uint32>({})
 export let cLoadouts: TSDictionary<uint64 /*owner*/, TSDictionary<uint32/*tab*/, TSDictionary<uint8/*id*/, DHPlayerLoadout>>> = CreateDictionary<uint64, TSDictionary<uint32, TSDictionary<uint8, DHPlayerLoadout>>>({})
@@ -102,7 +102,7 @@ class CharacterPoints {
             let point = new DHCharacterPoint(type, spec, sum, max)
 
             if (owner === 0xffffffff)
-                cMaxPointDefalts[type] = point
+                cMaxPointDefaults[type] = point
             else 
                 cCharPoints[owner][type][spec] = point
 
@@ -127,7 +127,7 @@ class CharacterSpecs {
             let spellIcon = res.GetUInt32(5)
             let specTabId = res.GetUInt32(6)
 
-            let spec = new DHPlayerSpec(owner, id, name, description, active, spellIcon, specTabId);
+            let spec = new DHPlayerSpec(owner, id, name, description, !!active, spellIcon, specTabId);
 
             if (active)
                 cActiveSpecs[id] = spec.Id

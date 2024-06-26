@@ -1,3 +1,3 @@
-import { testing } from "./testing";
+import { RouteTopics } from "./TopicRouter";
 
-testing()
+RouteTopics()

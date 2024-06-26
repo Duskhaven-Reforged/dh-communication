@@ -56,6 +56,14 @@ export class DHCharacterTalent {
         this.TabId = tab
         this.CurrentRank = currentRank
     }
+
+    public IsNull() : bool {
+        return this.SpellId === 0
+    }
+
+    public static Empty() : DHCharacterTalent {
+        return new DHCharacterTalent(0, 0, 0)
+    }
 }
 
 export class DHTalentPrereq {
@@ -77,11 +85,11 @@ export class DHPlayerSpec {
     CharGuid: TSNumber<uint64>
     Name: string
     Description: string
-    Active: uint8
+    Active: bool
     SpellIconId: uint32
     SpecTabId: uint32
 
-    constructor(owner: number, id: number, name: string, desc: string, active: uint8, icon: uint32, spec: uint32) {
+    constructor(owner: number, id: number, name: string, desc: string, active: bool, icon: uint32, spec: uint32) {
         this.CharGuid = owner
         this.Id = id
         this.Name = name
@@ -89,6 +97,14 @@ export class DHPlayerSpec {
         this.Active = active
         this.SpellIconId = icon
         this.SpecTabId = spec
+    }
+
+    public IsNull() : bool {
+        return this.CharGuid === 0
+    }
+
+    public static Empty() : DHPlayerSpec {
+        return new DHPlayerSpec(0, 0, '', '', false, 0, 0)
     }
 
     Talents: TSDictionary<uint32, TSDictionary<uint32, DHCharacterTalent>> = CreateDictionary<uint32, TSDictionary<uint32, DHCharacterTalent>>({})
@@ -171,6 +187,14 @@ export class DHTalentTab {
             this.TabIndex = tabIndex
     }
 
+    public IsNull () : bool {
+        return this.Id === 0
+    }
+
+    public static Empty() : DHTalentTab {
+        return new DHTalentTab(0, 0, 0, '', 0, '', '', 0, '', 0, 0)
+    }
+
     Talents: TSDictionary<uint32, DHTalent> = CreateDictionary<uint32, DHTalent>({})
 }
 
@@ -223,3 +247,4 @@ export class DHTreeMetaData {
     NodeLocation: TSDictionary<uint32, DHNodeMetaData> = CreateDictionary<uint32, DHNodeMetaData>({})
 }
 
+export const base64_char : string = "|ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";

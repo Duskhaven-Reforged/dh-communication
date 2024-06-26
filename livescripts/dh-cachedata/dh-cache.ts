@@ -1,7 +1,6 @@
-import { DHCharacterPoint, DHCharacterTalent, DHPlayerLoadout, DHPlayerSpec, DHPointType, DHTalent, DHTalentTab, DHTreeMetaData } from "../classes";
-import { LoadCharacterData, cActiveLoadouts, cActiveSpecs, cCharPoints, cLoadouts, cSpecs } from "./dh-chardata";
-
-import { LoadWorldData, wClassNodeToSpell, wClassRaceTabMap, wPointTypeToTabs, wSpecNodeToSpell, wSpellToTab, wTabToSpell, wTalentTrees } from "./dh-worlddata";
+import { DHCharacterPoint, DHCharacterTalent, DHPlayerLoadout, DHPlayerSpec, DHPointType, DHTalent, DHTalentTab, DHTreeMetaData, TALENT_POINT_TYPES, base64_char } from "../classes";
+import { LoadCharacterData, cActiveLoadouts, cActiveSpecs, cCharPoints, cLoadouts, cMaxPointDefaults, cSpecs } from "./dh-chardata";
+import { LoadWorldData, wClassNodeToSpell, wRaceClassTabMap, wPointTypeToTabs, wSpecNodeToSpell, wSpellToTab, wTabToSpell, wTalentTrees } from "./dh-worlddata";
 
 export class DHCache {
     
@@ -21,9 +20,9 @@ export class DHCache {
         ]
 
         RACE_LIST.forEach((race) => {
-            wClassRaceTabMap[race] = CreateDictionary<uint32, TSArray<uint32>>({})
+            wRaceClassTabMap[race] = CreateDictionary<uint32, TSArray<uint32>>({})
             CLASS_LIST.forEach((pClass) => {
-                wClassRaceTabMap[race][pClass] = CreateArray<uint32>([])
+                wRaceClassTabMap[race][pClass] = CreateArray<uint32>([])
             })
         })
 
@@ -38,10 +37,10 @@ export class DHCache {
         let race = player.GetRace()
         let pClass = player.GetClass()
 
-        if (wClassRaceTabMap.contains(race))
-            if (wClassRaceTabMap[race].contains(pClass)) {
+        if (wRaceClassTabMap.contains(race))
+            if (wRaceClassTabMap[race].contains(pClass)) {
                 if (wPointTypeToTabs.contains(tpt)) {
-                    wClassRaceTabMap[race][pClass].forEach((tab) => {
+                    wRaceClassTabMap[race][pClass].forEach((tab) => {
                         if (wPointTypeToTabs[tpt].includes(tab))
                             out.push(wTalentTrees[tab])
                     })
@@ -75,7 +74,7 @@ export class DHCache {
                 cLoadouts[owner][tab.Id][plo.Id] = plo
                 cActiveLoadouts[owner] = plo
 
-                const res = QueryWorld("insert into `forge_character_talent_loadouts` (`guid`, `id`, `talentTabId`, `name`, `talentString`, `active`) values ("+owner+", "+plo.Id+", "+tab.Id+", '"+plo.Name+"', '"+loadout+"', "+true+")")
+                const res = QueryCharacters("insert into `forge_character_talent_loadouts` (`guid`, `id`, `talentTabId`, `name`, `talentString`, `active`) values ("+owner+", "+plo.Id+", "+tab.Id+", '"+plo.Name+"', '"+loadout+"', "+true+")")
                 while (res.GetRow()) {}
             })
         }
@@ -95,12 +94,12 @@ export class DHCache {
         return 0
     }
 
-    public TryGetCharacterTalents(player: TSPlayer, tab: number) : TSDictionary<uint32, DHCharacterTalent> | any {
+    public TryGetCharacterTalents(player: TSPlayer, tab: number) : TSDictionary<uint32, DHCharacterTalent> {
         let spec : DHPlayerSpec = this.TryGetCharacterActiveSpec(player)
         if (spec.Talents.contains(tab))
             return spec.Talents[tab]
 
-        return {}
+        return CreateDictionary<uint32, DHCharacterTalent>({})
     }
 
     public TryGetAllCharacterSpecs(player: TSPlayer) : TSArray<DHPlayerSpec> {
@@ -115,24 +114,24 @@ export class DHCache {
         return out
     }
 
-    public TryGetCharacterActiveSpec(player: TSPlayer) : DHPlayerSpec | any {
+    public TryGetCharacterActiveSpec(player: TSPlayer) : DHPlayerSpec {
         let guid = player.GetGUID().GetCounter()
         if (cActiveSpecs.contains(guid))
             return this.TryGetCharacterSpec(player, cActiveSpecs[guid])
 
-        return null
+        return DHPlayerSpec.Empty()
     }
 
-    public TryGetCharacterSpec(player: TSPlayer, spec: number) : DHPlayerSpec | any {
+    public TryGetCharacterSpec(player: TSPlayer, spec: number) : DHPlayerSpec {
         let guid = player.GetGUID().GetCounter()
         if (cSpecs.contains(guid))
             if (cSpecs[guid].contains(spec))
                 return cSpecs[guid][spec]
-
-        return null
+        
+        return DHPlayerSpec.Empty()
     }
 
-    public GetTalent(player: TSPlayer, spell: number) : DHCharacterTalent | any {
+    public GetTalent(player: TSPlayer, spell: number) : DHCharacterTalent {
         if(wSpellToTab.contains(spell)) {
             let tab = wTalentTrees[wSpellToTab[spell]]
             let activeSpec : DHPlayerSpec = this.TryGetCharacterActiveSpec(player)
@@ -143,32 +142,142 @@ export class DHCache {
                 }
             }
         }
-        return null
+        return DHCharacterTalent.Empty()
     }
 
-    public GetSpecPoints(player: TSPlayer, pointType: DHPointType, spec: number) : DHCharacterPoint {
-        let guid = player.GetGUID().GetCounter()
-        if (cCharPoints.contains(guid)) {
-            if (cCharPoints[guid].contains(pointType)) {
-                if (cCharPoints[guid][pointType].contains(spec))
-                    return cCharPoints[guid][pointType][spec]
+    public GetSpecPoints(player: TSPlayer, pointType: DHPointType, spec: uint8) : DHCharacterPoint {
+        if (spec) {
+            let guid = player.GetGUID().GetCounter()
+            if (cCharPoints.contains(guid)) {
+                if (cCharPoints[guid].contains(pointType)) {
+                    if (cCharPoints[guid][pointType].contains(spec))
+                        return cCharPoints[guid][pointType][spec]
+                }
             }
-        }
 
-        let fcp = new DHCharacterPoint(pointType, spec, 0, 0)
-        return this.UpdateCharPoints(player, fcp)
+            let fcp = new DHCharacterPoint(pointType, spec, 0, 0)
+            return this.UpdateCharPoints(player, fcp)
+        } else {
+            let spec = this.TryGetCharacterActiveSpec(player)
+            if (!spec.IsNull()) {
+                let real: DHPlayerSpec = spec
+                return this.GetSpecPoints(player, pointType, real.Id)
+           }
+
+           this.CreateBaseSpec(player, pointType)
+
+           return this.GetSpecPoints(player, pointType, 0)
+        }
     }
 
-    public UpdateCharPoints(player: TSPlayer, point: DHCharacterPoint) : DHCharacterPoint {
+    public UpdateCharPoints(player: TSPlayer, point: DHCharacterPoint) {
         let guid = player.GetGUID().GetCounter()
         
         cCharPoints[guid][point.Type][point.SpecId] = point
 
-        const res = QueryWorld("UPDATE INTO `forge_character_points` (`guid`,`type`,`spec`,`sum`,`max`) VALUES ("+guid+","+point.Type+","+point.SpecId+","+point.Sum+","+point.Max+")")
-        while (res.GetRow()) {}
+        const res = QueryCharacters("UPDATE INTO `forge_character_points` (`guid`,`type`,`spec`,`sum`,`max`) VALUES ("+guid+","+point.Type+","+point.SpecId+","+point.Sum+","+point.Max+")")
 
         return point
     }
-}
 
-export const base64_char : string = "|ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    public UpdateCharSpec(player: TSPlayer, spec: DHPlayerSpec) {
+        let owner = player.GetGUID().GetCounter()
+        let acct = player.GetAccountID()
+        
+        cSpecs[owner][spec.Id] = spec
+
+        if (spec.Id !== cActiveSpecs[owner] && spec.Active) {
+            cSpecs[owner][cActiveSpecs[owner]].Active = false
+            this.SaveSpec(cSpecs[owner][cActiveSpecs[owner]])
+
+            cActiveSpecs[owner] = spec.Id
+        }
+
+        this.SaveSpec(spec)
+
+    }
+
+    public SaveSpec(spec: DHPlayerSpec) {
+        let guid = spec.CharGuid
+
+        const res = QueryCharacters("UPDATE INTO `forge_character_specs` (`id`,`guid`,`name`,`description`,`active`,`spellicon`,`visability`,`charSpec`) VALUES ("+spec.Id+","+guid+",'"+spec.Name+"','"+spec.Description+"',"+spec.Active+","+spec.SpellIconId+",1,"+spec.SpecTabId+")")
+
+        spec.PointsSpent.forEach((key, val) => {
+            const res = QueryCharacters("UPDATE INTO forge_character_talents_spent(`guid`,`spec`,`tabid`,`spent`) VALUES("+guid+", "+spec.Id+", "+key+", "+val+")")
+        })
+
+        spec.Talents.forEach((tab, talents) => {
+            talents.forEach((spellId, talent) => {
+                this.SaveTalent(guid, spec.Id, talent)
+            })
+        })
+    }
+
+    public SaveTalent(guid: number, specId: number, talent: DHCharacterTalent) {
+        QueryCharacters("UPDATE INTO `forge_character_talents` (`guid`,`spec`,`spellid`,`tabId`,`currentrank`) VALUES ("+guid+","+specId+","+talent.SpellId+","+talent.TabId+","+talent.CurrentRank+")")
+    }
+
+    public GetCommonCharacterPoint(player: TSPlayer, pt: DHPointType) {
+        return this.GetSpecPoints(player, pt, 0);
+    }
+
+    public GetMaxPointDefaults(type: DHPointType) : DHCharacterPoint {
+        if (cMaxPointDefaults.contains(type))
+            return cMaxPointDefaults[type]
+        else
+            return new DHCharacterPoint(type, 0xffffffff, 0, 0)
+    }
+
+    public TryGetTabPointType(tab: number) : DHPointType {
+        if (wTalentTrees.contains(tab))
+            return wTalentTrees[tab].TalentType
+
+        return DHPointType.MISSING
+    }
+
+    public TryGetTalentTab(player: TSPlayer, tab: number) : DHTalentTab {
+        let race = player.GetRace()
+        let pClass = player.GetClass()
+        if (wRaceClassTabMap.contains(race)) {
+            if (wRaceClassTabMap[race].contains(pClass))
+                if (wRaceClassTabMap[race][pClass].indexOf(tab))
+                    return wTalentTrees[tab]
+                }
+
+        return DHTalentTab.Empty()
+    }
+
+    public CreateBaseSpec(player: TSPlayer, pointType: DHPointType) {
+        
+        let spec = new DHPlayerSpec(player.GetGUID().GetCounter(), 1, "Base", "Base spec used for everything", true, 133743, 1)
+        let tabs = this.TryGetCustomTalentTabs(player, DHPointType.TALENT)
+        if (tabs.length) {
+            tabs.forEach((tab) => {
+                tab.Talents.forEach((spell, talent) => {
+                    let newTalent = new DHCharacterTalent(talent.SpellId, tab.Id, 0)
+                    newTalent.Type = talent.NodeType
+                    spec.Talents[tab.Id][newTalent.SpellId] = newTalent
+                })
+            })
+        }
+        tabs = this.TryGetCustomTalentTabs(player, DHPointType.CLASS)
+        if (tabs.length) {
+            tabs.forEach((tab) => {
+                tab.Talents.forEach((spell, talent) => {
+                    let newTalent = new DHCharacterTalent(talent.SpellId, tab.Id, 0)
+                    newTalent.Type = talent.NodeType
+                    spec.Talents[tab.Id][newTalent.SpellId] = newTalent
+                })
+            })
+        }
+
+        TALENT_POINT_TYPES.forEach((type) => {
+            let fpt = this.GetCommonCharacterPoint(player, type)
+            let maxP = this.GetMaxPointDefaults(type)
+
+            let newPoint = new DHCharacterPoint(type, spec.Id, maxP.Sum, maxP.Max)
+            this.UpdateCharPoints(player, newPoint)
+        })
+        this.UpdateCharSpec(player, spec)
+    }
+}
