@@ -248,3 +248,4 @@ export class DHTreeMetaData {
 }
 
 export const base64_char : string = "|ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+export const ACOUNT_WIDE_KEY = 0xfffffffe

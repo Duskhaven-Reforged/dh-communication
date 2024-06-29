@@ -44,13 +44,15 @@ export enum  ClientCallbackOperations
     GET_LOADOUTS                    = 121,
     SAVE_LOADOUT                    = 122,
     DELETE_LOADOUT                  = 123,
+
+    MALFORMED_PACKET_ERROR          = 999,
 };
 
 //dont reuse IDs
-export class ClientCallbackPayload {
+export class SimpleMessagePayload {
     //all vars here
-    message: string = ""
     op: number = ClientCallbackOperations.GET_TALENTS
+    message: string = ""
 
     //constructor, self explanatory
     constructor(opcode: number, message: string) {
@@ -60,7 +62,7 @@ export class ClientCallbackPayload {
 
     //parsing the packet
     read(read: TSPacketRead): void {
-        this.message = read.ReadString();
+        
     }
     //writing the packet
     write(): TSPacketWrite {
@@ -71,3 +73,21 @@ export class ClientCallbackPayload {
     }
 }
 
+export class ServerToClientPayload {
+    op: number = -1
+
+    //constructor, self explanatory
+    constructor(opcode: number) {
+        this.op = opcode;
+    }
+
+    //parsing the packet
+    read(read: TSPacketRead): void {
+    }
+    //writing the packet
+    write(): TSPacketWrite {
+        //you can default the size to 0, it will find it's own size. sometimes string brick this. i default to 2000 whenever it acts up
+        let packet = CreateCustomPacket(this.op, 0);
+        return packet;
+    }
+}

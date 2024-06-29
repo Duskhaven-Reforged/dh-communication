@@ -106,13 +106,15 @@ class CustomTalentTabs {
             }
 
             wRaceClassTabMap.forEach((race, classMap) => {
-                let rBit = (tab.Racemask & (1 << (race - 1)))
+                let raceFlag = (1 << (race - 1))
+                let rBit = (tab.Racemask & raceFlag)
 
                 if (tab.Racemask !== 0 && rBit === 0)
                     return
 
                 classMap.forEach((wClass, tabs) => {
-                    let cBit = (tab.Classmask & (1 << (wClass - 1)))
+                    let classFlag = (1 << (wClass - 1))
+                    let cBit = (tab.Classmask & classFlag)
                     if (cBit !== 0 || tab.Classmask === 0) {
                         wRaceClassTabMap[race][wClass].push(tab.Id)
                         wPointTypeToTabs[tab.TalentType].push(tab.Id)
@@ -123,7 +125,6 @@ class CustomTalentTabs {
             wTalentTrees[tab.Id] = tab;
             count++
         }
-
         return `\t\tLoaded ${count} entries.\n`
     }
 }

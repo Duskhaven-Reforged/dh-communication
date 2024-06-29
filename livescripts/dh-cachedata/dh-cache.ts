@@ -1,22 +1,26 @@
-import { DHCharacterPoint, DHCharacterTalent, DHPlayerLoadout, DHPlayerSpec, DHPointType, DHTalent, DHTalentTab, DHTreeMetaData, TALENT_POINT_TYPES, base64_char } from "../classes";
+import { ACOUNT_WIDE_KEY, DHCharacterPoint, DHCharacterTalent, DHNodeType, DHPlayerLoadout, DHPlayerSpec, DHPointType, DHTalentTab, TALENT_POINT_TYPES, base64_char } from "../classes";
 import { LoadCharacterData, cActiveLoadouts, cActiveSpecs, cCharPoints, cLoadouts, cMaxPointDefaults, cSpecs } from "./dh-chardata";
-import { LoadWorldData, wClassNodeToSpell, wRaceClassTabMap, wPointTypeToTabs, wSpecNodeToSpell, wSpellToTab, wTabToSpell, wTalentTrees } from "./dh-worlddata";
+import { LoadWorldData, wClassNodeToSpell, wRaceClassTabMap, wPointTypeToTabs, wSpecNodeToSpell, wSpellToTab, wTabToSpell, wTalentTrees, wChoiceNodesRev } from "./dh-worlddata";
 
 export class DHCache {
     
     constructor() {
         // TODO: custom races
         let RACE_LIST = [ 
-            Race.HUMAN, Race.ORC, Race.DWARF, Race.NIGHTELF, 
-            Race.UNDEAD, Race.TAUREN, Race.GNOME, Race.TROLL,
-            Race.BLOODELF, Race.DRAENEI,
+            Race.HUMAN, Race.ORC, Race.DWARF, Race.NIGHTELF, Race.UNDEAD_PLAYER, 
+            Race.TAUREN, Race.GNOME, Race.TROLL, Race.VULPERA, Race.BLOODELF, Race.DRAENEI, 
+            Race.WORGEN, Race.NIGHTBORNE, Race.PANDAREN, Race.VOIDELF, Race.EREDAR, 
+            Race.DRACTHYR, Race.ZANDALARI_TROLL, Race.OGRE, Race.DRAENEI_LIGHTFORGED, 
+            Race.GOBLIN, Race.NAGA, Race.BROKEN, Race.TUSKARR, Race.FOREST_TROLL, 
+            Race.SKELETON, Race.DEMONHUNTERH, Race.ARAKKOA, Race.TAUNKA, Race.FELORC, 
+            Race.KULTIRAN, Race.DEMONHUNTERA,
         ]
         // TODO: custom classes
         let CLASS_LIST = [
             Class.WARRIOR, Class.PALADIN, Class.HUNTER,
             Class.ROGUE, Class.PRIEST, Class.DEATH_KNIGHT,
-            Class.SHAMAN, Class.MAGE, Class.WARLOCK,
-            Class.DRUID,
+            Class.SHAMAN, Class.MAGE, Class.WARLOCK, Class.DEMON_HUNTER,
+            Class.DRUID, Class.MONK, Class.BARD, Class.TINKER
         ]
 
         RACE_LIST.forEach((race) => {
@@ -164,7 +168,7 @@ export class DHCache {
                 return this.GetSpecPoints(player, pointType, real.Id)
            }
 
-           this.CreateBaseSpec(player, pointType)
+           this.CreateBaseSpec(player)
 
            return this.GetSpecPoints(player, pointType, 0)
         }
@@ -182,7 +186,6 @@ export class DHCache {
 
     public UpdateCharSpec(player: TSPlayer, spec: DHPlayerSpec) {
         let owner = player.GetGUID().GetCounter()
-        let acct = player.GetAccountID()
         
         cSpecs[owner][spec.Id] = spec
 
@@ -194,7 +197,31 @@ export class DHCache {
         }
 
         this.SaveSpec(spec)
+    }
 
+    public AddCharacterPointsToAllSpecs(player: TSPlayer, type: DHPointType, amount: number) {
+        let m = this.GetMaxPointDefaults(type)
+        let ccp = this.GetCommonCharacterPoint(player, type)
+
+        if (m.Max > 0) {
+            let maxPoints = amount + ccp.Sum
+            if (maxPoints >= m.Max) {
+                maxPoints = maxPoints - m.Max
+                amount = amount - maxPoints
+            }
+        }
+
+        if (amount > 0) {
+            ccp.Sum += amount
+            cSpecs[player.GetGUID().GetCounter()].forEach((specId, spec) => {
+                let sp = this.GetSpecPoints(player, type, specId)
+                sp.Sum += amount
+                this.UpdateCharPoints(player, sp)
+            })
+
+            // todo: send message on awarded points
+            // ChatHandler(player->GetSession()).SendSysMessage("|cff8FCE00You have been awarded " + std::to_string(amount) + " " + GetpointTypeName(pointType) + " point(s).");
+        }
     }
 
     public SaveSpec(spec: DHPlayerSpec) {
@@ -240,14 +267,16 @@ export class DHCache {
         let pClass = player.GetClass()
         if (wRaceClassTabMap.contains(race)) {
             if (wRaceClassTabMap[race].contains(pClass))
-                if (wRaceClassTabMap[race][pClass].indexOf(tab))
+                if (wRaceClassTabMap[race][pClass].includes(tab)) {
+                    console.log(`Got tab ${tab}`)
                     return wTalentTrees[tab]
                 }
+        }
 
         return DHTalentTab.Empty()
     }
 
-    public CreateBaseSpec(player: TSPlayer, pointType: DHPointType) {
+    public CreateBaseSpec(player: TSPlayer) {
         
         let spec = new DHPlayerSpec(player.GetGUID().GetCounter(), 1, "Base", "Base spec used for everything", true, 133743, 1)
         let tabs = this.TryGetCustomTalentTabs(player, DHPointType.TALENT)
@@ -275,9 +304,85 @@ export class DHCache {
             let fpt = this.GetCommonCharacterPoint(player, type)
             let maxP = this.GetMaxPointDefaults(type)
 
-            let newPoint = new DHCharacterPoint(type, spec.Id, maxP.Sum, maxP.Max)
+            let newPoint = new DHCharacterPoint(type, spec.Id, fpt.Sum, maxP.Max)
             this.UpdateCharPoints(player, newPoint)
         })
         this.UpdateCharSpec(player, spec)
+    }
+
+    public HandleDeleteCharacter(player: TSPlayer) {
+        let guid = player.GetGUID().GetCounter()
+        QueryCharacters(`DELETE FROM forge_character_specs WHERE guid = ${guid}`)
+        QueryCharacters(`DELETE FROM character_modes WHERE guid = ${guid}`)
+        QueryCharacters(`DELETE FROM forge_character_points WHERE guid = ${guid} AND spec != ${ACOUNT_WIDE_KEY}`)
+        QueryCharacters(`DELETE FROM forge_character_talents WHERE guid = ${guid} AND spec != ${ACOUNT_WIDE_KEY}`)
+        QueryCharacters(`DELETE FROM forge_character_talents_spent WHERE guid = ${guid} AND spec != ${ACOUNT_WIDE_KEY}`)
+    }
+
+    public ForgetTalents(player: TSPlayer, spec: DHPlayerSpec, type: DHPointType) {
+        let tabs = this.TryGetCustomTalentTabs(player, type)
+        tabs.forEach((tab) => {
+            tab.Talents.forEach((spellId, talent) => {
+                if (talent.NodeType == DHNodeType.CHOICE) {
+                    wChoiceNodesRev.forEach((spell, nodeIndex) => {
+                        if (player.HasSpell(spell))
+                            player.RemoveSpell(spell, false, false)
+                    })
+                }
+                else {
+                    talent.Ranks.forEach((rank, spell) => {
+                        let info = GetSpellInfo(spell)
+                        for (let eff = SpellEffIndex.EFFECT_0; eff <= SpellEffIndex.EFFECT_2; eff++) {
+                            let effect = info.GetEffect(eff)
+                            if (effect.GetType() === SpellEffects.LEARN_SPELL) {
+                                player.RemoveSpell(effect.GetTriggerSpell(), false, false)
+                            }
+
+                            player.RemoveSpell(spell, false, false)
+                        }
+                    })
+                }
+
+                if (spec.Talents.contains(tab.Id))
+                    if (spec.Talents[tab.Id].contains(spellId))
+                        spec.Talents[tab.Id][spellId].CurrentRank = 0
+            })
+        })
+        this.UpdateCharSpec(player, spec)
+
+        let fcp = this.GetSpecPoints(player, type, spec.Id)
+        let amount = 0
+        let level = player.GetLevel()
+        if (level >= 10)
+            level -= 9
+
+        switch(type) {
+            case DHPointType.TALENT: {
+                if (level > 1) {
+                    amount = Math.floor(level/2)
+                } else
+                    if (level % 2)
+                        amount = 1
+            } break;
+            case DHPointType.CLASS: {
+                if (level > 1) {
+                    let rem = level % 2
+                    let div = Math.floor(level/2)
+                    if (rem)
+                        div++
+
+                    amount = div
+                }
+            } break;
+            default:
+                break;
+        }
+
+        fcp.Max = amount
+        fcp.Sum = amount
+
+        this.UpdateCharPoints(player, fcp)
+        if (type === DHPointType.TALENT)
+            this.ForgetTalents(player, spec, DHPointType.CLASS)
     }
 }

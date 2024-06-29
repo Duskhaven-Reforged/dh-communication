@@ -1,3 +1,3 @@
-import { RouteTopics } from "./TopicRouter";
+import { TalentTreeUI } from "./dh-ui/dh-talent/TalentTree";
 
-RouteTopics()
+TalentTreeUI()
