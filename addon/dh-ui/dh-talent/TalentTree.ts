@@ -1,6 +1,6 @@
 import { Backdrop, CONSTANTS, GetClassId, PATH, Util } from './Constants';
-import { GetTalentTreeLayout, OnTalentError, SendCallbackToServer } from '../../dh-message/TopicRouter';
-import { ClientCallbackOperations } from '../../../shared/Messages';
+import { ClientCallbackOperations, SimpleMessagePayload } from '../../../shared/Messages';
+import { GetTalentTreeLayoutPayload } from '../../../shared/Payloads/TalentTreeLayoutPayload';
 import { GetCharacterSpecsPayload } from '../../../shared/Payloads/GetCharacterSpecsPayload';
 
 // caches for intraaddon info sharing
@@ -425,10 +425,6 @@ export function TalentTreeUI() {
     ClassSpecWindow.Hide()
     let PlayerTalentFrameTabsLeft = null
 
-    TalentMicroButton.SetScript("OnClick", function() {
-        PlayerTalentFrameToggle()
-    })
-
     function InitializeTabsLeft() {
         if (!PlayerTalentFrameTabsLeft) {
             let tabsLeft = CreateFrame("Frame", "TalentFrame_TabsLeft", TalentFrame)
@@ -450,34 +446,34 @@ export function TalentTreeUI() {
 
     // ---------------------------- HOOKS FOR CALLBACKS ---------------------------- \\
 
-    // OnCustomPacket(ClientCallbackOperations.GET_CHARACTER_SPECS,pkt=>{ 
-    //     let Reader = new GetCharacterSpecsPayload()
-    //     let layout = Reader.read(pkt)
-    //     if (layout.SpecCounts) {
-    //         console.log(`Received ${ClientCallbackOperations.TALENT_TREE_LAYOUT}: for ${layout.SpecCounts} tabs`)
-    //         layout.Specs.forEach((spec) => {
-    //             if (spec.Active) {
-    //                 TalentTree.SelectedSpec = spec.SpecTabId
-    //                 TalentTree.ActiveSpec = spec
-    //                 spec.Points.forEach((Point) => {
-    //                     TreeCache.Points[Point.Type] = Point.SpecPointSum
-    //                     TalentTree.MaxPoints[Point.Type] = Point.AbsoluteMax
-    //                 })
-    //             } else {
-    //                 TalentTree.SpecSlots[spec.Id] = spec
-    //             }
-    //         })
+    OnCustomPacket(ClientCallbackOperations.GET_CHARACTER_SPECS,pkt=>{ 
+        let Reader = new GetCharacterSpecsPayload()
+        let layout = Reader.read(pkt)
+        if (layout.SpecCounts) {
+            console.log(`Received ${ClientCallbackOperations.TALENT_TREE_LAYOUT}: for ${layout.SpecCounts} tabs`)
+            layout.Specs.forEach((spec) => {
+                if (spec.Active) {
+                    TalentTree.SelectedSpec = spec.SpecTabId
+                    TalentTree.ActiveSpec = spec
+                    spec.Points.forEach((Point) => {
+                        TreeCache.Points[Point.Type] = Point.SpecPointSum
+                        TalentTree.MaxPoints[Point.Type] = Point.AbsoluteMax
+                    })
+                } else {
+                    TalentTree.SpecSlots[spec.Id] = spec
+                }
+            })
 
-    //         if (TalentTree.INITIALIZED && TalentTree.SelectedTab) {
-    //             //ShowTypeTalentPoint(TalentTree.SelectedTab.TalentType, TalentTree.SelectedTab.Id)
-    //         }  else {
-    //             InitializeTabsLeft()
-    //         }
-    //         TalentTree.INITIALIZED = true
-    //         //SendCallbackToServer(ClientCallbackOperations.GET_TALENTS, '-1')
-    //         //SendCallbackToServer(ClientCallbackOperations.GET_LOADOUTS, '-1')
-    //     }
-    // })
+            if (TalentTree.INITIALIZED && TalentTree.SelectedTab) {
+                //ShowTypeTalentPoint(TalentTree.SelectedTab.TalentType, TalentTree.SelectedTab.Id)
+            }  else {
+                InitializeTabsLeft()
+            }
+            TalentTree.INITIALIZED = true
+            //SendCallbackToServer(ClientCallbackOperations.GET_TALENTS, '-1')
+            //SendCallbackToServer(ClientCallbackOperations.GET_LOADOUTS, '-1')
+        }
+    })
 
     OnCustomPacket(ClientCallbackOperations.LEARN_TALENT_ERROR,pkt=>{
         OnTalentError(pkt)
@@ -485,33 +481,8 @@ export function TalentTreeUI() {
     OnCustomPacket(ClientCallbackOperations.TALENT_TREE_LAYOUT,pkt=>{ 
         GetTalentTreeLayout(pkt)
     })
+
     SendCallbackToServer(ClientCallbackOperations.TALENT_TREE_LAYOUT, '-1')
-}
-
-export function PlayerTalentFrameToggle() {
-    if (PlayerTalentFrame || PlayerSpecFrame) {
-        if (PlayerTalentFrame.IsVisible()) {
-            PlayerTalentFrame.Hide()
-            TalentMicroButton.SetButtonState('NORMAL')
-        } else if (PlayerSpecFrame.IsVisible()) {
-            PlayerSpecFrame.Hide()
-            TalentMicroButton.SetButtonState('NORMAL')
-        } else {
-            if (SpellBookFrame.IsVisible())  SpellBookFrame.Hide()
-            if (PVPFrame.IsVisible()) PVPFrame.Hide()
-            if (WorldMapFrame.IsVisible()) WorldMapFrame.Hide()
-            if (LFDQueueFrame.IsVisible()) LFDQueueFrame.Hide()
-            if (CharacterFrame.IsVisible()) CharacterFrame.Hide()
-            if (AchievementFrame.IsVisible()) AchievementFrame.Hide()
-            if (FriendsFrame.IsVisible()) FriendsFrame.Hide()
-            if (QuestLogFrame.IsVisible()) QuestLogFrame.Hide()
-            if (HelpFrame.IsVisible()) HelpFrame.Hide()
-
-            PlayerTalentFrame.Show()
-            TalentMicroButton.SetButtonState('PUSHED')
-        }
-    } else
-        TalentTreeUI()
 }
 
 export function SaveLoadout(id, name, loadout) {
@@ -581,4 +552,33 @@ export function GetClassTree(classString) {
     case 'Druid':
         return '42'
     }
+}
+
+let ValidTabs: TSArray<number> = [
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+    16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
+    29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42,
+]
+
+export function SendCallbackToServer(op: ClientCallbackOperations, msg: string) {
+    let packet = new SimpleMessagePayload(op, msg)
+    packet.write().Send()
+}
+
+export function OnTalentError(pkt: TSPacketRead) {
+    let customPacket = new SimpleMessagePayload(ClientCallbackOperations.TALENT_TREE_LAYOUT, "")
+    customPacket.read(pkt)
+    console.log("Talent learn error: "+customPacket.message)
+}
+
+export function GetTalentTreeLayout(pkt: TSPacketRead) {
+    let Reader = new GetTalentTreeLayoutPayload()
+    let layout = Reader.read(pkt)
+    if (layout)
+        if (layout.TabId)
+            if (ValidTabs.includes(layout.TabId)) { // strange bug on first login where it gives a decimal tab id, just ignore it
+                TalentTree.TalentTrees[layout.TabId] = layout
+                console.log('Get spec info.')
+                SendCallbackToServer(ClientCallbackOperations.GET_CHARACTER_SPECS, '-1')
+            }
 }

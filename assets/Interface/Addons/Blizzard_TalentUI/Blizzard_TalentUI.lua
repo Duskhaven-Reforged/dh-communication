@@ -2,7 +2,7 @@
 -- PlayerTalentFrame
 
 function PlayerTalentFrame_Toggle(pet, suggestedTalentGroup)
-    local Toggle = require('TSAddons.dh-communication.addon.dh-ui.dh-talent.TalentTree')
+    local Toggle = require('TSAddons.dh-communication.addon.dh-ui.lua-hooks')
     Toggle.PlayerTalentFrameToggle()
 end
 

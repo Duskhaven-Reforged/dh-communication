@@ -73,7 +73,6 @@ export class DHCommonMessage {
                 })
                 out.Talents.push(Talent)
             })
-            // TODO send packet player->SendForgeUIMsg(ForgeTopic::TALENT_TREE_LAYOUT, msg);
             let pkt = new GetTalentTreeLayoutPayload().BuildPacket(out)
             pkt.SendToPlayer(player)
         })

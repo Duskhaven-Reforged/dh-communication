@@ -50,7 +50,6 @@ export class GetTalentTreeLayoutPayload {
 
     read(read: TSPacketRead): TalentTreeLayoutPayload {
         let output = new TalentTreeLayoutPayload()
-
         output.TabId = read.ReadDouble()
         output.TabName = read.ReadString()
         output.TabIcon = read.ReadDouble()
@@ -86,6 +85,7 @@ export class GetTalentTreeLayoutPayload {
             for (let j = 0; j < Talent.PrereqCount; j++) {
                 let Prereq = new TTLPTalentPrereq()
                 Prereq.Talent = read.ReadDouble()
+                console.log(`Rank: ${Prereq.Talent}`)
                 Prereq.TabId = read.ReadDouble()
                 Prereq.ReqRank = read.ReadDouble()
                 Talent.Prereqs.push(Prereq)
@@ -107,7 +107,7 @@ export class GetTalentTreeLayoutPayload {
     }
 
     BuildPacket(Payload: TalentTreeLayoutPayload): TSPacketWrite {
-        let packet = CreateCustomPacket(ClientCallbackOperations.TALENT_TREE_LAYOUT, 2000);
+        let packet = CreateCustomPacket(ClientCallbackOperations.TALENT_TREE_LAYOUT, 0);
         packet.WriteDouble(Payload.TabId)
         packet.WriteString(Payload.TabName)
         packet.WriteDouble(Payload.TabIcon)
