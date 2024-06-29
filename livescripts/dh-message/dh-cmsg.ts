@@ -71,6 +71,7 @@ export class DHCommonMessage {
                 talent.Choices.forEach((num, choice) => {
                     Talent.Choices.push(choice.SpellId)
                 })
+                out.Talents.push(Talent)
             })
             // TODO send packet player->SendForgeUIMsg(ForgeTopic::TALENT_TREE_LAYOUT, msg);
             let pkt = new GetTalentTreeLayoutPayload().BuildPacket(out)

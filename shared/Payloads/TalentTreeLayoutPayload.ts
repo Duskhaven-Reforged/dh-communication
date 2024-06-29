@@ -45,7 +45,6 @@ export class TalentTreeLayoutPayload {
 
     TalentsCount: number
     Talents: TSArray<TTLPTalent> = []
-
 }
 export class GetTalentTreeLayoutPayload {
 
@@ -108,7 +107,7 @@ export class GetTalentTreeLayoutPayload {
     }
 
     BuildPacket(Payload: TalentTreeLayoutPayload): TSPacketWrite {
-        let packet = CreateCustomPacket(ClientCallbackOperations.TALENT_TREE_LAYOUT, 0);
+        let packet = CreateCustomPacket(ClientCallbackOperations.TALENT_TREE_LAYOUT, 2000);
         packet.WriteDouble(Payload.TabId)
         packet.WriteString(Payload.TabName)
         packet.WriteDouble(Payload.TabIcon)

@@ -415,8 +415,6 @@ export function TalentTreeUI() {
                 RankText.SetFont('Fonts\\FRIZQT__.TTF', 13, 'OUTLINE')
                 RankText.SetPoint('CENTER', 10, 8.5)
 
-                Talent.Hide()
-
                 GridTalentTalents[i][j] = Talent
                 GridTalentTalentsNodes[i][j] = []
             }
@@ -499,6 +497,16 @@ export function PlayerTalentFrameToggle() {
             PlayerSpecFrame.Hide()
             TalentMicroButton.SetButtonState('NORMAL')
         } else {
+            if (SpellBookFrame.IsVisible())  SpellBookFrame.Hide()
+            if (PVPFrame.IsVisible()) PVPFrame.Hide()
+            if (WorldMapFrame.IsVisible()) WorldMapFrame.Hide()
+            if (LFDQueueFrame.IsVisible()) LFDQueueFrame.Hide()
+            if (CharacterFrame.IsVisible()) CharacterFrame.Hide()
+            if (AchievementFrame.IsVisible()) AchievementFrame.Hide()
+            if (FriendsFrame.IsVisible()) FriendsFrame.Hide()
+            if (QuestLogFrame.IsVisible()) QuestLogFrame.Hide()
+            if (HelpFrame.IsVisible()) HelpFrame.Hide()
+
             PlayerTalentFrame.Show()
             TalentMicroButton.SetButtonState('PUSHED')
         }
