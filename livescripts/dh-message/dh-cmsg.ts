@@ -1,5 +1,5 @@
 import { load } from 'js-yaml';
-import { ClientCallbackOperations } from '../../shared/Messages';
+import { ClientCallbackOperations, SimpleMessagePayload } from '../../shared/Messages';
 import { DHPointType, DHTalentTab, TALENT_POINT_TYPES, base64_char } from '../classes';
 import { DHCache } from '../dh-cachedata/dh-cache';
 import { cLoadouts } from '../dh-cachedata/dh-chardata';
@@ -172,35 +172,6 @@ export class DHCommonMessage {
 
         let pkt = new GetCharacterSpecsPayload().BuildPacket(out)
         pkt.SendToPlayer(player)
-    }
-
-    public SendActiveSpecInfo(player: TSPlayer) {
-        // let spec = this.cache.TryGetCharacterActiveSpec(player)
-        // if (!spec.IsNull()) {
-        //     let out = spec.Id + "^" + spec.Name + "^" + spec.Description + "^" + spec.Active + "^" + spec.SpellIconId + "^1^" + spec.SpecTabId
-
-        //     let i = 0
-        //     spec.PointsSpent.forEach((tab, num) => {
-        //         let del = i ? '%' : ''
-        //         out += del+ tab + '~' + num
-        //         i++
-        //     })
-        //     out += '~'
-
-        //     let j = 0
-        //     TALENT_POINT_TYPES.forEach((type) => {
-        //         let del = j ? '@' : ''
-        //         let m = this.cache.GetMaxPointDefaults(type)
-        //         let tp = this.cache.GetCommonCharacterPoint(player, type)
-        //         let sp = this.cache.GetSpecPoints(player, type, spec.Id)
-
-        //         out += del + type + '$' + sp.Sum + '$' + tp.Sum + '$' + m.Sum + '$' + m.Max
-        //         j++
-        //     })
-
-        //     let pkt = new SimpleMessagePayload(ClientCallbackOperations.GET_CHARACTER_SPECS, out);
-        //     pkt.write().SendToPlayer(player)
-        // }
     }
 
     public SendLoadouts(player: TSPlayer) {

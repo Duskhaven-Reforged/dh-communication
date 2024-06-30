@@ -23,6 +23,10 @@ export class CPSSpec {
     PointsSpent: TSArray<CSPPointSpend> = []
     PointsCount: number
     Points: TSArray<CSPPoints> = []
+
+    constructor(){
+        this.Id = -1
+    }
 }
 export class CharacterSpecsPayload {
     SpecCounts: number
@@ -66,7 +70,7 @@ export class GetCharacterSpecsPayload {
     }
 
     BuildPacket(Payload: CharacterSpecsPayload): TSPacketWrite {
-        let packet = CreateCustomPacket(ClientCallbackOperations.TALENT_TREE_LAYOUT, 0);
+        let packet = CreateCustomPacket(ClientCallbackOperations.GET_CHARACTER_SPECS, 0);
         packet.WriteDouble(Payload.SpecCounts)
         Payload.Specs.forEach((Spec) => {
             packet.WriteDouble(Spec.Id)

@@ -85,7 +85,6 @@ export class GetTalentTreeLayoutPayload {
             for (let j = 0; j < Talent.PrereqCount; j++) {
                 let Prereq = new TTLPTalentPrereq()
                 Prereq.Talent = read.ReadDouble()
-                console.log(`Rank: ${Prereq.Talent}`)
                 Prereq.TabId = read.ReadDouble()
                 Prereq.ReqRank = read.ReadDouble()
                 Talent.Prereqs.push(Prereq)

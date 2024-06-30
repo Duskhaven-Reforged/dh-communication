@@ -1,12 +1,12 @@
 import { Backdrop, CONSTANTS, GetClassId, PATH, Util } from './Constants';
 import { ClientCallbackOperations, SimpleMessagePayload } from '../../../shared/Messages';
-import { GetTalentTreeLayoutPayload } from '../../../shared/Payloads/TalentTreeLayoutPayload';
-import { GetCharacterSpecsPayload } from '../../../shared/Payloads/GetCharacterSpecsPayload';
+import { GetTalentTreeLayoutPayload, TalentTreeLayoutPayload } from '../../../shared/Payloads/TalentTreeLayoutPayload';
+import { CPSSpec, CharacterSpecsPayload, GetCharacterSpecsPayload } from '../../../shared/Payloads/GetCharacterSpecsPayload';
 
 // caches for intraaddon info sharing
 export let TalentTree = {
     TalentTrees: [],
-    ActiveSpec: null,
+    ActiveSpec: new CPSSpec(),
     SpecsTab: [],
     SpecSlots: [],
     SelectedTab: null,
@@ -46,7 +46,7 @@ let SecondRankToolTip = CreateFrame("GameTooltip", "secondRankToolTip", WorldFra
 
 export function TalentTreeUI() {
 
-    let TalentFrame = CreateFrame('Frame', 'PlayerTalentFrame', UIParent);
+    let TalentFrame = CreateFrame('Frame', 'CustomTalentFrame', UIParent);
     TalentFrame.SetSize(1000, 800)
     TalentFrame.SetScale(0.9)
     TalentFrame.SetPoint('CENTER', 0, 50)
@@ -425,16 +425,88 @@ export function TalentTreeUI() {
     ClassSpecWindow.Hide()
     let PlayerTalentFrameTabsLeft = null
 
+    let TalentTabsLeftSpec = []
     function InitializeTabsLeft() {
         if (!PlayerTalentFrameTabsLeft) {
-            let tabsLeft = CreateFrame("Frame", "TalentFrame_TabsLeft", TalentFrame)
+            let tabsLeft = CreateFrame("Frame", "ClassSpecWindow_TabsLeft", ClassSpecWindow)
             tabsLeft.SetFrameLevel(5);
-            tabsLeft.SetSize(875, 875);
+            tabsLeft.SetSize(875, ClassSpecWindow.GetHeight());
             tabsLeft.SetPoint("TOPLEFT", -500, 300)
-            let tabsLeftSpec = []
-            tabsLeft.SetBackdrop(Backdrop)
-            tabsLeft.SetBackdropColor(1, 1, 0, 1)
-        
+            TalentTabsLeftSpec = []
+
+            let TabCount = TalentTree.TalentTrees.length
+            let StartX = 73
+            if (TabCount >= 2)
+                StartX = 192
+            else if (TabCount >= 4)
+                StartX = 10
+
+            TalentTree.TalentTrees.forEach((Tree, TabId) => {
+                if (Tree) {
+                    let ActiveSpec: CPSSpec = TalentTree.ActiveSpec
+                    let PointSpent = ActiveSpec.PointsSpent
+                    console.log(PointSpent)
+                    let uClass = UnitClass('player')
+
+                    let Spec = CreateFrame('Button', 'ClassSpecWindow_TabLefts_Spec'+Tree.Id, tabsLeft)
+                    Spec.SetPoint('CENTER', StartX, -265)
+                    Spec.SetSize(498, 795)
+                    Spec.SetFrameLevel(5)
+
+                    let button = CreateFrame('Button', 'ClassSpecWindow_TabLefts_Spec_Button'+Tree.Id, tabsLeft)
+                    button.SetPoint('LEFT', StartX, -50)
+                    button.SetSize(1, 1)
+
+                    let NormalTex = Spec.CreateTexture("$parentNormalTexture", "ARTWORK")
+                    NormalTex.SetPoint('CENTER', 0, 15)
+                    NormalTex.SetTexture(CONSTANTS.UI.SPECIALIZATION_BUTTON)
+                    NormalTex.SetVertexColor(0.5, 0.5, 0.5, 1)
+
+                    let HilightTex = Spec.CreateTexture("SetHighlightTexture", "ARTWORK")
+                    HilightTex.SetPoint('CENTER', 0, 15)
+                    HilightTex.SetTexture(CONSTANTS.UI.SPECIALIZATION_BUTTON_BG_HOVER_OR_PUSHED)
+                    HilightTex.SetVertexColor(0.5, 0.5, 0.5, 1)
+
+                    let PushedTex = Spec.CreateTexture("SetHighlightTexture", "ARTWORK")
+                    PushedTex.SetTexture(CONSTANTS.UI.SPECIALIZATION_BUTTON_BG_HOVER_OR_PUSHED)
+                    PushedTex.SetAlpha(.8)
+
+                    let LockedTex = Spec.CreateTexture("$parentNormalTexture", "ARTWORK")
+                    LockedTex.SetTexture(CONSTANTS.UI.SPECIALIZATION_BUTTON_BG_DISABLED)
+                    LockedTex.SetTexCoord(0, 0.625, 0.265625, 0)
+
+                    let ClickInterceptor = CreateFrame('Button', 'clickInterceptor', tabsLeft)
+                    ClickInterceptor.SetAllPoints(tabsLeft)
+                    ClickInterceptor.EnableMouse(true)
+                    ClickInterceptor.SetFrameLevel(tabsLeft.GetFrameLevel()+1)
+
+
+                    Spec.SetNormalTexture(NormalTex)
+                    ClickInterceptor.SetHighlightTexture(HilightTex)
+                    Spec.SetPushedTexture(PushedTex)
+                    Spec.SetDisabledTexture(LockedTex)
+
+                    let Circle = CreateFrame('Frame', 'ClassSpecWindow_TabsLeft_Spec_Circle', tabsLeft)
+                    Circle.SetPoint('TOP', 0, -30)
+                    Circle.SetFrameLevel(10)
+                    Circle.SetSize(200, 200)
+                    Circle.SetBackdrop({bgFile: CONSTANTS.UI.SPEC_RING})
+
+                    let Slot = CreateFrame('Frame', 'IconSlot', Circle)
+                    Slot.SetAllPoints()
+                    Slot.SetFrameLevel(9)
+
+                    let CircleTex = Slot.CreateTexture('$parentNormalTexture', 'BACKGROUND')
+                    CircleTex.SetAllPoints()
+                    CircleTex.SetTexture(PATH + `\\tabBG\\SpecThumbs\\${uClass}_${Tree.Name}`)
+
+                    let Title = Circle.CreateFontString()
+                    Title.SetFont("Fonts\\FRIZQT__.TTF", 40, "OUTLINE")
+                    Title.SetPoint('BOTTOM', 0, 0)
+                    Title.SetText(Tree.Name)
+                }
+            })
+
             PlayerTalentFrameTabsLeft = tabsLeft
         }
     }
@@ -449,8 +521,9 @@ export function TalentTreeUI() {
     OnCustomPacket(ClientCallbackOperations.GET_CHARACTER_SPECS,pkt=>{ 
         let Reader = new GetCharacterSpecsPayload()
         let layout = Reader.read(pkt)
+        print(layout.SpecCounts)
         if (layout.SpecCounts) {
-            console.log(`Received ${ClientCallbackOperations.TALENT_TREE_LAYOUT}: for ${layout.SpecCounts} tabs`)
+            console.log(`Received ${ClientCallbackOperations.GET_CHARACTER_SPECS}: for ${layout.SpecCounts} specs`)
             layout.Specs.forEach((spec) => {
                 if (spec.Active) {
                     TalentTree.SelectedSpec = spec.SpecTabId
@@ -470,7 +543,7 @@ export function TalentTreeUI() {
                 InitializeTabsLeft()
             }
             TalentTree.INITIALIZED = true
-            //SendCallbackToServer(ClientCallbackOperations.GET_TALENTS, '-1')
+            SendCallbackToServer(ClientCallbackOperations.GET_TALENTS, '-1')
             //SendCallbackToServer(ClientCallbackOperations.GET_LOADOUTS, '-1')
         }
     })
@@ -578,7 +651,6 @@ export function GetTalentTreeLayout(pkt: TSPacketRead) {
         if (layout.TabId)
             if (ValidTabs.includes(layout.TabId)) { // strange bug on first login where it gives a decimal tab id, just ignore it
                 TalentTree.TalentTrees[layout.TabId] = layout
-                console.log('Get spec info.')
                 SendCallbackToServer(ClientCallbackOperations.GET_CHARACTER_SPECS, '-1')
             }
 }
