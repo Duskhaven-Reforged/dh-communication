@@ -20,6 +20,10 @@ export function Main(events: TSEvents) {
         mDHDMsg.cache.AddDefaultLoadout(player)
     })
 
+    events.Player.OnDelete((guid, account) => {
+        mDHDMsg.cache.HandleDeleteCharacter(guid)
+    })
+
     events.Player.OnLogout((player) => {
         let spec = mDHDMsg.cache.TryGetCharacterActiveSpec(player)
         if (!spec.IsNull()) {
@@ -31,30 +35,30 @@ export function Main(events: TSEvents) {
         let spec = mDHDMsg.cache.TryGetCharacterActiveSpec(player)
         if (!spec.IsNull()) {
             let curLevel = player.GetLevel()
-            if (oldLevel < curLevel) {
-                let levelDiff = curLevel - oldLevel
-                if (oldLevel < 10 && levelDiff > 1)
-                    levelDiff -= 9 - oldLevel
+            if (curLevel > 9) {
+                if (oldLevel < curLevel) {
+                    let levelDiff = curLevel - oldLevel
+                    if (oldLevel < 10 && levelDiff > 1)
+                        levelDiff -= 9 - oldLevel
 
-                if (levelDiff > 1) {
-                    let div = Math.floor(levelDiff / 2)
-                    let rem = levelDiff % 2
+                    if (levelDiff > 1) {
+                        let div = Math.floor(levelDiff / 2)
+                        let rem = levelDiff % 2
 
-                    mDHDMsg.cache.AddCharacterPointsToAllSpecs(player, DHPointType.TALENT, div)
-                    if (rem)
-                        div += 1
+                        mDHDMsg.cache.AddCharacterPointsToAllSpecs(player, DHPointType.TALENT, div)
+                        if (rem)
+                            div += 1
 
-                    mDHDMsg.cache.AddCharacterPointsToAllSpecs(player, DHPointType.CLASS, div)
-                } else {
-                    if (curLevel % 2)
-                        mDHDMsg.cache.AddCharacterPointsToAllSpecs(player, DHPointType.TALENT, 1)
-                    else
-                        mDHDMsg.cache.AddCharacterPointsToAllSpecs(player, DHPointType.CLASS, 1)
+                        mDHDMsg.cache.AddCharacterPointsToAllSpecs(player, DHPointType.CLASS, div)
+                    } else {
+                        if (curLevel % 2)
+                            mDHDMsg.cache.AddCharacterPointsToAllSpecs(player, DHPointType.TALENT, 1)
+                        else
+                            mDHDMsg.cache.AddCharacterPointsToAllSpecs(player, DHPointType.CLASS, 1)
+                    }
                 }
-                console.log(`Handled points on level.`)
             }
             //mDHDMsg.SendTalents(player)
-            console.log(`Sending spec info.`)
             mDHDMsg.cache.UpdateCharSpec(player, spec)
             mDHDMsg.SendSpecInfo(player)
             LearnSpellsForLevel(player)

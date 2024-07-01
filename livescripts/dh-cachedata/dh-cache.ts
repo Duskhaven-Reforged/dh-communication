@@ -1,11 +1,11 @@
+import { ClientCallbackOperations, SimpleMessagePayload } from '../../shared/Messages';
 import { ACOUNT_WIDE_KEY, DHCharacterPoint, DHCharacterTalent, DHNodeType, DHPlayerLoadout, DHPlayerSpec, DHPointType, DHTalentTab, TALENT_POINT_TYPES, base64_char } from '../classes';
-import { LoadCharacterData, cActiveLoadouts, cActiveSpecs, cCharPoints, cLoadouts, cMaxPointDefaults, cSpecs } from './dh-chardata';
+import { LoadCharacterData, cActiveLoadouts, cCharPoints, cLoadouts, cMaxPointDefaults, cSpecs } from './dh-chardata';
 import { LoadWorldData, wClassNodeToSpell, wRaceClassTabMap, wPointTypeToTabs, wSpecNodeToSpell, wSpellToTab, wTabToSpell, wTalentTrees, wChoiceNodesRev } from './dh-worlddata';
 
 export class DHCache {
     
     constructor() {
-        // TODO: custom races
         let RACE_LIST = [ 
             Race.HUMAN, Race.ORC, Race.DWARF, Race.NIGHTELF, Race.UNDEAD_PLAYER, 
             Race.TAUREN, Race.GNOME, Race.TROLL, Race.VULPERA, Race.BLOODELF, Race.DRAENEI, 
@@ -15,7 +15,6 @@ export class DHCache {
             Race.SKELETON, Race.DEMONHUNTERH, Race.ARAKKOA, Race.TAUNKA, Race.FELORC, 
             Race.KULTIRAN, Race.DEMONHUNTERA,
         ]
-        // TODO: custom classes
         let CLASS_LIST = [
             Class.WARRIOR, Class.PALADIN, Class.HUNTER,
             Class.ROGUE, Class.PRIEST, Class.DEATH_KNIGHT,
@@ -119,18 +118,10 @@ export class DHCache {
 
     public TryGetCharacterActiveSpec(player: TSPlayer) : DHPlayerSpec {
         let guid = player.GetGUID().GetCounter()
-        if (cActiveSpecs.contains(guid))
-            return this.TryGetCharacterSpec(player, cActiveSpecs[guid])
-
-        return DHPlayerSpec.Empty()
-    }
-
-    public TryGetCharacterSpec(player: TSPlayer, spec: number) : DHPlayerSpec {
-        let guid = player.GetGUID().GetCounter()
-        if (cSpecs.contains(guid))
-            if (cSpecs[guid].contains(spec))
-                return cSpecs[guid][spec]
         
+        if (cSpecs.contains(guid))
+            return cSpecs[guid][1]
+
         return DHPlayerSpec.Empty()
     }
 
@@ -158,7 +149,7 @@ export class DHCache {
                 }
             }
 
-            let fcp = new DHCharacterPoint(pointType, spec, 0, 0)
+            let fcp = new DHCharacterPoint(pointType, spec, 0, 25)
             return this.UpdateCharPoints(player, fcp)
         } else {
             let spec = this.TryGetCharacterActiveSpec(player)
@@ -184,18 +175,10 @@ export class DHCache {
         let owner = player.GetGUID().GetCounter()
         
         cSpecs[owner][spec.Id] = spec
-
-        if (spec.Id !== cActiveSpecs[owner] && spec.Active) {
-            if (cActiveSpecs[owner]) {
-                cSpecs[owner][cActiveSpecs[owner]].Active = false
-                this.SaveSpec(cSpecs[owner][cActiveSpecs[owner]])
-            }
-            cActiveSpecs[owner] = spec.Id
-        }
         this.SaveSpec(spec)
     }
 
-    public AddCharacterPointsToAllSpecs(player: TSPlayer, type: DHPointType, amount: number) {
+    public AddCharacterPointsToAllSpecs(player: TSPlayer, type: DHPointType, amount: int) {
         let m = this.GetMaxPointDefaults(type)
         let ccp = this.GetCommonCharacterPoint(player, type)
 
@@ -209,14 +192,16 @@ export class DHCache {
 
         if (amount > 0) {
             ccp.Sum += amount
+            console.log(`${ccp.Sum}\n`)
             cSpecs[player.GetGUID().GetCounter()].forEach((specId, spec) => {
                 let sp = this.GetSpecPoints(player, type, specId)
                 sp.Sum += amount
+                console.log(`${sp.Sum}\n`)
                 this.UpdateCharPoints(player, sp)
             })
 
-            // todo: send message on awarded points
-            // ChatHandler(player->GetSession()).SendSysMessage('|cff8FCE00You have been awarded ' + std::to_string(amount) + ' ' + GetpointTypeName(pointType) + ' point(s).');
+            let pkt = new SimpleMessagePayload(ClientCallbackOperations.LEVELUP, `|cff8FCE00You have been awarded ${amount} ${GetPointTypeName(type)} point${amount > 1 ? 's' : ''}.`);
+            pkt.write().SendToPlayer(player)
         }
     }
 
@@ -225,11 +210,9 @@ export class DHCache {
 
         const res = QueryCharacters('REPLACE INTO `forge_character_specs` (`id`,`guid`,`name`,`description`,`active`,`spellicon`,`visability`,`charSpec`) VALUES ('+spec.Id+','+guid+',\''+spec.Name+'\',\''+spec.Description+'\','+spec.Active+','+spec.SpellIconId+',1,'+spec.SpecTabId+')')
 
-        console.log(`Saving ${spec.PointsSpent.get_length()} point spent sets\n`)
         spec.PointsSpent.forEach((key, val) => {
             const res = QueryCharacters('REPLACE INTO forge_character_talents_spent(`guid`,`spec`,`tabid`,`spent`) VALUES('+guid+', '+spec.Id+', '+key+', '+val+')')
         })
-        console.log(`Saving ${spec.Talents.get_length()} talents\n`)
         spec.Talents.forEach((tab, talents) => {
             talents.forEach((spellId, talent) => {
                 this.SaveTalent(guid, spec.Id, talent)
@@ -242,14 +225,11 @@ export class DHCache {
     }
 
     public GetCommonCharacterPoint(player: TSPlayer, pt: DHPointType) {
-        return this.GetSpecPoints(player, pt, 1);
+        return this.GetSpecPoints(player, pt, 4294967295);
     }
 
     public GetMaxPointDefaults(type: DHPointType) : DHCharacterPoint {
-        if (cMaxPointDefaults.contains(type))
-            return cMaxPointDefaults[type]
-        else
-            return new DHCharacterPoint(type, 0xffffffff, 0, 0)
+        return new DHCharacterPoint(type, 4294967295, 0, 25)
     }
 
     public TryGetTabPointType(tab: number) : DHPointType {
@@ -307,10 +287,8 @@ export class DHCache {
         this.UpdateCharSpec(player, spec)
     }
 
-    public HandleDeleteCharacter(player: TSPlayer) {
-        let guid = player.GetGUID().GetCounter()
+    public HandleDeleteCharacter(guid: uint64) {
         QueryCharacters(`DELETE FROM forge_character_specs WHERE guid = ${guid}`)
-        QueryCharacters(`DELETE FROM character_modes WHERE guid = ${guid}`)
         QueryCharacters(`DELETE FROM forge_character_points WHERE guid = ${guid} AND spec != ${ACOUNT_WIDE_KEY}`)
         QueryCharacters(`DELETE FROM forge_character_talents WHERE guid = ${guid} AND spec != ${ACOUNT_WIDE_KEY}`)
         QueryCharacters(`DELETE FROM forge_character_talents_spent WHERE guid = ${guid} AND spec != ${ACOUNT_WIDE_KEY}`)
@@ -382,4 +360,15 @@ export class DHCache {
         if (type === DHPointType.TALENT)
             this.ForgetTalents(player, spec, DHPointType.CLASS)
     }
+}
+
+function GetPointTypeName(Type: DHPointType): string {
+    switch (Type) {
+        case DHPointType.CLASS:
+            return 'Class'
+        case DHPointType.TALENT:
+            return 'Specialization'
+        default:
+            return ''
+        }
 }

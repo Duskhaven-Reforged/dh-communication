@@ -45,6 +45,7 @@ export enum  ClientCallbackOperations
     SAVE_LOADOUT                    = 122,
     DELETE_LOADOUT                  = 123,
 
+    LEVELUP                         = 300,
     MALFORMED_PACKET_ERROR          = 999,
 };
 

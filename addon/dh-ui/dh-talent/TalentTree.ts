@@ -1,6 +1,6 @@
 import { Backdrop, CONSTANTS, GetClassId, PATH, Util } from './Constants';
 import { ClientCallbackOperations, SimpleMessagePayload } from '../../../shared/Messages';
-import { GetTalentTreeLayoutPayload, TalentTreeLayoutPayload } from '../../../shared/Payloads/TalentTreeLayoutPayload';
+import { GetTalentTreeLayoutPayload, TTLPTalent, TTLPTalentPrereq, TalentTreeLayoutPayload } from '../../../shared/Payloads/TalentTreeLayoutPayload';
 import { CPSSpec, CharacterSpecsPayload, GetCharacterSpecsPayload } from '../../../shared/Payloads/GetCharacterSpecsPayload';
 
 // caches for intraaddon info sharing
@@ -14,17 +14,18 @@ export let TalentTree = {
     INITIALIZED: false,
     SelectedSpec: null,
     MaxPoints: [],
-    ClassTree: null,
+    ClassTree: -1,
     ClassTab: null,
     TalentLoadoutCache: [],
     CurrentLoadout: null,
     PrevLoadout: null,
     ActiveString: null,
+    FirstTab: 900,
+    Tabs: [],
 }
 export let TreeCache = {
     Spells: [],
     PointsSpent: [],
-    Investments: [],
     TotalInvests: [],
     PrereqUnlocks: [],
     PrereqRev: [],
@@ -40,6 +41,7 @@ export let PlayerTalentFrame
 export let PlayerSpecFrame
 export let GridTalentTalents = []
 export let GridTalentTalentsNodes = []
+let TalentFrameContainerBackground
 
 let FirstRankToolTip = CreateFrame("GameTooltip", "firstRankToolTip", WorldFrame, "GameTooltipTemplate");
 let SecondRankToolTip = CreateFrame("GameTooltip", "secondRankToolTip", WorldFrame, "GameTooltipTemplate");
@@ -244,14 +246,13 @@ export function TalentTreeUI() {
             configButton.SetPoint('LEFT', closeButton, 'RIGHT', -70, 0) 
         }
     })
-
     
     let TalentFrameContainer = CreateFrame('Frame', 'TalentFrameContainer', TalentFrame)
     TalentFrameContainer.SetSize(TalentFrame.GetWidth() * 1.42, TalentFrame.GetHeight() * 0.925);
     TalentFrameContainer.SetPoint('CENTER', 0, 0)
     TalentFrameContainer.SetFrameStrata('MEDIUM');
 
-    let TalentFrameContainerBackground = TalentFrame.CreateTexture(null, 'BACKGROUND')
+    TalentFrameContainerBackground = TalentFrame.CreateTexture(null, 'BACKGROUND')
     TalentFrameContainerBackground.SetTexCoord(0.16, 1, 0.0625, 0.5625)
     TalentFrameContainerBackground.SetPoint('CENTER', -32, 20)
     TalentFrameContainerBackground.SetDrawLayer('BACKGROUND', -1)
@@ -350,11 +351,13 @@ export function TalentTreeUI() {
         UpdateScale(0.01)
     })
 
-    TalentTree.ClassTree = GetClassTree(UnitClass('player'))
-
+    let TalentFrameGridTalent
     function InitializeGridForTalents() {
         let GridTalent = CreateFrame('Frame', 'TalentFrameGridTalent', TalentFrameContainer)
         GridTalent.SetAllPoints()
+
+        let Background = GridTalent.CreateTexture('GridTalentBG', 'BACKGROUND')
+        Background.SetAllPoints()
     
         let visualizationSize = 30;
         let spaceBetweenNodes = 30; 
@@ -415,100 +418,293 @@ export function TalentTreeUI() {
                 RankText.SetFont('Fonts\\FRIZQT__.TTF', 13, 'OUTLINE')
                 RankText.SetPoint('CENTER', 10, 8.5)
 
-                GridTalentTalents[i][j] = Talent
+                let TextureIconLeft = Talent.CreateTexture('TextureIconLeft', 'ARTWORK')
+                TextureIconLeft.Hide()
+                let TextureIconRight = Talent.CreateTexture('TextureIconRight', 'ARTWORK')
+                TextureIconRight.Hide()
+
+                Talent.Hide()
+
+                let FrameLinks = {
+                    Frame: Talent,
+                    TextureIcon: TextureIcon,
+                    Border: Border,
+                    BorderTexture: BorderTexture,
+                    Ranks: Ranks,
+                    RankText: RankText,
+                    TextureIconLeft: TextureIconLeft,
+                    TextureIconRight: TextureIconRight,
+                }
+
+                GridTalentTalents[i][j] = FrameLinks
                 GridTalentTalentsNodes[i][j] = []
             }
         }
+
+        TalentFrameGridTalent = GridTalent
     }
 
     TalentFrame.Hide()
     ClassSpecWindow.Hide()
-    let PlayerTalentFrameTabsLeft = null
 
-    let TalentTabsLeftSpec = []
+    let PlayerTalentFrameTabsLeftData = []
+    let Roles = ['Damage', 'Healer', 'Tank']
     function InitializeTabsLeft() {
-        if (!PlayerTalentFrameTabsLeft) {
-            let tabsLeft = CreateFrame("Frame", "ClassSpecWindow_TabsLeft", ClassSpecWindow)
-            tabsLeft.SetFrameLevel(5);
-            tabsLeft.SetSize(875, ClassSpecWindow.GetHeight());
-            tabsLeft.SetPoint("TOPLEFT", -500, 300)
-            TalentTabsLeftSpec = []
+        let tabsLeft = CreateFrame("Frame", "ClassSpecWindow_TabsLeft", ClassSpecWindow)
+        tabsLeft.SetFrameLevel(5);
+        tabsLeft.SetSize(875, 875);
+        tabsLeft.SetPoint("TOPLEFT", -500, 300)
 
-            let TabCount = TalentTree.TalentTrees.length
-            let StartX = 73
-            if (TabCount >= 2)
-                StartX = 192
-            else if (TabCount >= 4)
-                StartX = 10
+        let TabCount = TalentTree.TalentTrees.length
+        let StartX = 73
+        if (TabCount >= 2)
+            StartX = 192
+        else if (TabCount >= 4)
+            StartX = 10
 
-            TalentTree.TalentTrees.forEach((Tree, TabId) => {
-                if (Tree) {
-                    let ActiveSpec: CPSSpec = TalentTree.ActiveSpec
-                    let PointSpent = ActiveSpec.PointsSpent
-                    console.log(PointSpent)
-                    let uClass = UnitClass('player')
+        TalentTree.TalentTrees.forEach((Tree) => {
+            if (Tree) {
+                let ActiveSpec: CPSSpec = TalentTree.ActiveSpec
+                let PointSpent = 0
+                ActiveSpec.PointsSpent.forEach((Spend) => {
+                    if (Tree.TabId === Spend.TabId)
+                        PointSpent = Spend.Amount
+                })
+                let uClass = UnitClass('player')
 
-                    let Spec = CreateFrame('Button', 'ClassSpecWindow_TabLefts_Spec'+Tree.Id, tabsLeft)
-                    Spec.SetPoint('CENTER', StartX, -265)
-                    Spec.SetSize(498, 795)
-                    Spec.SetFrameLevel(5)
+                let Spec = CreateFrame('Button', 'ClassSpecWindow_TabLefts_Spec'+Tree.Id, tabsLeft)
+                Spec.SetPoint('CENTER', StartX, -265)
+                Spec.SetSize(498, 795)
+                Spec.SetFrameLevel(5)
 
-                    let button = CreateFrame('Button', 'ClassSpecWindow_TabLefts_Spec_Button'+Tree.Id, tabsLeft)
-                    button.SetPoint('LEFT', StartX, -50)
-                    button.SetSize(1, 1)
+                let NormalTex = Spec.CreateTexture("$parentNormalTexture", "ARTWORK")
+                NormalTex.SetPoint('CENTER', 0, 15)
+                NormalTex.SetTexture(CONSTANTS.UI.SPECIALIZATION_BUTTON)
+                NormalTex.SetVertexColor(0.5, 0.5, 0.5, 1)
 
-                    let NormalTex = Spec.CreateTexture("$parentNormalTexture", "ARTWORK")
-                    NormalTex.SetPoint('CENTER', 0, 15)
-                    NormalTex.SetTexture(CONSTANTS.UI.SPECIALIZATION_BUTTON)
-                    NormalTex.SetVertexColor(0.5, 0.5, 0.5, 1)
+                let HilightTex = Spec.CreateTexture("SetHighlightTexture", "ARTWORK")
+                HilightTex.SetPoint('CENTER', 0, 15)
+                HilightTex.SetTexture(CONSTANTS.UI.SPECIALIZATION_BUTTON_BG_HOVER_OR_PUSHED)
+                HilightTex.SetVertexColor(0.5, 0.5, 0.5, 1)
 
-                    let HilightTex = Spec.CreateTexture("SetHighlightTexture", "ARTWORK")
-                    HilightTex.SetPoint('CENTER', 0, 15)
-                    HilightTex.SetTexture(CONSTANTS.UI.SPECIALIZATION_BUTTON_BG_HOVER_OR_PUSHED)
-                    HilightTex.SetVertexColor(0.5, 0.5, 0.5, 1)
+                let PushedTex = Spec.CreateTexture("SetHighlightTexture", "ARTWORK")
+                PushedTex.SetTexture(CONSTANTS.UI.SPECIALIZATION_BUTTON_BG_HOVER_OR_PUSHED)
+                PushedTex.SetAlpha(.8)
 
-                    let PushedTex = Spec.CreateTexture("SetHighlightTexture", "ARTWORK")
-                    PushedTex.SetTexture(CONSTANTS.UI.SPECIALIZATION_BUTTON_BG_HOVER_OR_PUSHED)
-                    PushedTex.SetAlpha(.8)
+                let LockedTex = Spec.CreateTexture("$parentNormalTexture", "ARTWORK")
+                LockedTex.SetTexture(CONSTANTS.UI.SPECIALIZATION_BUTTON_BG_DISABLED)
+                LockedTex.SetTexCoord(0, 0.625, 0.265625, 0)
 
-                    let LockedTex = Spec.CreateTexture("$parentNormalTexture", "ARTWORK")
-                    LockedTex.SetTexture(CONSTANTS.UI.SPECIALIZATION_BUTTON_BG_DISABLED)
-                    LockedTex.SetTexCoord(0, 0.625, 0.265625, 0)
-
-                    let ClickInterceptor = CreateFrame('Button', 'clickInterceptor', tabsLeft)
-                    ClickInterceptor.SetAllPoints(tabsLeft)
-                    ClickInterceptor.EnableMouse(true)
-                    ClickInterceptor.SetFrameLevel(tabsLeft.GetFrameLevel()+1)
+                let ClickInterceptor = CreateFrame('Button', 'clickInterceptor', Spec)
+                ClickInterceptor.SetAllPoints(Spec)
+                ClickInterceptor.EnableMouse(true)
+                ClickInterceptor.SetFrameLevel(Spec.GetFrameLevel()+1)
 
 
-                    Spec.SetNormalTexture(NormalTex)
-                    ClickInterceptor.SetHighlightTexture(HilightTex)
-                    Spec.SetPushedTexture(PushedTex)
-                    Spec.SetDisabledTexture(LockedTex)
+                Spec.SetNormalTexture(NormalTex)
+                ClickInterceptor.SetHighlightTexture(HilightTex)
+                Spec.SetPushedTexture(PushedTex)
+                Spec.SetDisabledTexture(LockedTex)
 
-                    let Circle = CreateFrame('Frame', 'ClassSpecWindow_TabsLeft_Spec_Circle', tabsLeft)
-                    Circle.SetPoint('TOP', 0, -30)
-                    Circle.SetFrameLevel(10)
-                    Circle.SetSize(200, 200)
-                    Circle.SetBackdrop({bgFile: CONSTANTS.UI.SPEC_RING})
+                let Circle = CreateFrame('Frame', 'ClassSpecWindow_TabsLeft_Spec_Circle', Spec)
+                Circle.SetPoint('TOP', 0, -30)
+                Circle.SetFrameLevel(10)
+                Circle.SetSize(200, 200)
+                Circle.SetBackdrop({bgFile: CONSTANTS.UI.SPEC_RING})
 
-                    let Slot = CreateFrame('Frame', 'IconSlot', Circle)
-                    Slot.SetAllPoints()
-                    Slot.SetFrameLevel(9)
+                let Slot = CreateFrame('Frame', 'IconSlot', Circle)
+                Slot.SetAllPoints()
+                Slot.SetFrameLevel(9)
 
-                    let CircleTex = Slot.CreateTexture('$parentNormalTexture', 'BACKGROUND')
-                    CircleTex.SetAllPoints()
-                    CircleTex.SetTexture(PATH + `\\tabBG\\SpecThumbs\\${uClass}_${Tree.Name}`)
+                let CircleTex = Slot.CreateTexture('$parentNormalTexture', 'BACKGROUND')
+                CircleTex.SetAllPoints()
+                CircleTex.SetTexture(PATH + `tabBG\\SpecThumbs\\${uClass[1]}_${Tree.TabName}`)
 
-                    let Title = Circle.CreateFontString()
-                    Title.SetFont("Fonts\\FRIZQT__.TTF", 40, "OUTLINE")
-                    Title.SetPoint('BOTTOM', 0, 0)
-                    Title.SetText(Tree.Name)
+                let Title = Circle.CreateFontString()
+                Title.SetFont("Fonts\\FRIZQT__.TTF", 40, "OUTLINE")
+                Title.SetPoint('BOTTOM', 0, 0)
+                Title.SetText(Tree.TabName)
+
+                let SamplesTitle = Spec.CreateFontString(null, 'OVERLAY', 'GameFontNormalSmall')
+                SamplesTitle.SetFont("Fonts\\FRIZQT__.TTF", 15, "OUTLINE")
+                SamplesTitle.SetPoint('BOTTOM', 0, 150)
+                SamplesTitle.SetText('Sample Abilities')
+                SamplesTitle.SetTextColor(1,1,1,1)
+
+                let RoleTex = Circle.CreateTexture('RoleTex', 'ARTWORK')
+                RoleTex.SetTexture(PATH + `tabBg\\Roles\\${Tree.Role}`)
+                RoleTex.SetSize(30, 30)
+                RoleTex.SetPoint('BOTTOM', -40, -40)
+                RoleTex.SetDrawLayer('ARTWORK', 3)
+
+                let LineTex = Circle.CreateTexture('LineTex', 'ARTWORK')
+                LineTex.SetTexture(PATH + `DescriptionLine`)
+                LineTex.SetSize(220, 5)
+                LineTex.SetPoint('BOTTOM', Title, 'BOTTOM', 0, -60)
+                LineTex.SetDrawLayer('ARTWORK', 3)
+                LineTex.SetVertexColor(.5, .5, .5)
+
+                let RoleText = Circle.CreateFontString('RoleText', 'OVERLAY', 'GameFontNormalSmall')
+                RoleText.SetFont("Fonts\\FRIZQT__.TTF", 15, "OUTLINE")
+                RoleText.SetText(Roles[Tree.TabRole-1])
+
+                let Description = Spec.CreateFontString('Description', 'OVERLAY', 'GameFontNormalSmall')
+                Description.SetFont("Fonts\\FRIZQT__.TTF", 18, "OUTLINE")
+                Description.SetText(Tree.TabDesc)
+                Description.SetWidth(300)
+                Description.SetPoint("CENTER", 0, -70)
+
+                // Sample Spell Icons
+                let SpellIconIds: TSArray<string> = (<string>Tree.TabSpellString).split(', ')
+                let PosX = 0
+                let PosY = 80
+                let Direction = -1
+                let Count = 0
+                let CurrentTab
+
+                SpellIconIds.forEach((SpellId) => {
+                    let SpellTex = Spec.CreateTexture('SpellTex', 'BACKGROUND')
+                    SpellTex.SetSize(50, 50)
+                    SpellTex.SetPoint('BOTTOM', PosX, PosY)
+                    SpellTex.SetDrawLayer('BACKGROUND', -1)
+
+                    let SpellCircle = Spec.CreateTexture('SpellCircle', 'ARTWORK')
+                    SpellCircle.SetPoint('CENTER', SpellTex, 'CENTER', 0, 0)
+                    SpellCircle.SetSize(60, 60)
+                    SpellCircle.SetTexture(PATH+'SampleBorder')
+                    SpellCircle.SetDrawLayer('ARTWORK', 1)
+
+                    let SpellInfo = GetSpellInfo(parseInt(SpellId))
+                    let Name = SpellInfo[0]
+                    let Rank = SpellInfo[1]
+                    let Icon = SpellInfo[2]
+
+                    SetPortraitToTexture(SpellTex, Icon)
+                    let SpellButton = CreateFrame('Button', 'SpellButton', Spec)
+                    SpellButton.SetSize(50, 50)
+                    SpellButton.SetPoint('CENTER', SpellTex, 'CENTER', 0, 0)
+                    SpellButton.SetFrameLevel(ClickInterceptor.GetFrameLevel()+1)
+                    SpellButton.SetScript('OnEnter', function(self) {
+                        GameTooltip.SetOwner(self, 'ANCHOR_RIGHT')
+                        GameTooltip.SetHyperlink(`spell:${SpellId}`)
+                        GameTooltip.Show()
+                    })
+                    SpellButton.SetScript('OnLeave', function () {
+                        GameTooltip.Hide()
+                        GameTooltip.ClearLines()
+                    })
+
+                    if (!Count)
+                        PosX = 0
+                    else {
+                        PosX = 70 * Direction * Math.ceil(Count/2)
+                        Direction = -Direction
+                    }
+
+                    SpellTex.SetPoint('BOTTOM', PosX, PosY)
+                    SpellButton.SetPoint('CENTER', SpellTex, 'CENTER', 0, 0)
+                    Count++
+                })
+
+                let OffX
+                switch (Tree.TabRole) {
+                    case 1:
+                        OffX = 75
+                        break
+                    case 2:
+                        OffX = 60
+                        break
+                    case 3:
+                        OffX = 48
+                        break
                 }
-            })
 
-            PlayerTalentFrameTabsLeft = tabsLeft
-        }
+                RoleText.SetPoint('RIGHT', RoleTex, 'RIGHT', OffX, 0)
+                let ActivateSpecBtn = CreateFrame('Button', 'ActivateSpecButton', Spec, 'UIPanelButtonTemplate')
+                ActivateSpecBtn.SetSize(130, 25)
+                ActivateSpecBtn.SetPoint("BOTTOM", 0, 30)
+                ActivateSpecBtn.SetText("Activate")
+                ActivateSpecBtn.SetFrameLevel(ClickInterceptor.GetFrameLevel() + 1)
+
+                ActivateSpecBtn.SetScript('OnClick', function (self: WoWAPI.Button) {
+                    if (self.GetText() === 'Activate') {
+                        CurrentTab = Tree
+                        SendCallbackToServer(ClientCallbackOperations.ACTIVATE_CLASS_SPEC, Tree.TabId)
+                    }
+                })
+
+                ActivateSpecBtn.SetScript('OnUpdate', function (self: WoWAPI.Button, elapsed) {
+                    let PlayerLevel = UnitLevel('player')
+                    if (PlayerLevel < 10)
+                        self.Disable()
+                    else
+                        self.Enable()
+                })
+
+                let EventFrame = CreateFrame('Frame')
+                EventFrame.RegisterEvent('UNIT_SPELLCAST_SUCCEEDED')
+                EventFrame.RegisterEvent('UNIT_SPELLCAST_INTERRUPTED')
+                EventFrame.SetScript('OnEvent', function (self, event, unit, spellName) {
+                    if (unit === 'player')
+                        if (event === 'UNIT_SPELLCAST_SUCCEEDED' && spellName === 'Activate Primary Spec' && CurrentTab) {
+                            //SelectTab(CurrentTab)
+                            CurrentTab = null
+                        } else if (event === 'UNIT_SPELLCAST_INTERRUPTED' && CurrentTab) {
+                            ActivateSpecBtn.SetButtonState('NORMAL')
+                            CurrentTab = null
+                        }
+                })
+                
+                if (TabCount <= 2) {
+                    StartX += 710
+                    NormalTex.SetSize(Spec.GetWidth() + 410, Spec.GetHeight() + 180)
+                    HilightTex.SetSize(Spec.GetWidth() + 410, Spec.GetHeight() + 180)
+                    PushedTex.SetSize(Spec.GetWidth() + 410, Spec.GetHeight() + 180)
+                } else if (TabCount === 3) {
+                    StartX += 472
+                    NormalTex.SetSize(Spec.GetWidth() + 103, Spec.GetHeight() + 180)
+                    HilightTex.SetSize(Spec.GetWidth() + 103, Spec.GetHeight() + 180)
+                    PushedTex.SetSize(Spec.GetWidth() + 103, Spec.GetHeight() + 180)
+                } else {
+                    StartX += 355
+                    NormalTex.SetSize(Spec.GetWidth() - 50, Spec.GetHeight() + 180)
+                    HilightTex.SetSize(Spec.GetWidth() - 50, Spec.GetHeight() + 180)
+                    PushedTex.SetSize(Spec.GetWidth() - 50, Spec.GetHeight() + 180)
+                }
+
+                let TabLeftData = {
+                    Frame: Spec,
+                    ActivateSpecBtn: ActivateSpecBtn,
+                }
+
+                PlayerTalentFrameTabsLeftData[Tree.TabId] = TabLeftData
+            }
+        })
+    }
+
+    let PointsBottomLeft, PointsBottomRight 
+    function InitializeTalentPointDisplay() {
+        if (PointsBottomLeft && PointsBottomRight)
+            return;
+
+        let Right = CreateFrame('Frame', 'TalentPoints', TalentFrame)
+        Right.SetSize(100, 100)
+        Right.SetFrameLevel(2000)
+        Right.SetPoint('TOP', -370, -55)
+        let RightPoints = TalentFrame.CreateFontString()
+        RightPoints.SetFont("Fonts\\FRIZQT__.TTF", 15, "OUTLINE")
+        RightPoints.SetPoint('TOPRIGHT', -70, -35)
+
+        let Left = CreateFrame('Frame', 'TalentPoints', TalentFrame)
+        Left.SetSize(100, 100)
+        Left.SetFrameLevel(2000)
+        Left.SetPoint('CENTER', -370, -55)
+        let LeftPoints = TalentFrame.CreateFontString()
+        LeftPoints.SetFont("Fonts\\FRIZQT__.TTF", 15, "OUTLINE")
+        LeftPoints.SetPoint('TOPLEFT', -20, -35)
+
+        PointsBottomLeft = LeftPoints
+        PointsBottomRight = RightPoints
     }
 
     InitializeGridForTalents()
@@ -516,18 +712,608 @@ export function TalentTreeUI() {
     PlayerTalentFrame = TalentFrame
     PlayerSpecFrame = ClassSpecWindow
 
+    function GetCurRankAndNextSpell(TabId: number, Talent: TTLPTalent) {
+        let NextSpell = 0
+        let Spell = 0
+        let CurRank = 0
+        if (CurRank < 1) {
+            Spell = Talent.Ranks[0].Spell
+        } else if (CurRank) {
+            Spell = Talent.Ranks[CurRank-1].Spell
+            if (CurRank !== Talent.NumRanks)
+                NextSpell = Talent.Ranks[CurRank].Spell
+        }
+
+        return {CurRank: CurRank, SpellId: Spell,  NextRankSpellId: NextSpell}
+    }
+
+    function FindSpellInTab(Tab: TalentTreeLayoutPayload, SpellId: number) : TTLPTalent {
+        Tab.Talents.forEach((Talent) => {
+            if (Talent.SpellId == SpellId)
+                return Talent
+        })
+
+        return null
+    }
+
+    function IsNodeUnlocked(Talent: TTLPTalentPrereq, Rank) {
+        return Rank == Talent.ReqRank
+    }
+
+    function GetPositionXY(Frame: WoWAPI.Frame) {
+        const [a, b, c, xOfs, yOfs] = Frame.GetPoint()
+        let Position = {
+            x: xOfs,
+            y: yOfs,
+        }
+        return Position
+    }
+
+    function Degrees(Radians) {
+        return Radians * (180/Math.PI)
+    }
+
+    function DrawNode(StartPos, EndPos, PrevFrame: WoWAPI.Frame, Talent: TTLPTalent, RequiredTalent: TTLPTalent) {
+        let x1 = StartPos.x
+        let y1 = StartPos.y
+        let x2 = EndPos.x
+        let y2 = EndPos.y
+
+        let DX = x1 - x2
+        let DY = y1 - y2
+        let Angle = Degrees(Math.atan2(DY, DX))
+        let Length = Math.sqrt((x2 - x1)**2 + (y2 - y2)**2)
+
+        let CX = (x1 + x2)/2
+        let CY = (y1 + y2)/2
+
+        if (DY !== 0 && DX == 0)
+            CX -= 1
+
+        let Node = CreateFrame('Frame', 'NodeLine', PrevFrame)
+        Node.SetSize(Length - 30, 12)
+        Node.SetPoint('CENTER', CX, CY)
+        
+        let Animation = PrevFrame.CreateAnimationGroup()
+        let Spin = Animation.CreateAnimation('Rotation')
+        Spin.SetOrder(1)
+        Spin.SetDuration(0)
+        Spin.SetDegrees(Angle)
+        Spin.SetEndDelay(999999)
+
+        Animation.Stop()
+        Animation.Play()
+    }
+
+    function InitializePrereqsAndLines(Talent: TTLPTalent, Tab: TalentTreeLayoutPayload, ) {
+        Talent.Prereqs.forEach((Prereq) => {
+            let Required = FindSpellInTab(Tab, Prereq.Talent)
+            if (Required) {
+                let PrevFrame = TalentFrameGridTalent[Required.Row][Required.Col]
+                let ThisFrame = TalentFrameGridTalent[Talent.Row][Talent.Col]
+
+                let LineTexture = TalentFrameContainer.CreateTexture(`LineTexture:${Prereq.Talent}:${Required.SpellId}`, 'OVERLAY')
+                LineTexture.SetDrawLayer('ARTWORK', 7)
+                let Width = 10
+
+                if (IsNodeUnlocked(Prereq, TreeCache.Spells[Tab.TabId][Talent.NodeIndex])) {
+                    LineTexture.SetTexture(CONSTANTS.UI.CONNECTOR)
+                } else {
+                    LineTexture.SetTexture(CONSTANTS.UI.CONNECTOR_DISABLED)
+                }
+
+                let StartPos = GetPositionXY(ThisFrame)
+                let EndPos = GetPositionXY(PrevFrame)
+                DrawNode(StartPos, EndPos, PrevFrame, Talent, Required)
+            }
+        })
+    }
+
+    function CreateTooltip(Talent: TTLPTalent, NextSpellId: uint32, TFrame: WoWAPI.Frame) {
+        let Rank = TreeCache.Spells[Talent.TabId][Talent.NodeIndex]
+        
+        FirstRankToolTip.SetOwner(TFrame, 'ANCHOR_RIGHT')
+        SecondRankToolTip.SetOwner(FirstRankToolTip, 'ANCHOR_BOTTOM')
+
+        FirstRankToolTip.SetHyperlink(`spell:${Talent.SpellId}`)
+
+        if (Talent.RankCost > 0 && Rank < Talent.NumRanks) {
+            FirstRankToolTip.AddLine(`Cost: ${Talent.RankCost}`, 1, 1, 1)
+            FirstRankToolTip.AddLine(`Required Level: ${Talent.ReqLevel}`, 1, 1, 1)
+        }
+
+        if (NextSpellId) {
+            SecondRankToolTip.AddLine(`Next Rank: ${NextSpellId}`, 1, 1, 1)
+            SecondRankToolTip.SetBackdropColor(0, 0, 0, 0,)
+            SecondRankToolTip.AddLine('')
+            SecondRankToolTip.SetPoint('TOP', FirstRankToolTip, 'TOP', 0, -(FirstRankToolTip.GetHeight() + 25))
+            FirstRankToolTip.SetSize(FirstRankToolTip.GetWidth(), FirstRankToolTip.GetHeight() + SecondRankToolTip.GetHeight() + 30)
+        } else {
+            FirstRankToolTip.SetSize(FirstRankToolTip.GetWidth(), FirstRankToolTip.GetHeight() + 40)
+        }
+    }
+
+    let ChoiceTalentData = []
+    let FrameStatusLookup
+    function PopulateGridFromTab(Tab: TalentTreeLayoutPayload) {
+        if (TalentFrameGridTalent)
+            TalentFrameGridTalent.Hide()
+
+        FrameStatusLookup = []
+
+        if (Tab.TalentsCount) {
+            Tab.Talents.forEach((Talent) => {
+                const {CurRank, SpellId, NextRankSpellId} = GetCurRankAndNextSpell(Tab.TabId, Talent)
+                let CurrentRank = CurRank 
+                let SpellInfo = GetSpellInfo(Talent.SpellId) 
+                const [Name, Rank, Icon] = SpellInfo[0] ? SpellInfo : GetSpellInfo(5)
+                let Col = Talent.Col
+                let Row = Talent.Row-1
+                let nRanks = Talent.NumRanks
+                
+                if (Tab.TabId !== TalentTree.ClassTree)
+                    Col += 11
+
+                let FrameData = GridTalentTalents[Row][Col]
+                let Frame = FrameData.Frame 
+
+                if (!TreeCache.IndexToFrame[Tab.TabId][Talent.NodeIndex])
+                    TreeCache.IndexToFrame[Tab.TabId][Talent.NodeIndex] = {row: Row, col: Col}
+
+                if (!TreeCache.Spells[Tab.TabId][Talent.NodeIndex])
+                    TreeCache.Spells[Tab.TabId][Talent.NodeIndex] = 0
+
+                if (!Frame)
+                    return
+
+                let FrameStatus = {
+                    CanUpRank: false,
+                    CanDeRank: false,
+                    Update: true,
+                    ReqsMet: false,
+                    Init: false,
+                    TooltipActive: false,
+                }
+
+                TreeCache.PointsSpent[Tab.TabId] = 0
+                TreeCache.TotalInvests[Talent.TabPointReq] = 0
+
+                let ChoiceTalents = CreateFrame('Frame', 'Choice_Talents', TalentFrame)
+                ChoiceTalents.SetSize(200, 100)
+                ChoiceTalents.SetPoint('CENTER')
+                ChoiceTalents.Hide()
+
+                if (Talent.PrereqCount) {
+                    InitializePrereqsAndLines(Talent, Tab)
+                }
+
+                FrameStatus.Init = true
+
+                if (Talent.NumRanks == 0) {
+                    Frame.SetSize(38, 38)
+                    FrameData.Ranks.Hide()
+                    FrameData.Border.Hide()
+                    FrameData.TextureIcon.SetTexture(Icon)
+                }
+
+                Frame.SetScript('OnEnter', function() {
+                    if (TreeCache.Points[Tab.TabType] < Talent.RankCost || TreeCache.PointsSpent[Tab.TabId] < Talent.TabPointReq|| UnitLevel('player') < Talent.ReqLevel || !FrameStatus.ReqsMet) {
+                        return
+                    }
+                    if (Talent.NodeType <= 1) {
+                        CreateTooltip(Talent, NextRankSpellId, GridTalentTalents[Row][Col].Frame)
+                        FrameStatus.TooltipActive = true
+                    }
+                    
+                    if (Talent.NodeType == 2 && Talent.ChoicesCount > 0) { // Choice node
+                        ChoiceTalents.SetParent(Frame)
+                        ChoiceTalents.SetFrameLevel(200)
+                        ChoiceTalents.SetFrameStrata('FULLSCREEN')
+                        ChoiceTalents.ClearAllPoints()
+                        ChoiceTalents.SetPoint('CENTER', Frame, 'CENTER')
+
+                        let ChoiceTalentButtons: TSArray<WoWAPI.Button> = []
+                        ChoiceTalentData[Talent.SpellId] = []
+
+                        Talent.Choices.forEach((ChoiceSpellId, i) => {
+                            let ChoiceTalentButton = ChoiceTalentButtons[i]
+                            if (!ChoiceTalentButton) {
+                                ChoiceTalentButton = CreateFrame('Button', `ChoiceTalentButton:${ChoiceSpellId}`, ChoiceTalents)
+                                ChoiceTalentButton.SetSize(50, 50)
+                                ChoiceTalentButtons[i] = ChoiceTalentButton
+
+                                ChoiceTalentButton.SetScript('OnMouseDown', function(self, input) {
+                                    let change = false
+                                    if (input === 'LeftButton') {
+                                        let WasZero = TreeCache.Spells[Tab.TabId][Talent.NodeIndex] === 0
+                                        TreeCache.Spells[Tab.TabId][Talent.NodeIndex] = i
+                                        TreeCache.PointsSpent[Tab.TabId] += Talent.RankCost
+
+                                        let CurRank = TreeCache.Spells[Tab.TabId][Talent.NodeIndex]
+
+                                        TreeCache.PrereqUnlocks[Tab.TabId][Talent.SpellId] = CurRank
+                                        TreeCache.PrereqRev[Talent.SpellId] = []
+
+                                        if (Talent.PrereqCount) {
+                                            Talent.Prereqs.forEach((Prereq) => {
+                                                if (TreeCache.PrereqRev[Prereq.Talent] && Prereq.ReqRank <= TreeCache.PrereqUnlocks[Prereq.TabId][Prereq.Talent])
+                                                    TreeCache.PrereqRev[Prereq.Talent][Talent.SpellId] = true
+                                            })
+                                        }
+
+                                        if (WasZero)
+                                            TreeCache.Points[Tab.TabType] -= 1
+
+                                        let change = true
+                                    }
+
+                                    if (change)
+                                        ShowTalentPointType(Tab.TabType, Tab.TabId)
+                                })
+
+                                let ChoiceTexture = ChoiceTalentButton.CreateTexture(`ChoiceTexture:${i}`, 'BACKGROUND')
+                                ChoiceTexture.SetAllPoints(ChoiceTalentButton)
+
+                                let ChoiceBorderTexture = ChoiceTalentButton.CreateTexture(`ChoiceBorderTexture${i}`, 'ARTWORK')
+                                ChoiceBorderTexture.SetPoint('CENTER', 0, 2)
+                                ChoiceBorderTexture.SetSize(ChoiceTalentButton.GetWidth()*1.7, ChoiceTalentButton.GetHeight()*1.7)
+                                ChoiceBorderTexture.SetTexture(PATH+'Talents_DF')
+                                ChoiceBorderTexture.SetTexCoord(0.5, 0.5625, 0.125, 0.1875)
+                                ChoiceBorderTexture.SetVertexColor(0, 1, 0, 1)
+
+                                ChoiceTalentData[Talent.SpellId][i] = {
+                                    Button: ChoiceTalentButton,
+                                    Texture: ChoiceTexture,
+                                    BorderTexture: ChoiceBorderTexture,
+                                }
+                            }
+                            const [ChoiceName, Skip, ChoiceIcon] = GetSpellInfo(ChoiceSpellId)
+                            SetPortraitToTexture(ChoiceTalentData[Talent.SpellId][i].Textura, ChoiceIcon)
+                            ChoiceTalentButton.SetPoint('CENTER', ChoiceTalents, 'CENTER', ((i - 1)* 60) - (30 * (Talent.ChoicesCount-1)), 0)
+                            ChoiceTalentButton.Show()
+
+                            ChoiceTalentButton.SetScript('OnEnter', function(self) {
+                                CreateTooltip(Talent, NextRankSpellId, GridTalentTalents[Talent.Row][Talent.Col].Frame)
+                                FrameStatus.TooltipActive = true
+                            })
+
+                            ChoiceTalentButton.SetScript('OnLeave', function (self) {
+                                FrameStatus.TooltipActive = false
+                            })
+
+                            ChoiceTalents.SetScript('OnHide', function() {
+                                FrameStatus.TooltipActive = false
+                                FirstRankToolTip.Hide()
+                            })
+
+                            TreeCache.ChoiceNodes[Talent.NodeIndex] = ChoiceTalentButtons
+                        })
+                        ChoiceTalents.Show()
+                    }
+                })
+
+                Frame.SetScript('OnLeave', function() {
+                    FirstRankToolTip.Hide()
+                    SecondRankToolTip.Hide()
+                    FrameStatus.TooltipActive = false
+                    ChoiceTalents.Hide()
+                })
+
+                if (Talent.NodeType !== 2)
+                    FrameData.RankText.SetText(CurrentRank === -1 ? 0 : CurrentRank)
+
+                Frame.SetScript('OnMouseDown', function(self, input) {
+                    let SpellRank = TreeCache.Spells[Tab.TabId][Talent.NodeIndex]
+                    let Change = false
+                    if (input === 'LeftButton' && FrameStatus.CanUpRank && Talent.NodeType < 2) {
+                        if (SpellRank < nRanks) {
+                            TreeCache.Spells[Tab.TabId][Talent.NodeIndex] += 1
+                            TreeCache.PointsSpent[Tab.TabId] += Talent.RankCost
+
+                            TreeCache.PrereqUnlocks[Tab.TabId][Talent.SpellId] = TreeCache.Spells[Tab.TabId][Talent.NodeIndex]
+                            TreeCache.PrereqRev[Talent.SpellId] = []
+                            if (Talent.PrereqCount > 0) {
+                                Talent.Prereqs.forEach((Prereq) => {
+                                    if (TreeCache.PrereqRev[Prereq.Talent] && Prereq.ReqRank <= TreeCache.PrereqUnlocks[Prereq.TabId][Prereq.Talent])
+                                        TreeCache.PrereqRev[Prereq.Talent][Talent.SpellId] = true
+                                })
+                            }
+
+                            TreeCache.Points[Tab.TabType] -= Talent.RankCost
+                            Change = true
+                        }
+                    } else if (input !== 'LeftButton' && FrameStatus.CanDeRank) {
+                        if (TreeCache.Spells[Tab.TabId][Talent.NodeIndex] > 0) {
+                            if (Talent.NodeType === 2) {
+                                TreeCache.Spells[Tab.TabId][Talent.NodeIndex] = 0
+                            } else {
+                                TreeCache.Spells[Tab.TabId][Talent.NodeIndex] = SpellRank - 1
+                            }
+
+                            TreeCache.PointsSpent[Tab.TabId] -= Talent.RankCost
+
+                            TreeCache.PrereqUnlocks[Tab.TabId][Talent.SpellId] = TreeCache.Spells[Tab.TabId][Talent.NodeIndex]
+
+                            if (Talent.PrereqCount) {
+                                Talent.Prereqs.forEach((Prereq) => {
+                                    if (TreeCache.PrereqRev[Prereq.Talent] && TreeCache.Spells[Tab.TabId][Talent.NodeIndex] < 1)
+                                        TreeCache.PrereqRev[Prereq.Talent][Talent.SpellId] = null
+                                })
+                            }
+
+                            TreeCache.Points[Tab.TabType] += Talent.RankCost
+                            Change = true
+                        }
+                    }
+                    if (Change) {
+                        FrameStatus.Update = true
+                        if (Talent.NodeType < 2)
+                            FrameData.RankText.SetText(TreeCache.Spells[Tab.TabId][Talent.NodeIndex])
+
+                        ShowTalentPointType(Tab.TabType, Tab.TabId)
+                    }
+                })
+
+                Frame.SetScript('OnUpdate', function() {
+                    let Allow = false
+
+                    if (TreeCache.PrereqRev[Talent.SpellId]) {
+                        if (TreeCache.PrereqRev[Talent.SpellId].length)
+                            Allow = true
+                    }
+                    
+                    FrameStatus.CanDeRank = !Allow
+
+                    if (Talent.NodeType === 2) {
+                        // TODO Add IsMouseOverFrame if ()
+                        ChoiceTalents.Show()
+                    }
+
+                    if (Talent.NodeType === 2 && Talent.ChoicesCount) {
+                        let SpellLearned = 0
+                        if (ChoiceTalentData.length) {
+                            ChoiceTalentData.forEach((ButtonData, i) => {
+                                if (TreeCache.Spells[Tab.TabId][Talent.NodeIndex] == i) {
+                                    SpellLearned = Talent.Choices[i]
+                                    ButtonData.BorderTexture.SetVertexColor(1, 1, 0, 1)
+                                } else
+                                ButtonData.BorderTexture.SetVertexColor(0, 1, 0, 1)
+                            })
+                        }
+
+                        if (SpellLearned) {
+                            const [n, r, SpellIcon] = GetSpellInfo(SpellLearned)
+                            FrameData.TextureIcon.SetTexture(SpellIcon)
+                            FrameData.TextureIcon.ClearAllPoints()
+                            FrameData.TextureIcon.SetSize(33.5, 33.5)
+                            FrameData.TextureIcon.SetPoint('CENTER', FrameData.Border, 'CENTER', 2, 1)
+                            FrameData.TextureIconLeft.Hide()
+                            FrameData.TextureIconRight.Hide()
+                            FrameData.BorderTexture.SetTexCoord(0, 0.125, 0.25, 0.375)
+                        } else {
+                            FrameData.TextureIconLeft.Show()
+                            FrameData.TextureIconRight.Show()
+                        }
+
+                        let debug1 = TreeCache.Points[Tab.TabType] < Talent.RankCost
+                        let debug2 = TreeCache.PointsSpent[Tab.TabId] < Talent.TabPointReq 
+                        let debug3 = UnitLevel('player') < Talent.ReqLevel || !FrameStatus.ReqsMet
+
+                        if ( debug1 || debug2 || debug3) {
+                            if (Talent.NumRanks > TreeCache.Spells[Tab.TabId][Talent.NodeIndex]) {
+                                FrameData.TextureIcon.SetDesaturated(true)
+                                if (FrameData.Border && FrameData.BorderTexture) {
+                                    FrameData.BorderTexture.SetDesaturated(true)
+                                    FrameData.TextureIconLeft.SetDesaturated(true)
+                                    FrameData.TextureIconRight.SetDesaturated(true)
+                                }
+                                FrameStatus.CanUpRank = false
+                            } 
+                        } else {
+                            FrameData.TextureIcon.SetDesaturated(false)
+                            if (FrameData.Border && FrameData.BorderTexture) {
+                                FrameData.BorderTexture.SetDesaturated(false)
+                                FrameData.TextureIconLeft.SetDesaturated(false)
+                                FrameData.TextureIconRight.SetDesaturated(false)
+                            }
+                            FrameStatus.CanUpRank = true
+                        }
+                    }
+
+                    if (TreeCache.Spells[Tab.TabId][Talent.NodeIndex] <= 0)
+                        FrameData.BorderTexture.SetVertexColor(0, 1, 0, 1)
+
+                    if (Talent.PrereqCount > 0) {
+                        Talent.Prereqs.forEach((Prereq) => {
+                            if (TreeCache.PrereqUnlocks[Prereq.TabId]) {
+                                let ReqUnlocked = TreeCache.PrereqUnlocks[Prereq.TabId][Prereq.Talent]
+                                if (ReqUnlocked) {
+                                    if (ReqUnlocked >= Prereq.ReqRank)
+                                        FrameStatus.ReqsMet = true
+                                    else
+                                        FrameStatus.ReqsMet = false
+                                } else {
+                                    FrameStatus.ReqsMet = false
+                                }
+                            } else {
+                                FrameStatus.ReqsMet = false
+                            }
+                        })
+                    } else {
+                        FrameStatus.ReqsMet = true
+                    }
+
+                    if (TreeCache.Points[Tab.TabType] < Talent.RankCost || TreeCache.PointsSpent[Tab.TabId] < Talent.TabPointReq || UnitLevel('player') < Talent.ReqLevel || !FrameStatus.ReqsMet) {
+                        if (Talent.NumRanks > TreeCache.Spells[Tab.TabId][Talent.NodeIndex]) {
+                            FrameData.TextureIcon.SetDesaturated(true)
+                            if (FrameData.Border && FrameData.BorderTexture) {
+                                FrameData.BorderTexture.SetDesaturated(true)
+                            } 
+                        }
+                        FrameStatus.CanUpRank = false
+                    } else {
+                        FrameData.TextureIcon.SetDesaturated(false)
+                        if (FrameData.Border && FrameData.BorderTexture) {
+                            FrameData.BorderTexture.SetDesaturated(false)
+                        }
+                        FrameStatus.CanUpRank = true
+                    }
+                    FrameStatus.Update = false
+                    FrameStatusLookup[Row][Col] = FrameStatus
+                })
+
+                if (Talent.NodeType === 0) {
+                    SetPortraitToTexture(FrameData.TextureIcon, Icon)
+                    FrameData.BorderTexture.ClearAllPoints()
+                    FrameData.BorderTexture.SetPoint('CENTER', FrameData.Border, 'CENTER', 2, 2)
+                    FrameData.BorderTexture.SetSize(60, 60)
+                    FrameData.TextureIcon.ClearAllPoints()
+                    FrameData.TextureIcon.SetPoint('CENTER', FrameData.Border, 'CENTER')
+                    FrameData.TextureIcon.SetSize(35, 35)
+                } else if (Talent.NodeType === 1) {
+                    FrameData.TextureIcon.SetTexture(Icon)
+                    FrameData.BorderTexture.ClearAllPoints()
+                    FrameData.BorderTexture.SetPoint('CENTER', FrameData.Border, 'CENTER', 2, -3)
+                    FrameData.BorderTexture.SetSize(59, 59)
+                }
+
+                if (Talent.NodeType && Talent.ChoicesCount) {
+                    if (Talent.ChoicesCount >= 2) {
+                        const [SpellId1, SpellId2] = Talent.Choices
+                        const [a, b, Icon1] = GetSpellInfo(SpellId1)
+                        const [c, d, Icon2] = GetSpellInfo(SpellId2)
+
+                        if (!Icon1 || !Icon2) {
+                            console.log(`Error, missing texture for 1 or more choices for: ${Talent.SpellId}`)
+                            return
+                        }
+
+                        let IconSize = FrameData.TextureIcon.GetWidth() + 10
+                        FrameData.TextureIconLeft.SetSize(IconSize/2, IconSize/2)
+                        FrameData.TextureIconLeft.SetPoint('LEFT', FrameData.TextureIcon, 'LEFT', -2, 2)
+                        FrameData.TextureIconLeft.SetTexCoord(0, 0.5, 0, 1)
+
+                        FrameData.TextureIconRight.SetSize(IconSize/2, IconSize/2)
+                        FrameData.TextureIconRight.SetPoint('LEFT', FrameData.TextureIcon, 'Right', 0, 0)
+                        FrameData.TextureIconRight.SetTexCoord(0.5, 1, 0, 1)
+
+                        FrameData.BorderTexture.ClearAllPoints()
+                        FrameData.BorderTexture.SetPoint('CENTER', FrameData.Border, 'CENTER', 0.5, 0.5)
+                        FrameData.BorderTexture.SetSize(66, 66)
+
+                        SetPortraitToTexture(FrameData.TextureIconLeft, Icon1)
+                        SetPortraitToTexture(FrameData.TextureIconRight, Icon2)
+                    }
+                }
+
+                let TextureSettings = {
+                    0: {Desaturate: false, Coords: {minX: 0.5, maxX: 0.5625, minY: 0.125, maxY: 0.1875}},
+                    1: {Desaturate: false, Coords: {minX: 0.125, maxX: 0.25, minY: 0.625, maxY: 0.75}},
+                    2: {Desaturate: false, Coords: {minX: 0, maxX: 0.125, minY: 0.625, maxY: 0.75}},
+                }
+                let Settings = TextureSettings[Talent.NodeType]
+
+                if (Settings) {
+                    FrameData.TextureIcon.SetDesaturated(Settings.Desaturate)
+                    FrameData.BorderTexture.SetTexCoord(Settings.Coords.minX, Settings.Coords.maxX, Settings.Coords.minY, Settings.Coords.maxY)
+                }
+
+                if (!FrameStatusLookup[Row])
+                    FrameStatusLookup[Row] = []
+
+                FrameStatusLookup[Row][Col] = FrameStatus
+
+                Frame.Show()
+            })
+        }
+    }
+
+    function GetPointsByType(type: number) {
+        return TreeCache.Points[type]
+    }
+
+    function ShowTalentPointType(Type: number, TabId: number) {
+        let Tab = TabId === TalentTree.ClassTree ? TalentTree.ClassTab : TalentTree.TalentTrees[TabId]
+        let ClassName = UnitClass('player')[0]
+
+        if (!Tab) 
+            return;
+
+        if (Type === 0) {
+            PointsBottomLeft.SetText(`${ClassName} points available: ${GetPointsByType(7)}`)
+            PointsBottomRight.SetText(`${Tab.TabName} points available: ${GetPointsByType(0)}`)
+        } else {
+            PointsBottomLeft.SetText(`${ClassName} points available: ${GetPointsByType(7)}`)
+        }
+    }
+
+    let LastPushedTabId = null
+    function SelectTab(Tab: TalentTreeLayoutPayload) {
+        TalentTree.SelectedTab = Tab
+
+        if (Tab.TabType === 0) {
+            if (!TreeCache.IndexToFrame.includes(Tab.TabId))
+                TreeCache.IndexToFrame[Tab.TabId] = []
+
+            if (!TreeCache.Spells.includes(Tab.TabId))
+                TreeCache.Spells[Tab.TabId] = []
+
+            if (!TreeCache.PrereqUnlocks.includes(Tab.TabId))
+                TreeCache.PrereqUnlocks[Tab.TabId] = []
+
+            InitializeGridForTalents()
+
+            if (Tab.TalentsCount) {
+                PopulateGridFromTab(Tab)
+
+                if (!TreeCache.IndexToFrame.includes(TalentTree.ClassTree))
+                    TreeCache.IndexToFrame[TalentTree.ClassTree] = []
+
+                if (!TreeCache.Spells.includes(TalentTree.ClassTree))
+                    TreeCache.Spells[TalentTree.ClassTree] = []
+
+                if (!TreeCache.PrereqUnlocks.includes(TalentTree.ClassTree))
+                    TreeCache.PrereqUnlocks[TalentTree.ClassTree] = []
+
+                PopulateGridFromTab(TalentTree.ClassTab)
+            }
+            TalentFrameGridTalent.Show()
+        } else 
+            TalentFrameGridTalent.Hide()
+
+        ShowTalentPointType(Tab.TabType, Tab.TabId)
+        if (TalentTree.SelectedTab) {
+            PlayerTalentFrameTabsLeftData[Tab.TabId].Frame.SetButtonState('NORMAL', 1)
+        }
+
+        if (LastPushedTabId && PlayerTalentFrameTabsLeftData[LastPushedTabId]) {
+            PlayerTalentFrameTabsLeftData[LastPushedTabId].Frame.SetButtonState('NORMAL', 1)
+            let BGPath = PATH + TalentTree.TalentTrees[LastPushedTabId].TabBg
+            TalentFrameContainerBackground.SetTexture(BGPath)
+        }
+
+        if (PlayerTalentFrameTabsLeftData[Tab.TabId]) {
+            PlayerTalentFrameTabsLeftData[Tab.TabId].Frame.SetButtonState('PUSHED', 1)
+            LastPushedTabId = Tab.TabId
+
+            let BGPath = PATH + Tab.TabBg
+            TalentFrameContainerBackground.SetTexture(BGPath)
+        }
+
+        //update active spec button
+    }
+
     // ---------------------------- HOOKS FOR CALLBACKS ---------------------------- \\
 
     OnCustomPacket(ClientCallbackOperations.GET_CHARACTER_SPECS,pkt=>{ 
         let Reader = new GetCharacterSpecsPayload()
         let layout = Reader.read(pkt)
-        print(layout.SpecCounts)
-        if (layout.SpecCounts) {
-            console.log(`Received ${ClientCallbackOperations.GET_CHARACTER_SPECS}: for ${layout.SpecCounts} specs`)
+        if (layout.SpecCounts > 0) {
             layout.Specs.forEach((spec) => {
                 if (spec.Active) {
                     TalentTree.SelectedSpec = spec.SpecTabId
                     TalentTree.ActiveSpec = spec
+                    
                     spec.Points.forEach((Point) => {
                         TreeCache.Points[Point.Type] = Point.SpecPointSum
                         TalentTree.MaxPoints[Point.Type] = Point.AbsoluteMax
@@ -538,13 +1324,16 @@ export function TalentTreeUI() {
             })
 
             if (TalentTree.INITIALIZED && TalentTree.SelectedTab) {
-                //ShowTypeTalentPoint(TalentTree.SelectedTab.TalentType, TalentTree.SelectedTab.Id)
+                ShowTalentPointType(TalentTree.SelectedTab.TabType, TalentTree.SelectedTab.TabId)
             }  else {
                 InitializeTabsLeft()
+                InitializeTalentPointDisplay()
+
+                SelectTab(TalentTree.TalentTrees[TalentTree.FirstTab])
             }
             TalentTree.INITIALIZED = true
             SendCallbackToServer(ClientCallbackOperations.GET_TALENTS, '-1')
-            //SendCallbackToServer(ClientCallbackOperations.GET_LOADOUTS, '-1')
+            SendCallbackToServer(ClientCallbackOperations.GET_LOADOUTS, '-1')
         }
     })
 
@@ -553,6 +1342,12 @@ export function TalentTreeUI() {
     })
     OnCustomPacket(ClientCallbackOperations.TALENT_TREE_LAYOUT,pkt=>{ 
         GetTalentTreeLayout(pkt)
+    })
+    OnCustomPacket(ClientCallbackOperations.LEVELUP, pkt=> {
+        console.log(pkt.ReadString())
+    })
+    OnCustomPacket(ClientCallbackOperations.GET_TALENTS, pkt => {
+        console.log(`Got talents: ${pkt.ReadString()}`)
     })
 
     SendCallbackToServer(ClientCallbackOperations.TALENT_TREE_LAYOUT, '-1')
@@ -602,31 +1397,6 @@ export function BuildLoadoutString() {
     return out
 }
 
-export function GetClassTree(classString) {
-    switch(classString) {
-    case 'Warrior':
-        return '33'
-    case 'Paladin':
-        return '34'
-    case 'Hunter':
-        return '35'
-    case 'Rogue':
-        return '36'
-    case 'Priest':
-        return '37'
-    case 'Death Knight':
-        return '38'
-    case 'Shaman':
-        return '39'
-    case 'Mage':
-        return '40'
-    case 'Warlock':
-        return '41'
-    case 'Druid':
-        return '42'
-    }
-}
-
 let ValidTabs: TSArray<number> = [
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
     16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
@@ -647,10 +1417,21 @@ export function OnTalentError(pkt: TSPacketRead) {
 export function GetTalentTreeLayout(pkt: TSPacketRead) {
     let Reader = new GetTalentTreeLayoutPayload()
     let layout = Reader.read(pkt)
+
+    // todo Send them all at once
     if (layout)
         if (layout.TabId)
             if (ValidTabs.includes(layout.TabId)) { // strange bug on first login where it gives a decimal tab id, just ignore it
-                TalentTree.TalentTrees[layout.TabId] = layout
+                if (layout.TabType === 7) {
+                    TalentTree.ClassTab = layout
+                    TalentTree.ClassTree = layout.TabId
+                } else {
+                    TalentTree.FirstTab = TalentTree.FirstTab > layout.TabId ? layout.TabId : TalentTree.FirstTab 
+                    TalentTree.TalentTrees[layout.TabId] = layout
+
+                    if (!TalentTree.Tabs.includes(layout.TabId))
+                        TalentTree.Tabs.push(layout.TabId)
+                }
                 SendCallbackToServer(ClientCallbackOperations.GET_CHARACTER_SPECS, '-1')
             }
 }

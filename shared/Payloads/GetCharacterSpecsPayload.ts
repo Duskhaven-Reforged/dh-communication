@@ -65,6 +65,8 @@ export class GetCharacterSpecsPayload {
                 Point.AbsoluteMax = read.ReadDouble()
                 Spec.Points.push(Point)
             }
+
+            output.Specs.push(Spec)
         }
         return output
     }

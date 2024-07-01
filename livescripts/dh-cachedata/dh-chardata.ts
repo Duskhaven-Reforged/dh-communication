@@ -5,7 +5,6 @@ export let cActions: TSDictionary<uint64, TSDictionary<uint8, TSDictionary<uint8
 export let cCharPoints: TSDictionary<uint64 /*owner*/, TSDictionary<uint16/*pointType*/, TSDictionary<uint8/*spec*/, DHCharacterPoint>>> = CreateDictionary<uint64, TSDictionary<uint16, TSDictionary<uint8, DHCharacterPoint>>>({})
 export let cMaxPointDefaults: TSDictionary<uint16, DHCharacterPoint> = CreateDictionary<uint16, DHCharacterPoint>({})
 export let cSpecs: TSDictionary<uint64 /*owner*/, TSDictionary<uint8/*spec*/, DHPlayerSpec>> = CreateDictionary<uint64, TSDictionary<uint8, DHPlayerSpec>>({})
-export let cActiveSpecs: TSDictionary<uint64, uint32> = CreateDictionary<uint64, uint32>({})
 export let cLoadouts: TSDictionary<uint64 /*owner*/, TSDictionary<uint32/*tab*/, TSDictionary<uint8/*id*/, DHPlayerLoadout>>> = CreateDictionary<uint64, TSDictionary<uint32, TSDictionary<uint8, DHPlayerLoadout>>>({})
 export let cActiveLoadouts: TSDictionary<uint64, DHPlayerLoadout> = CreateDictionary<uint64, DHPlayerLoadout>({})
 
@@ -96,12 +95,12 @@ class CharacterPoints {
         while (res.GetRow()) {
             let owner = res.GetUInt64(0)  
             let type = res.GetUInt16(1)
-            let spec = res.GetUInt32(2)
+            let spec = res.GetUInt64(2)
             let sum = res.GetUInt32(3)
             let max = res.GetUInt32(4)
             let point = new DHCharacterPoint(type, spec, sum, max)
 
-            if (owner === 0xffffffff)
+            if (owner === 4294967295)
                 cMaxPointDefaults[type] = point
             else 
                 cCharPoints[owner][type][spec] = point
@@ -128,9 +127,6 @@ class CharacterSpecs {
             let specTabId = res.GetUInt32(6)
 
             let spec = new DHPlayerSpec(owner, id, name, description, !!active, spellIcon, specTabId);
-
-            if (active)
-                cActiveSpecs[id] = spec.Id
 
             cSpecs[owner][id] = spec
 
