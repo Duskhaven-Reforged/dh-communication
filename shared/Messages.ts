@@ -63,7 +63,7 @@ export class SimpleMessagePayload {
 
     //parsing the packet
     read(read: TSPacketRead): void {
-        
+        this.message = read.ReadString()
     }
     //writing the packet
     write(): TSPacketWrite {

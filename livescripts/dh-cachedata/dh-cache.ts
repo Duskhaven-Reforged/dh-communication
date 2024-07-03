@@ -1,7 +1,7 @@
 import { ClientCallbackOperations, SimpleMessagePayload } from '../../shared/Messages';
-import { ACOUNT_WIDE_KEY, DHCharacterPoint, DHCharacterTalent, DHNodeType, DHPlayerLoadout, DHPlayerSpec, DHPointType, DHTalentTab, TALENT_POINT_TYPES, base64_char } from '../classes';
+import { ACOUNT_WIDE_KEY, DHCharacterPoint, DHCharacterTalent, DHNodeType, DHPlayerLoadout, DHPlayerSpec, DHPointType, DHTalentTab, DHTreeMetaData, TALENT_POINT_TYPES, base64_char } from '../classes';
 import { LoadCharacterData, cActiveLoadouts, cCharPoints, cLoadouts, cMaxPointDefaults, cSpecs } from './dh-chardata';
-import { LoadWorldData, wClassNodeToSpell, wRaceClassTabMap, wPointTypeToTabs, wSpecNodeToSpell, wSpellToTab, wTabToSpell, wTalentTrees, wChoiceNodesRev } from './dh-worlddata';
+import { LoadWorldData, wClassNodeToSpell, wRaceClassTabMap, wPointTypeToTabs, wSpecNodeToSpell, wSpellToTab, wTabToSpell, wTalentTrees, wChoiceNodesRev, wTreeMetaData, wClassNodeToClassTree, wChoiceNodes } from './dh-worlddata';
 
 export class DHCache {
     
@@ -82,6 +82,186 @@ export class DHCache {
         }
     }
 
+    LocalTreeMetaData: TSDictionary<uint32, DHTreeMetaData> = CreateDictionary<uint32, DHTreeMetaData>({})
+    SimplifiedTreeMap: TSDictionary<uint32, TSDictionary<uint8, TSDictionary<uint8, uint32>>> = CreateDictionary<uint32, TSDictionary<uint8, TSDictionary<uint8, uint32>>>({})
+    ToLearn: TSArray<DHCharacterTalent> = CreateArray<DHCharacterTalent>([])
+    Unlocks: TSArray<uint32> = CreateArray<uint32>([])
+    public TrySaveNewLoadout(Player: TSPlayer, LoadoutString: string) {
+        this.LocalTreeMetaData = CreateDictionary<uint32, DHTreeMetaData>({})
+        this.SimplifiedTreeMap = CreateDictionary<uint32, TSDictionary<uint8, TSDictionary<uint8, uint32>>>({})
+        console.log(LoadoutString+'\n')
+        let ERROR = new SimpleMessagePayload(ClientCallbackOperations.LEARN_TALENT_ERROR, 'Talent learn error: ')
+        if (LoadoutString.length > 3 && Player.GetLevel() >= 10) {
+            let Spec = this.TryGetCharacterActiveSpec(Player)
+            if (!Spec.IsNull()) {
+                let TreeBaseData = LoadoutString.substring(0, 3)
+                let Type: DHPointType = base64_char.indexOf(TreeBaseData.charAt(0)) - 1
+                let PlayerSpec = base64_char.indexOf(TreeBaseData.charAt(1))
+                let PlayerClass = base64_char.indexOf(TreeBaseData.charAt(2))
+                if (Player.GetClass() === PlayerClass && PlayerSpec === Spec.SpecTabId) {
+                    let Tab = this.TryGetTalentTab(Player, PlayerSpec)
+                    if (!Tab.IsNull()) {
+                        let Ranks = LoadoutString.substring(3)
+                        let ClassMap = wClassNodeToSpell[Player.GetClassMask()]
+                        let SpecMap = wSpecNodeToSpell[PlayerSpec]
+                        let TreeLen = ClassMap.get_length() + SpecMap.get_length()
+                        if (TreeLen === Ranks.length) {
+                            let TabId = 0
+                            let SpellId = 0
+                            for (let c = 0; c < TreeLen; c++) {
+                                let RankChar: string = Ranks.charAt(c)
+                                let TreeIndex = TreeLen - SpecMap.get_length()
+                                if (c >= TreeIndex) {
+                                    TabId = PlayerSpec
+                                    SpellId = SpecMap[c+1-TreeIndex]
+                                } else {
+                                    TabId = wClassNodeToClassTree[Player.GetClassMask()]
+                                    SpellId = ClassMap[c+1]
+                                }
+                                if (wTreeMetaData.contains(TabId) ) {
+                                    this.LocalTreeMetaData[TabId] = wTreeMetaData[TabId]
+                                } else {
+                                    ERROR.message += `Unknown tab: ${TabId}`
+                                    ERROR.write().SendToPlayer(Player)
+                                    return
+                                }
+                                if (wTreeMetaData[TabId].NodeLocation.contains(SpellId)) {
+                                    let NodeLoc = wTreeMetaData[TabId].NodeLocation[SpellId]
+                                    this.SimplifiedTreeMap[TabId][NodeLoc.Row][NodeLoc.Col] = base64_char.indexOf(RankChar) - 1
+                                } else {
+                                    ERROR.message += `Unknown spell: ${SpellId}`
+                                    ERROR.write().SendToPlayer(Player) 
+                                    return
+                                }
+                            }
+                        } else {
+                            ERROR.message += 'Malformed talent string - Incorrect number of nodes.'
+                            ERROR.write().SendToPlayer(Player)
+                            return 
+                        }
+                    } else {
+                        ERROR.message += 'Attempting to learn talents for nonexistent spec.'
+                        ERROR.write().SendToPlayer(Player)
+                        return
+                    }
+
+                    let Verified = this.VerifyFlatTable(Player, Tab)
+                    if (Verified) {
+                        this.ForgetTalents(Player, Spec, 0)
+                        let Tabs = CreateArray<uint32>([])
+                        this.ToLearn.forEach((Talent) => {
+                            if (!Tabs.includes(Talent.TabId)) {
+                                Tabs.push(Talent.TabId)
+                            }
+
+                            let ChoiceNode = Talent.Type === CustomNodeType.CHOICE
+                            Spec.Talents[Talent.TabId][Talent.SpellId] = Talent
+                            if (Talent.CurrentRank > 0) {
+                                let TTab = this.TryGetTalentTab(Player, Talent.TabId)
+                                let Points = this.GetSpecPoints(Player, TTab.TalentType)
+                                Spec.PointsSpent[Talent.TabId] += Talent.CurrentRank * TTab.Talents[Talent.SpellId].RankCost
+                                Points.Sum -= Talent.CurrentRank * TTab.Talents[Talent.SpellId].RankCost
+
+                                TTab.Talents[Talent.SpellId].UnlearnSpells.forEach((UnlearnSpellId) => {
+                                    Player.RemoveSpell(UnlearnSpellId, false, false)
+                                })
+
+                                let RankedSpell = TTab.Talents[Talent.SpellId].Ranks[Talent.CurrentRank]
+                                if (!Player.HasSpell(Talent.SpellId)) {
+                                    if (ChoiceNode) {
+                                        let Choice = wChoiceNodes[Talent.SpellId][Talent.CurrentRank-1]
+                                        Player.LearnSpell(Choice)
+                                        Spec.ChoiceNodesChosen[Talent.SpellId] = Choice
+                                    } else {
+                                        Player.LearnSpell(RankedSpell)
+                                    }
+
+                                    this.UpdateCharPoints(Player, Points)
+                                }
+                            }
+                        })
+                        this.UpdateCharSpec(Player, Spec)
+                        let Loadout = cActiveLoadouts[Player.GetGUID().GetCounter()]
+                        Loadout.TalentString = LoadoutString
+                        cLoadouts[Player.GetGUID().GetCounter()][Loadout.TabId][Loadout.Id] = Loadout
+                        cActiveLoadouts[Player.GetGUID().GetCounter()] = Loadout
+                    } else
+                        return
+
+                } else {
+                    ERROR.message += `Attempting to learn talents for an improper class (${PlayerClass} ? ${Player.GetClass()}) or spec (${PlayerSpec} ? ${Spec.SpecTabId}).`
+                    ERROR.write().SendToPlayer(Player)
+                    return
+                }
+            }
+        } else {
+            ERROR.message += 'No talent info provided in request and/or your level is too low.'
+            ERROR.write().SendToPlayer(Player)
+            return
+        }
+    }
+
+    private VerifyFlatTable(Player: TSPlayer, SpecTab: DHTalentTab) : bool{
+        this.ToLearn = CreateArray<DHCharacterTalent>([])
+        this.Unlocks = CreateArray<uint32>([])
+        if (SpecTab.Classmask == Player.GetClassMask()) {
+            let Spend = CreateDictionary<uint32, uint8>({})
+            this.SimplifiedTreeMap.forEach((TabId, Rows) => {
+                let Tab = this.TryGetTalentTab(Player, TabId)
+                let Points = this.GetSpecPoints(Player, Tab.TalentType)
+                Rows.forEach((RowId, Cols)=> {
+                    Cols.forEach((ColId, Rank) => {
+                        if (this.LocalTreeMetaData.contains(TabId)) {
+                            let Meta = this.LocalTreeMetaData[TabId]
+                            if (RowId > Meta.MaxYDim || ColId > Meta.MaxXDim)
+                                return false
+                            else {
+                                if (Meta.Nodes.contains(RowId)) {
+                                    if (Meta.Nodes[RowId].contains(ColId)) {
+                                        let Node = Meta.Nodes[RowId][ColId]
+                                        if (Tab.Talents.contains(Node.SpellId)) {
+                                            let Talent = Tab.Talents[Node.SpellId]
+                                            let ChoiceNode = Talent.NodeType === CustomNodeType.CHOICE
+                                            if (Rank > 0) {
+                                                if (ChoiceNode) {
+                                                    if (!wChoiceNodes.contains(Node.SpellId))
+                                                        return false
+                                                } else if (Talent.NumberOfRanks < Rank - 1) {
+                                                    return false
+                                                }
+                                                if (Talent.Prereqs.length) {
+                                                    if (!this.Unlocks.includes(Node.SpellId))
+                                                        return false
+                                                }
+
+                                                if (Talent.RequiredLevel > Player.GetLevel() || Node.PointReq >> Spend[TabId])
+                                                    return false
+
+                                                Spend[TabId] += ChoiceNode ? Talent.RankCost : Rank - 1 * Talent.RankCost
+                                                if (Spend[Tab.Id] > Points.Max)
+                                                    return false;
+
+                                                Node.Unlocks.forEach((Unlock) => {
+                                                    this.Unlocks.push(Unlock.SpellId)
+                                                })
+                                            }
+                                            let CharacterTalent =  new DHCharacterTalent(Talent.SpellId, TabId, Rank)
+                                            CharacterTalent.Type = Talent.NodeType
+                                            this.ToLearn.push(CharacterTalent)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    })
+                })
+            })
+
+            return true
+        }
+        return false
+    }
+
     public TryGetTabIdForSpell(player: TSPlayer, spell: number) : number {
         if (wSpellToTab.contains(spell))
             return wSpellToTab[spell]
@@ -139,27 +319,17 @@ export class DHCache {
         return DHCharacterTalent.Empty()
     }
 
-    public GetSpecPoints(player: TSPlayer, pointType: DHPointType, spec: uint8) : DHCharacterPoint {
-        if (spec) {
-            let guid = player.GetGUID().GetCounter()
-            if (cCharPoints.contains(guid)) {
-                if (cCharPoints[guid].contains(pointType)) {
-                    if (cCharPoints[guid][pointType].contains(spec))
-                        return cCharPoints[guid][pointType][spec]
-                }
+    public GetSpecPoints(player: TSPlayer, pointType: DHPointType, spec: uint8 = 1) : DHCharacterPoint {
+        let guid = player.GetGUID().GetCounter()
+        if (cCharPoints.contains(guid)) {
+            if (cCharPoints[guid].contains(pointType)) {
+                if (cCharPoints[guid][pointType].contains(spec))
+                    return cCharPoints[guid][pointType][spec]
             }
-
-            let fcp = new DHCharacterPoint(pointType, spec, 0, 25)
-            return this.UpdateCharPoints(player, fcp)
-        } else {
-            let spec = this.TryGetCharacterActiveSpec(player)
-            if (!spec.IsNull()) {
-                let real: DHPlayerSpec = spec
-                return this.GetSpecPoints(player, pointType, real.Id)
-           }
-
-           return this.GetSpecPoints(player, pointType, 0)
         }
+
+        let fcp = new DHCharacterPoint(pointType, spec, 0, 25)
+        return this.UpdateCharPoints(player, fcp)
     }
 
     public UpdateCharPoints(player: TSPlayer, point: DHCharacterPoint) {
@@ -182,26 +352,22 @@ export class DHCache {
         let m = this.GetMaxPointDefaults(type)
         let ccp = this.GetCommonCharacterPoint(player, type)
 
-        if (m.Max > 0) {
-            let maxPoints = amount + ccp.Sum
-            if (maxPoints >= m.Max) {
-                maxPoints = maxPoints - m.Max
-                amount = amount - maxPoints
-            }
-        }
-
         if (amount > 0) {
             ccp.Sum += amount
-            console.log(`${ccp.Sum}\n`)
             cSpecs[player.GetGUID().GetCounter()].forEach((specId, spec) => {
                 let sp = this.GetSpecPoints(player, type, specId)
-                sp.Sum += amount
-                console.log(`${sp.Sum}\n`)
-                this.UpdateCharPoints(player, sp)
-            })
+                if (sp.Sum < sp.Max) {
+                    let NewAmount = sp.Sum + amount
+                    if (NewAmount > sp.Max)
+                        amount = sp.Max - sp.Sum
 
-            let pkt = new SimpleMessagePayload(ClientCallbackOperations.LEVELUP, `|cff8FCE00You have been awarded ${amount} ${GetPointTypeName(type)} point${amount > 1 ? 's' : ''}.`);
-            pkt.write().SendToPlayer(player)
+                    sp.Sum += amount
+                    this.UpdateCharPoints(player, sp)
+
+                    let pkt = new SimpleMessagePayload(ClientCallbackOperations.LEVELUP, `|cff8FCE00You have been awarded ${amount} ${GetPointTypeName(type)} point${amount > 1 ? 's' : ''}.`);
+                    pkt.write().SendToPlayer(player)
+                }
+            })
         }
     }
 
@@ -245,7 +411,6 @@ export class DHCache {
         if (wRaceClassTabMap.contains(race)) {
             if (wRaceClassTabMap[race].contains(pClass))
                 if (wRaceClassTabMap[race][pClass].includes(tab)) {
-                    console.log(`Got tab ${tab}`)
                     return wTalentTrees[tab]
                 }
         }
@@ -355,7 +520,6 @@ export class DHCache {
 
         fcp.Max = amount
         fcp.Sum = amount
-
         this.UpdateCharPoints(player, fcp)
         if (type === DHPointType.TALENT)
             this.ForgetTalents(player, spec, DHPointType.CLASS)

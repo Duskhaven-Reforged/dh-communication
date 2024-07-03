@@ -65,6 +65,19 @@ export function Main(events: TSEvents) {
         }
     }) 
 
+    events.Player.OnSpellCast((who, spell, skip) => {
+        if (spell.GetEntry() === 80900) {
+            console.log(`Player ${who.GetGUID().GetCounter()} is activating spec.`)
+        }
+    })
+
+    events.Unit.OnCastCancelled((who, spell) => {
+        if (who.IsPlayer()) {
+            if (spell.GetEntry() === 80900)
+                console.log(`Player ${who.GetGUID().GetCounter()} cancelled activate spec.`)
+        }
+    })
+
     events.Spell.OnLearn((spell, player, active, disables, superceded, from_skill) => {
         // learn extra spells
     })

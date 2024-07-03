@@ -159,9 +159,9 @@ class CustomTalents {
             if (wTalentTrees.contains(talent.TalentTabId)) {
                 let tab = wTalentTrees[talent.TalentTabId]
                 if (talent.TalentType === DHPointType.CLASS)
-                    wSpecNodeToSpell[talent.TalentTabId][talent.NodeIndex] = talent.SpellId
-                else {
                     wClassNodeToSpell[tab.Classmask][talent.NodeIndex] = talent.SpellId
+                else {
+                    wSpecNodeToSpell[talent.TalentTabId][talent.NodeIndex] = talent.SpellId
                 }
 
                 wTalentTrees[talent.TalentTabId].Talents[talent.SpellId] = talent
@@ -176,7 +176,7 @@ class CustomTalents {
                         wTreeMetaData[talent.TalentTabId].MaxXDim = talent.ColumnIndex
                 }
 
-                let nodeMeta = new DHNodeMetaData(talent.SpellId, talent.TabPointReq, talent.ColumnIndex, talent.RowIndex, talent.NodeIndex)
+                let nodeMeta = new DHNodeMetaData(talent.SpellId, talent.RowIndex, talent.ColumnIndex, talent.TabPointReq, talent.NodeIndex)
                 wTreeMetaData[talent.TalentTabId].Nodes[nodeMeta.Row][nodeMeta.Col] = nodeMeta
                 wTreeMetaData[talent.TalentTabId].NodeLocation[nodeMeta.SpellId] = nodeMeta
 

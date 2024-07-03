@@ -4,6 +4,7 @@
 function PlayerTalentFrame_Toggle(pet, suggestedTalentGroup)
     local Toggle = require('TSAddons.dh-communication.addon.dh-ui.lua-hooks')
     Toggle.PlayerTalentFrameToggle()
+    UpdateMicroButtons();
 end
 
 function PlayerTalentFrame_OnLoad(self)

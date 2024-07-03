@@ -62,23 +62,23 @@ export let Backdrop: WoWAPI.Backdrop = {
 }
 
 export function GetClassId (classString) {
-    if (classString == "Warrior")
+    if (classString == "WARRIOR")
         return 1;
-    else if (classString == "Paladin")
+    else if (classString == "PALADIN")
         return 2;
-    else if (classString == "Hunter") 
+    else if (classString == "HUNTER") 
         return 3;
-    else if (classString == "Rogue") 
+    else if (classString == "ROGUE") 
         return 4;
-    else if (classString == "Priest") 
+    else if (classString == "PRIEST") 
         return 5;
-    else if (classString == "Death Knight") 
+    else if (classString == "DEATHKNIGHT") 
         return 6;
-    else if (classString == "Shaman") 
+    else if (classString == "SHAMAN") 
         return 7;
-    else if (classString == "Mage") 
+    else if (classString == "MAGE") 
         return 8;
-    else if (classString == "Warlock") 
+    else if (classString == "WARLOCK") 
         return 9;
     else
         return 11;

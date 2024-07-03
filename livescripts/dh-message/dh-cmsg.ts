@@ -1,10 +1,9 @@
-import { load } from 'js-yaml';
 import { ClientCallbackOperations, SimpleMessagePayload } from '../../shared/Messages';
 import { DHPointType, DHTalentTab, TALENT_POINT_TYPES, base64_char } from '../classes';
 import { DHCache } from '../dh-cachedata/dh-cache';
-import { cLoadouts } from '../dh-cachedata/dh-chardata';
+import { cActiveLoadouts, cLoadouts } from '../dh-cachedata/dh-chardata';
 import { wClassNodeToClassTree, wClassNodeToSpell, wSpecNodeToSpell } from '../dh-cachedata/dh-worlddata';
-import { GetTalentTreeLayoutPayload, TTLPTalent, TTLPTalentPrereq, TTLPTalentRank, TalentTreeLayoutPayload } from '../../shared/Payloads/TalentTreeLayoutPayload';
+import { GetTalentTreeLayoutPayload, TTLPTalent, TTLPTalentPrereq, TTLPTalentRank, TalentTreeLayout, TalentTreeLayoutPayload } from '../../shared/Payloads/TalentTreeLayoutPayload';
 import { CPSSpec, CSPPointSpend, CSPPoints, CharacterSpecsPayload, GetCharacterSpecsPayload } from '../../shared/Payloads/GetCharacterSpecsPayload';
 
 export class DHCommonMessage {
@@ -15,27 +14,28 @@ export class DHCommonMessage {
     }
 
     public BuildTalentTreeLayout(player: TSPlayer) {
-        TALENT_POINT_TYPES.forEach((type) => {
-            let tabs = this.cache.TryGetCustomTalentTabs(player, type)
-            this.BuildTree(player, type, tabs)
-        })
+        let tabs = CreateArray<DHTalentTab>([])
+        this.cache.TryGetCustomTalentTabs(player, DHPointType.TALENT).forEach((SpecTab) => {tabs.push(SpecTab)})
+        this.cache.TryGetCustomTalentTabs(player, DHPointType.CLASS).forEach((ClassTab) => {tabs.push(ClassTab)})
+        this.BuildTrees(player, tabs)
     }
 
-    public BuildTree(player: TSPlayer, type: DHPointType, tabs: TSArray<DHTalentTab>) {
+    public BuildTrees(player: TSPlayer, tabs: TSArray<DHTalentTab>) {
         let out = new TalentTreeLayoutPayload()
-
+        out.TabCount = tabs.length
         tabs.forEach((tab) => {
-            out.TabId = tab.Id
-            out.TabName = tab.Name
-            out.TabIcon = tab.SpellIconId
-            out.TabBg = tab.Background
-            out.TabDesc = tab.Description
-            out.TabRole = tab.Role
-            out.TabSpellString = tab.SpellString
-            out.TabType = tab.TalentType
-            out.TabIndex = tab.TabIndex
+            let Layout = new TalentTreeLayout()
+            Layout.TabId = tab.Id
+            Layout.TabName = tab.Name
+            Layout.TabIcon = tab.SpellIconId
+            Layout.TabBg = tab.Background
+            Layout.TabDesc = tab.Description
+            Layout.TabRole = tab.Role
+            Layout.TabSpellString = tab.SpellString
+            Layout.TabType = tab.TalentType
+            Layout.TabIndex = tab.TabIndex
 
-            out.TalentsCount = tab.Talents.get_length()
+            Layout.TalentsCount = tab.Talents.get_length()
             tab.Talents.forEach((spell, talent) => {
                 let Talent = new TTLPTalent()
                 Talent.TabId = tab.Id
@@ -71,11 +71,13 @@ export class DHCommonMessage {
                 talent.Choices.forEach((num, choice) => {
                     Talent.Choices.push(choice.SpellId)
                 })
-                out.Talents.push(Talent)
+                Layout.Talents.push(Talent)
             })
-            let pkt = new GetTalentTreeLayoutPayload().BuildPacket(out)
-            pkt.SendToPlayer(player)
+            out.Tabs.push(Layout)
         })
+
+        let pkt = new GetTalentTreeLayoutPayload().BuildPacket(out)
+        pkt.SendToPlayer(player)
     }
 
     public ApplyKnownTalents(player: TSPlayer) {
@@ -104,29 +106,10 @@ export class DHCommonMessage {
 
     public SendTalents(player: TSPlayer) {
         let spec = this.cache.TryGetCharacterActiveSpec(player)
-        if (!spec.IsNull()) {
-            let pClass = player.GetClass()
-            let cMask = player.GetClassMask()
-            let cSpec = spec.SpecTabId
-            let output = 'A'+base64_char.charAt(cSpec)+base64_char.charAt(pClass)
-
-            let i = 0
-            let classTree = spec.Talents[wClassNodeToClassTree[cMask]]
-            let classMap = wClassNodeToSpell[cMask]
-            classMap.forEach((k, v) => {
-                output += base64_char.charAt(classTree[classMap[i]].CurrentRank+1)
-                i++
-            })
-
-            let specTree = spec.Talents[cSpec]
-            let specMap = wSpecNodeToSpell[cSpec]
-            i = 0
-            specMap.forEach((k, v) => {
-                output += base64_char.charAt(specTree[specMap[i]].CurrentRank+1)
-                i++
-            })
-
-            let pkt = new SimpleMessagePayload(ClientCallbackOperations.GET_TALENTS, output);
+        if (spec) {
+            let Loadout = cActiveLoadouts[player.GetGUID().GetCounter()]
+            let Output = Loadout.TalentString
+            let pkt = new SimpleMessagePayload(ClientCallbackOperations.GET_TALENTS, Output);
             pkt.write().SendToPlayer(player)
         }
     }
@@ -155,15 +138,13 @@ export class DHCommonMessage {
             CPSS.PointsCount = TALENT_POINT_TYPES.length
             TALENT_POINT_TYPES.forEach((type) => {
                 let Point = new CSPPoints()
-                let m = this.cache.GetMaxPointDefaults(type)
-                let tp = this.cache.GetCommonCharacterPoint(player, type)
                 let cps = this.cache.GetSpecPoints(player, type, spec.Id)
                 
                 Point.Type = type
                 Point.SpecPointSum = cps.Sum
                 Point.SpecPointMax = cps.Max
-                Point.CommonPointSum = tp.Sum
-                Point.AbsoluteMax = m.Max
+                Point.CommonPointSum = cps.Sum
+                Point.AbsoluteMax = cps.Max
                 CPSS.Points.push(Point)
             })
 
