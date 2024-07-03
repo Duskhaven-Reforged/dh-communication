@@ -45,11 +45,11 @@ export function Main(events: TSEvents) {
                         let div = Math.floor(levelDiff / 2)
                         let rem = levelDiff % 2
 
-                        mDHDMsg.cache.AddCharacterPointsToAllSpecs(player, DHPointType.TALENT, div)
+                        mDHDMsg.cache.AddCharacterPointsToAllSpecs(player, DHPointType.CLASS, div)
                         if (rem)
                             div += 1
 
-                        mDHDMsg.cache.AddCharacterPointsToAllSpecs(player, DHPointType.CLASS, div)
+                        mDHDMsg.cache.AddCharacterPointsToAllSpecs(player, DHPointType.TALENT, div)
                     } else {
                         if (curLevel % 2)
                             mDHDMsg.cache.AddCharacterPointsToAllSpecs(player, DHPointType.TALENT, 1)

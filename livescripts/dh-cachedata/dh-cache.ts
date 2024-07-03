@@ -89,7 +89,6 @@ export class DHCache {
     public TrySaveNewLoadout(Player: TSPlayer, LoadoutString: string) {
         this.LocalTreeMetaData = CreateDictionary<uint32, DHTreeMetaData>({})
         this.SimplifiedTreeMap = CreateDictionary<uint32, TSDictionary<uint8, TSDictionary<uint8, uint32>>>({})
-        console.log(LoadoutString+'\n')
         let ERROR = new SimpleMessagePayload(ClientCallbackOperations.LEARN_TALENT_ERROR, 'Talent learn error: ')
         if (LoadoutString.length > 3 && Player.GetLevel() >= 10) {
             let Spec = this.TryGetCharacterActiveSpec(Player)
@@ -137,7 +136,7 @@ export class DHCache {
                         } else {
                             ERROR.message += 'Malformed talent string - Incorrect number of nodes.'
                             ERROR.write().SendToPlayer(Player)
-                            return 
+                            return
                         }
                     } else {
                         ERROR.message += 'Attempting to learn talents for nonexistent spec.'
@@ -328,7 +327,7 @@ export class DHCache {
             }
         }
 
-        let fcp = new DHCharacterPoint(pointType, spec, 0, 25)
+        let fcp = new DHCharacterPoint(pointType, spec, 0, pointType === DHPointType.TALENT ? 26 : 25)
         return this.UpdateCharPoints(player, fcp)
     }
 
@@ -350,17 +349,16 @@ export class DHCache {
 
     public AddCharacterPointsToAllSpecs(player: TSPlayer, type: DHPointType, amount: int) {
         let m = this.GetMaxPointDefaults(type)
-        let ccp = this.GetCommonCharacterPoint(player, type)
 
         if (amount > 0) {
-            ccp.Sum += amount
             cSpecs[player.GetGUID().GetCounter()].forEach((specId, spec) => {
                 let sp = this.GetSpecPoints(player, type, specId)
-                if (sp.Sum < sp.Max) {
+                if (sp.Sum < m.Max) {
                     let NewAmount = sp.Sum + amount
-                    if (NewAmount > sp.Max)
-                        amount = sp.Max - sp.Sum
+                    if (NewAmount > m.Max)
+                        amount = m.Max - sp.Sum
 
+                    sp.Max += amount
                     sp.Sum += amount
                     this.UpdateCharPoints(player, sp)
 
@@ -390,12 +388,8 @@ export class DHCache {
         QueryCharacters('REPLACE INTO `forge_character_talents` (`guid`,`spec`,`spellid`,`tabId`,`currentrank`) VALUES ('+guid+','+specId+','+talent.SpellId+','+talent.TabId+','+talent.CurrentRank+')')
     }
 
-    public GetCommonCharacterPoint(player: TSPlayer, pt: DHPointType) {
-        return this.GetSpecPoints(player, pt, 4294967295);
-    }
-
     public GetMaxPointDefaults(type: DHPointType) : DHCharacterPoint {
-        return new DHCharacterPoint(type, 4294967295, 0, 25)
+        return new DHCharacterPoint(type, 4294967295, 0, type === DHPointType.TALENT ? 26 : 25)
     }
 
     public TryGetTabPointType(tab: number) : DHPointType {
@@ -442,7 +436,7 @@ export class DHCache {
         }
 
         TALENT_POINT_TYPES.forEach((type) => {
-            let fpt = this.GetCommonCharacterPoint(player, type)
+            let fpt = this.GetSpecPoints(player, type)
             let maxP = this.GetMaxPointDefaults(type)
 
             let newPoint = new DHCharacterPoint(type, spec.Id, fpt.Sum, maxP.Max)
@@ -496,27 +490,11 @@ export class DHCache {
         if (level >= 10)
             level -= 9
 
-        switch(type) {
-            case DHPointType.TALENT: {
-                if (level > 1) {
-                    amount = Math.floor(level/2)
-                } else
-                    if (level % 2)
-                        amount = 1
-            } break;
-            case DHPointType.CLASS: {
-                if (level > 1) {
-                    let rem = level % 2
-                    let div = Math.floor(level/2)
-                    if (rem)
-                        div++
-
-                    amount = div
-                }
-            } break;
-            default:
-                break;
-        }
+        amount = Math.floor(level/2)
+        let IsTalentPoint = type === DHPointType.TALENT && (level % 2) > 0
+        console.log(`Is Talent? ${IsTalentPoint}\n`)
+        if (IsTalentPoint)
+            amount += 1;
 
         fcp.Max = amount
         fcp.Sum = amount

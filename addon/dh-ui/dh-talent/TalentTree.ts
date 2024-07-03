@@ -1059,9 +1059,6 @@ export function TalentTreeUI() {
                     let Allow = false
                     ShowTalentPointType(Tab.TabType, Tab.TabId)
 
-                    if (!FrameStatus.Update)
-                        return
-
                     if (Talent.NodeType < 2)
                         FrameData.RankText.SetText(TreeCache.Spells[Tab.TabId][Talent.NodeIndex])
 
@@ -1169,9 +1166,6 @@ export function TalentTreeUI() {
                         }
                         FrameStatus.CanUpRank = true
                     } else {
-                        if (FrameData.Border && FrameData.BorderTexture) {
-                            FrameData.BorderTexture.SetVertexColor(188 / 255, 150 / 255, 28 / 255)
-                        }
                         FrameStatus.CanUpRank = false
                     }
                     FrameStatus.Update = false
@@ -1404,16 +1398,9 @@ export function TalentTreeUI() {
                     TreeCache.Spells[Talent.TabId][Talent.NodeIndex] = 0
                     let Rank = Util.alpha.indexOf(ClassString[Talent.NodeIndex-1]) - 1
                     let Cost = Talent.RankCost
-                    let Row = Talent.Row - 1
-                    let Col = Talent.Col
-                    let FrameStatus = FrameStatusLookup[Row][Col]
-                    if (FrameStatus) {
-                        TreeCache.Points[7] -= Rank * Cost
-                        TreeCache.PointsSpent[ClassTab.TabId] += Rank * Cost
-                        TreeCache.Spells[Talent.TabId][Talent.NodeIndex] = Rank
-                        FrameStatus.Update = true
-                        FrameStatusLookup[Row][Col] = FrameStatus
-                    }
+                    TreeCache.Points[7] -= Rank * Cost
+                    TreeCache.PointsSpent[ClassTab.TabId] += Rank * Cost
+                    TreeCache.Spells[Talent.TabId][Talent.NodeIndex] = Rank
                 })
 
                 let SpecString = Talents.substring(3 + ClassTreeLen)
@@ -1421,16 +1408,9 @@ export function TalentTreeUI() {
                     TreeCache.Spells[Talent.TabId][Talent.NodeIndex] = 0
                     let Rank = Util.alpha.indexOf(SpecString[Talent.NodeIndex-1]) - 1
                     let Cost = Talent.RankCost
-                    let Row = Talent.Row - 1
-                    let Col = Talent.Col
-                    let FrameStatus = FrameStatusLookup[Row][Col]
-                    if (FrameStatus) {
-                        TreeCache.Points[Type] -= Rank * Cost
-                        TreeCache.PointsSpent[SpecTab.TabId] += Rank * Cost
-                        TreeCache.Spells[Talent.TabId][Talent.NodeIndex] = Rank
-                        FrameStatus.Update = true
-                        FrameStatusLookup[Row][Col] = FrameStatus
-                    }
+                    TreeCache.Points[Type] -= Rank * Cost
+                    TreeCache.PointsSpent[SpecTab.TabId] += Rank * Cost
+                    TreeCache.Spells[Talent.TabId][Talent.NodeIndex] = Rank
                 })
 
                 TalentTree.ActiveString = Talents
@@ -1534,7 +1514,7 @@ export function TalentTreeUI() {
     })
     OnCustomPacket(ClientCallbackOperations.GET_TALENTS, pkt => {
         let Loadout = pkt.ReadString()
-        console.log(`Read: ${Loadout}`)
+        console.log(`Reading: ${Loadout}`)
         LoadTalentString(Loadout)
     })
 
