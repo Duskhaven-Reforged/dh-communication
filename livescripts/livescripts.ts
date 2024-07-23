@@ -10,6 +10,7 @@ export function Main(events: TSEvents) {
 
     events.Player.OnLogin((player, first) => {
         LearnSpellsForLevel(player)
+        player.SendShopMail("Hello", "Hello")
 
         //todo load actions and maybe account bonuses
         // maybe unlearn flagged too
@@ -62,6 +63,7 @@ export function Main(events: TSEvents) {
             mDHDMsg.cache.UpdateCharSpec(player, spec)
             mDHDMsg.SendSpecInfo(player)
             LearnSpellsForLevel(player)
+            SetAllSkillsToLevel(player)
         }
     }) 
 
@@ -80,6 +82,14 @@ export function Main(events: TSEvents) {
 
     events.Spell.OnLearn((spell, player, active, disables, superceded, from_skill) => {
         // learn extra spells
+    })
+}
+
+export function SetAllSkillsToLevel(Player: TSPlayer) {
+    let Skills = [95, 162, 415, 45, 46, 176, 229, 55, 44, 172, 43, 54, 136, 173, 226, 160]
+    Skills.forEach((SkillId) => {
+        if (Player.HasSkill(SkillId))
+            Player.AdvanceSkill(SkillId, Player.GetMaxSkillValue(SkillId))
     })
 }
 
