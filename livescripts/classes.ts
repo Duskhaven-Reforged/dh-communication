@@ -155,7 +155,7 @@ export class DHTalent {
     }
 
     Prereqs: TSArray<DHTalentPrereq> = CreateArray<DHTalentPrereq>([])
-    Choices: TSDictionary<uint8, DHTalentChoice> = CreateDictionary<uint8, DHTalentChoice>({})
+    Choices: TSArray<uint32> = CreateArray<uint32>([])
     UnlearnSpells: TSArray<uint32> = CreateArray<uint32>([])
     Ranks: TSDictionary<uint8, uint32> = CreateDictionary<uint8, uint32>({})
     RanksRev: TSDictionary<uint32, uint8> = CreateDictionary<uint32, uint8>({})

@@ -1,55 +1,55 @@
 import { ClientCallbackOperations } from "../Messages"
 
 export class TTLPTalentPrereq {
-    Talent: number
-    TabId: number
-    ReqRank: number
+    Talent!: number
+    TabId!: number
+    ReqRank!: number
 }
 
 export class TTLPTalentRank {
-    Rank: number
-    Spell: number
+    Rank!: number
+    Spell!: number
 }
 
 export class TTLPTalent {
-    TabId: number
-    SpellId: number
-    Col: number
-    Row: number
-    RankCost: number
-    ReqLevel: number
-    TabPointReq: number
-    PrereqType: number
-    NodeType: number
-    Starter: number
-    NodeIndex: number
+    TabId!: number
+    SpellId!: number
+    Col!: number
+    Row!: number
+    RankCost!: number
+    ReqLevel!: number
+    TabPointReq!: number
+    PrereqType!: number
+    NodeType!: number
+    Starter!: number
+    NodeIndex!: number
 
-    NumRanks: number
+    NumRanks!: number
     Ranks: TSArray<TTLPTalentRank> = []
-    PrereqCount: number
+    PrereqCount!: number
     Prereqs: TSArray<TTLPTalentPrereq> = []
-    UnlearnsCount: number
+    UnlearnsCount!: number
     Unlearns: TSArray<number> = []
-    ChoicesCount: number
+    ChoicesCount!: number
     Choices: TSArray<number> = []
 }
 export class TalentTreeLayout {
-    TabId: number
-    TabName: string
-    TabIcon: number
-    TabBg: string
-    TabDesc: string
-    TabRole: number
-    TabSpellString: string
-    TabType: number
-    TabIndex: number
+    TabId!: number
+    TabName!: string
+    TabIcon!: number
+    TabBg!: string
+    TabDesc!: string
+    TabRole!: number
+    TabSpellString!: string
+    TabType!: number
+    TabIndex!: number
 
-    TalentsCount: number
+    TalentsCount!: number
     Talents: TSArray<TTLPTalent> = []
 }
 
 export class TalentTreeLayoutPayload {
-    TabCount: number
+    TabCount!: number
     Tabs: TSArray<TalentTreeLayout> = []
 }
 
@@ -108,7 +108,8 @@ export class GetTalentTreeLayoutPayload {
 
                 Talent.ChoicesCount = read.ReadDouble()
                 for (let j = 0; j < Talent.ChoicesCount; j++) {
-                    Talent.Choices.push(read.ReadDouble())
+                    let Choice = read.ReadDouble()
+                    Talent.Choices.push(Choice)
                 }
 
                 layout.Talents.push(Talent)

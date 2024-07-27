@@ -1,3 +1,7 @@
+import { ReloadArmsWarrTree } from "../TalentTrees/Warrior/Arms"
+import { ReloadFuryWarrTree } from "../TalentTrees/Warrior/Fury"
+import { ReloadProtWarrTree } from "../TalentTrees/Warrior/Protection"
+import { ReloadWarrTree } from "../TalentTrees/Warrior/warrior"
 import { DHNodeMetaData, DHPointType, DHTalent, DHTalentChoice, DHTalentPrereq, DHTalentTab, DHTreeMetaData } from "../classes"
 
 /* Cache tables */
@@ -18,6 +22,9 @@ export let wSpellToTab: TSDictionary<uint32, uint32> = CreateDictionary<uint32, 
 export let wTabToSpell: TSDictionary<uint32, uint32> = CreateDictionary<uint32, uint32>({})
 
 export function LoadWorldData() {
+    console.log(`\tLoading talent trees...\n`) 
+    RefillTrees(1 << Class.WARRIOR)
+
     console.log("\tLoading class level spell map...\n")
     console.log(new PlayerClassLevelSpells().Load())
 
@@ -34,13 +41,22 @@ export function LoadWorldData() {
     console.log(new CustomTalentPrereqs().Load())
 
     console.log("\tLoad talent choice nodes...\n")
-    console.log(new ChoiceNodes().Load())
+    console.log(new ChoiceNodeChoices().Load())
 
     console.log("\tLoading talent ranks...\n")
     console.log(new CustomTalentRanks().Load())
 
     console.log("\tLoading talent spell unlearns...\n")
     console.log(new CustomTalentUnlearns().Load())
+}
+
+export function RefillTrees(ClassMask: uint32) {
+    if (ClassMask & (1 << Class.WARRIOR)) {
+        ReloadWarrTree()
+        ReloadArmsWarrTree()
+        ReloadFuryWarrTree()
+        ReloadProtWarrTree()
+    }
 }
 
 class PlayerClassLevelSpells {
@@ -224,23 +240,28 @@ class CustomTalentPrereqs {
     }
 }
 
-class ChoiceNodes {
+class ChoiceNodeChoices {
     Load() : string {
         let count = 0;
-
         const res = QueryWorld('SELECT * FROM `forge_talent_choice_nodes`')
         while (res.GetRow()) {
             let ChoiceId = res.GetUInt32(0)
             let TalentTabId = res.GetUInt32(1)
             let ChoiceIndex = res.GetUInt8(2)
             let SpellChoice = res.GetUInt32(3)
+            
+            if (wChoiceNodes.contains(ChoiceId))
+                wChoiceNodes[ChoiceId].push(SpellChoice)
+            else
+                wChoiceNodes[ChoiceId] = CreateArray<uint32>([SpellChoice])
 
-            let choice = new DHTalentChoice(SpellChoice, false)
-            wChoiceNodes[ChoiceId].push(SpellChoice)
             wChoiceNodesRev[SpellChoice] = ChoiceId
             wChoiceNodeIndexLookup[ChoiceIndex] = SpellChoice
+        
+            if (wTalentTrees.contains(TalentTabId))
+                if (wTalentTrees[TalentTabId].Talents.contains(ChoiceId))
+                    wTalentTrees[TalentTabId].Talents[ChoiceId].Choices.push(SpellChoice)
             
-            wTalentTrees[TalentTabId].Talents[ChoiceId].Choices[ChoiceIndex] = choice
             count++
         }
 

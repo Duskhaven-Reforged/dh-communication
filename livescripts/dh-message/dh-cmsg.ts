@@ -71,9 +71,10 @@ export class DHCommonMessage {
                     Talent.Unlearns.push(spellId)
                 })
 
-                Talent.ChoicesCount = talent.Choices.get_length()
-                talent.Choices.forEach((num, choice) => {
-                    Talent.Choices.push(choice.SpellId)
+                Talent.ChoicesCount = talent.Choices.length
+                console.log(`${Talent.SpellId} : ${Talent.ChoicesCount}\n`)
+                talent.Choices.forEach((choice) => {
+                    Talent.Choices.push(choice)
                 })
                 Layout.Talents.push(Talent)
             })

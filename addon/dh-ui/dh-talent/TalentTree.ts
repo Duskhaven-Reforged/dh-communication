@@ -442,10 +442,12 @@ export function TalentTreeUI() {
                 RankText.SetFont('Fonts\\FRIZQT__.TTF', 13, 'OUTLINE')
                 RankText.SetPoint('CENTER', 10, 8.5)
 
-                let TextureIconLeft = Talent.CreateTexture('TextureIconLeft', 'ARTWORK')
-                TextureIconLeft.Hide()
-                let TextureIconRight = Talent.CreateTexture('TextureIconRight', 'ARTWORK')
-                TextureIconRight.Hide()
+                let TextureIconLeft = Talent.CreateTexture(null, 'ARTWORK')
+                TextureIconLeft.SetPoint('LEFT', TextureIcon, 'LEFT', 0, 0)
+                TextureIconLeft.SetTexCoord(0, 0.5, 0, 1)
+                let TextureIconRight = Talent.CreateTexture(null, 'ARTWORK')
+                TextureIconRight.SetPoint('LEFT', TextureIcon, 'RIGHT', 0, 0)
+                TextureIconRight.SetTexCoord(0.5, 1, 0, 1)
 
                 Talent.Hide()
 
@@ -735,7 +737,9 @@ export function TalentTreeUI() {
         let NextSpell = 0
         let Spell = 0
         let CurRank = 0
-        if (CurRank < 1) {
+        if (Talent.NodeType == 2)
+            Spell = Talent.SpellId
+        else if (CurRank < 1) {
             Spell = Talent.Ranks[0].Spell
         } else if (CurRank) {
             Spell = Talent.Ranks[CurRank-1].Spell
@@ -745,6 +749,18 @@ export function TalentTreeUI() {
 
         return {CurRank: CurRank, SpellId: Spell,  NextRankSpellId: NextSpell}
     }
+
+    function IsMouseOverFrame(Frame: WoWAPI.Frame, Margin = 0) : bool {
+        Margin = Math.abs(Margin)
+        let [Left, Bottom, Width, Height] = Frame.GetRect()
+        let [X, Y] = GetCursorPosition()
+        let Scale = Frame.GetEffectiveScale()
+
+        X /= Scale
+        Y /= Scale
+
+        return X > (Left - Margin) && X < (Left + Width + Margin) && Y > (Bottom - Margin) && Y < (Bottom + Height + Margin)
+    }   
 
     function FindSpellInTab(Tab: TalentTreeLayout, SpellId: number) : TTLPTalent {
         let out = null
@@ -846,8 +862,8 @@ export function TalentTreeUI() {
                 if (Tab.TabType === 0)
                     offset += 11
 
-                let PrevFrame = GridTalentTalents[Required.Row -1][Required.Col + offset].Frame
-                let ThisFrame = GridTalentTalents[Talent.Row -1][Talent.Col + offset].Frame
+                let PrevFrame = GridTalentTalents[Required.Row-1][Required.Col + offset].Frame
+                let ThisFrame = GridTalentTalents[Talent.Row-1][Talent.Col + offset].Frame
                 
                 let LineTexturePath = CONSTANTS.UI.CONNECTOR_DISABLED
 
@@ -858,11 +874,11 @@ export function TalentTreeUI() {
         })
     }
 
-    function CreateTooltip(Talent: TTLPTalent, NextSpellId: uint32, TFrame: WoWAPI.Frame) {
+    function CreateTooltip(Spell: number, NextSpellId: uint32, TFrame: WoWAPI.Frame) {
         FirstRankToolTip.SetOwner(TFrame, 'ANCHOR_RIGHT')
         SecondRankToolTip.SetOwner(FirstRankToolTip, 'ANCHOR_BOTTOM')
 
-        FirstRankToolTip.SetHyperlink(`spell:${Talent.SpellId}`)
+        FirstRankToolTip.SetHyperlink(`spell:${Spell}`)
 
         if (NextSpellId) {
             SecondRankToolTip.AddLine(`Next Rank: ${NextSpellId}`, 1, 1, 1)
@@ -913,13 +929,13 @@ export function TalentTreeUI() {
                     TooltipActive: false,
                 }
 
-                TreeCache.PointsSpent[Tab.TabId] = 0
-                TreeCache.TotalInvests[Talent.TabPointReq] = 0
-
-                let ChoiceTalents = CreateFrame('Frame', 'Choice_Talents', TalentFrame)
+                let ChoiceTalents = CreateFrame('Frame', 'Choice_Talents', Frame)
                 ChoiceTalents.SetSize(200, 100)
                 ChoiceTalents.SetPoint('CENTER')
                 ChoiceTalents.Hide()
+
+                TreeCache.PointsSpent[Tab.TabId] = 0
+                TreeCache.TotalInvests[Talent.TabPointReq] = 0
 
                 FrameStatus.Init = true
                 if (!FrameStatus[Row])
@@ -955,92 +971,95 @@ export function TalentTreeUI() {
                 })
 
                 Frame.SetScript('OnEnter', function() {
-                    if (TreeCache.Points[Tab.TabType] < Talent.RankCost || TreeCache.PointsSpent[Tab.TabId] < Talent.TabPointReq|| UnitLevel('player') < Talent.ReqLevel || !FrameStatus.ReqsMet) {
+                    if (TreeCache.Points[Tab.TabType] < Talent.RankCost || TreeCache.PointsSpent[Tab.TabId] < Talent.TabPointReq || UnitLevel('player') < Talent.ReqLevel || !FrameStatus.ReqsMet) {
                         return
                     }
-                    if (Talent.NodeType <= 1) {
-                        CreateTooltip(Talent, NextRankSpellId, GridTalentTalents[Row][Col].Frame)
+                    if (Talent.NodeType < 2) {
+                        CreateTooltip(Talent.SpellId, NextRankSpellId, GridTalentTalents[Row][Col].Frame)
                         FrameStatus.TooltipActive = true
                     }
                     
                     if (Talent.NodeType == 2 && Talent.ChoicesCount > 0) { // Choice node
-                        ChoiceTalents.SetParent(Frame)
-                        ChoiceTalents.SetFrameLevel(200)
-                        ChoiceTalents.SetFrameStrata('FULLSCREEN')
-                        ChoiceTalents.ClearAllPoints()
-                        ChoiceTalents.SetPoint('CENTER', Frame, 'CENTER')
+                        if (Talent.SpellId == Talent.Choices[0]) {
+                            ChoiceTalents.SetParent(Frame)
+                            ChoiceTalents.SetFrameLevel(200)
+                            ChoiceTalents.SetFrameStrata('FULLSCREEN')
+                            ChoiceTalents.ClearAllPoints()
+                            ChoiceTalents.SetPoint('CENTER', Frame, 'CENTER')
+                            if (!ChoiceTalentData[Talent.SpellId])
+                                ChoiceTalentData[Talent.SpellId] = []
+                            if (!TreeCache.ChoiceNodes[Talent.NodeIndex])
+                                TreeCache.ChoiceNodes[Talent.NodeIndex] = []
 
-                        let ChoiceTalentButtons: TSArray<WoWAPI.Button> = []
-                        ChoiceTalentData[Talent.SpellId] = []
+                            Talent.Choices.forEach((ChoiceSpellId, i) => {
+                                if (!TreeCache.ChoiceNodes[Talent.NodeIndex][ChoiceSpellId]) {
+                                    let ChoiceTalentButton = CreateFrame('Button', `ChoiceTalentButton:${ChoiceSpellId}`, ChoiceTalents)
+                                    ChoiceTalentButton.SetSize(50, 50)
 
-                        Talent.Choices.forEach((ChoiceSpellId, i) => {
-                            let ChoiceTalentButton = ChoiceTalentButtons[i]
-                            if (!ChoiceTalentButton) {
-                                ChoiceTalentButton = CreateFrame('Button', `ChoiceTalentButton:${ChoiceSpellId}`, ChoiceTalents)
-                                ChoiceTalentButton.SetSize(50, 50)
-                                ChoiceTalentButtons[i] = ChoiceTalentButton
+                                    ChoiceTalentButton.SetScript('OnMouseDown', function(self, input) {
+                                        let change = false
+                                        if (input === 'LeftButton') {
+                                            let WasZero = TreeCache.Spells[Tab.TabId][Talent.NodeIndex] === 0
+                                            TreeCache.Spells[Tab.TabId][Talent.NodeIndex] = i
+                                            TreeCache.PointsSpent[Tab.TabId] += Talent.RankCost
 
-                                ChoiceTalentButton.SetScript('OnMouseDown', function(self, input) {
-                                    let change = false
-                                    if (input === 'LeftButton') {
-                                        let WasZero = TreeCache.Spells[Tab.TabId][Talent.NodeIndex] === 0
-                                        TreeCache.Spells[Tab.TabId][Talent.NodeIndex] = i
-                                        TreeCache.PointsSpent[Tab.TabId] += Talent.RankCost
+                                            let CurRank = TreeCache.Spells[Tab.TabId][Talent.NodeIndex]
 
-                                        let CurRank = TreeCache.Spells[Tab.TabId][Talent.NodeIndex]
+                                            TreeCache.PrereqUnlocks[Tab.TabId][Talent.SpellId] = CurRank
 
-                                        TreeCache.PrereqUnlocks[Tab.TabId][Talent.SpellId] = CurRank
+                                            if (WasZero)
+                                                TreeCache.Points[Tab.TabType] -= 1
 
-                                        if (WasZero)
-                                            TreeCache.Points[Tab.TabType] -= 1
+                                            change = true
+                                        }
 
-                                        change = true
+                                        if (change) {
+                                            ShowTalentPointType(Tab.TabType, Tab.TabId)
+                                            FrameStatus.Update = true
+                                        }
+                                    })
+
+                                    let ChoiceTexture = ChoiceTalentButton.CreateTexture(`ChoiceTexture:${i}`, 'BACKGROUND')
+                                    ChoiceTexture.SetAllPoints(ChoiceTalentButton)
+
+                                    let ChoiceBorderTexture = ChoiceTalentButton.CreateTexture(`ChoiceBorderTexture${i}`, 'ARTWORK')
+                                    ChoiceBorderTexture.SetPoint('CENTER', 0, 2)
+                                    ChoiceBorderTexture.SetSize(ChoiceTalentButton.GetWidth()*1.7, ChoiceTalentButton.GetHeight()*1.7)
+                                    ChoiceBorderTexture.SetTexture(PATH+'Talents_DF')
+                                    ChoiceBorderTexture.SetTexCoord(0.5, 0.5625, 0.125, 0.1875)
+                                    ChoiceBorderTexture.SetVertexColor(0, 1, 0, 1)
+
+                                    ChoiceTalentData[Talent.SpellId][i] = {
+                                        Button: ChoiceTalentButton,
+                                        Texture: ChoiceTexture,
+                                        BorderTexture: ChoiceBorderTexture,
                                     }
 
-                                    if (change) {
-                                        ShowTalentPointType(Tab.TabType, Tab.TabId)
-                                        FrameStatus.Update = true
-                                    }
-                                })
+                                    const [ChoiceName, Skip, ChoiceIcon] = GetSpellInfo(ChoiceSpellId)
+                                    SetPortraitToTexture(ChoiceTalentData[Talent.SpellId][i].Texture, ChoiceIcon)
+                                    ChoiceTalentButton.SetPoint('CENTER', ChoiceTalents, 'CENTER', ((i - 1)* 60) + (30 * (Talent.ChoicesCount-1)), 0)
+                                    ChoiceTalentButton.Show()
 
-                                let ChoiceTexture = ChoiceTalentButton.CreateTexture(`ChoiceTexture:${i}`, 'BACKGROUND')
-                                ChoiceTexture.SetAllPoints(ChoiceTalentButton)
+                                    ChoiceTalentButton.SetScript('OnEnter', function(self) {
+                                        let ChoiceTalent = FindSpellInTab(Tab, ChoiceSpellId)
+                                        CreateTooltip(ChoiceSpellId, 0, ChoiceTalentButton)
+                                        FrameStatus.TooltipActive = true
+                                    })
 
-                                let ChoiceBorderTexture = ChoiceTalentButton.CreateTexture(`ChoiceBorderTexture${i}`, 'ARTWORK')
-                                ChoiceBorderTexture.SetPoint('CENTER', 0, 2)
-                                ChoiceBorderTexture.SetSize(ChoiceTalentButton.GetWidth()*1.7, ChoiceTalentButton.GetHeight()*1.7)
-                                ChoiceBorderTexture.SetTexture(PATH+'Talents_DF')
-                                ChoiceBorderTexture.SetTexCoord(0.5, 0.5625, 0.125, 0.1875)
-                                ChoiceBorderTexture.SetVertexColor(0, 1, 0, 1)
+                                    ChoiceTalentButton.SetScript('OnLeave', function (self) {
+                                        FrameStatus.TooltipActive = false
+                                    })
 
-                                ChoiceTalentData[Talent.SpellId][i] = {
-                                    Button: ChoiceTalentButton,
-                                    Texture: ChoiceTexture,
-                                    BorderTexture: ChoiceBorderTexture,
+                                    ChoiceTalents.SetScript('OnHide', function() {
+                                        FrameStatus.TooltipActive = false
+                                        FirstRankToolTip.Hide()
+                                    })
+
+                                    TreeCache.ChoiceNodes[Talent.NodeIndex][ChoiceSpellId] = ChoiceTalentButton
                                 }
-                            }
-                            const [ChoiceName, Skip, ChoiceIcon] = GetSpellInfo(ChoiceSpellId)
-                            SetPortraitToTexture(ChoiceTalentData[Talent.SpellId][i].Textura, ChoiceIcon)
-                            ChoiceTalentButton.SetPoint('CENTER', ChoiceTalents, 'CENTER', ((i - 1)* 60) - (30 * (Talent.ChoicesCount-1)), 0)
-                            ChoiceTalentButton.Show()
-
-                            ChoiceTalentButton.SetScript('OnEnter', function(self) {
-                                CreateTooltip(Talent, NextRankSpellId, GridTalentTalents[Talent.Row][Talent.Col].Frame)
-                                FrameStatus.TooltipActive = true
                             })
-
-                            ChoiceTalentButton.SetScript('OnLeave', function (self) {
-                                FrameStatus.TooltipActive = false
-                            })
-
-                            ChoiceTalents.SetScript('OnHide', function() {
-                                FrameStatus.TooltipActive = false
-                                FirstRankToolTip.Hide()
-                            })
-
-                            TreeCache.ChoiceNodes[Talent.NodeIndex] = ChoiceTalentButtons
-                        })
-                        ChoiceTalents.Show()
+                            ChoiceTalents.Show()
+                        }
                     }
                 })
 
@@ -1104,7 +1123,6 @@ export function TalentTreeUI() {
                             let By = FindSpellInTab(Tab, Spell)
                             let Dependency = TreeCache.Spells[Tab.TabId][By.NodeIndex]
                             if (Dependency > 0) {
-                                console.log(Dependency, By.PrereqCount)
                                 let SumDependency = 0
                                 By.Prereqs.forEach((Prereq) => {
                                     let OtherReq = FindSpellInTab(Tab, Prereq.Talent)
@@ -1131,11 +1149,13 @@ export function TalentTreeUI() {
                     FrameStatus.CanDeRank = !PreventDerank
 
                     if (Talent.NodeType === 2) {
-                        // TODO Add IsMouseOverFrame if ()
-                        ChoiceTalents.Show()
+                        if (!IsMouseOverFrame(Frame, 25))
+                            ChoiceTalents.Hide()
+                        else
+                            ChoiceTalents.Show()
                     }
 
-                    if (Talent.NodeType === 2 && Talent.ChoicesCount) {
+                    if (Talent.NodeType === 2 && Talent.ChoicesCount > 0) {
                         let SpellLearned = 0
                         if (ChoiceTalentData.length) {
                             ChoiceTalentData.forEach((ButtonData, i) => {
@@ -1248,8 +1268,8 @@ export function TalentTreeUI() {
                     FrameData.BorderTexture.SetSize(59, 59)
                 }
 
-                if (Talent.NodeType && Talent.ChoicesCount) {
-                    if (Talent.ChoicesCount >= 2) {
+                if (Talent.NodeType == 2) {
+                    if (Talent.ChoicesCount == 2) {
                         const [SpellId1, SpellId2] = Talent.Choices
                         const [a, b, Icon1] = GetSpellInfo(SpellId1)
                         const [c, d, Icon2] = GetSpellInfo(SpellId2)
@@ -1260,7 +1280,7 @@ export function TalentTreeUI() {
                         }
 
                         let IconSize = FrameData.TextureIcon.GetWidth() + 10
-                        FrameData.TextureIconLeft.SetSize(IconSize/2, IconSize/2)
+                        FrameData.TextureIconLeft.SetSize(IconSize/2, IconSize)
                         FrameData.TextureIconLeft.SetPoint('LEFT', FrameData.TextureIcon, 'LEFT', -2, 2)
                         FrameData.TextureIconLeft.SetTexCoord(0, 0.5, 0, 1)
 
@@ -1270,7 +1290,7 @@ export function TalentTreeUI() {
 
                         FrameData.BorderTexture.ClearAllPoints()
                         FrameData.BorderTexture.SetPoint('CENTER', FrameData.Border, 'CENTER', 0.5, 0.5)
-                        FrameData.BorderTexture.SetSize(66, 66)
+                        FrameData.BorderTexture.SetSize(65, 65)
 
                         SetPortraitToTexture(FrameData.TextureIconLeft, Icon1)
                         SetPortraitToTexture(FrameData.TextureIconRight, Icon2)
@@ -1285,6 +1305,9 @@ export function TalentTreeUI() {
                 let Settings = TextureSettings[Talent.NodeType]
 
                 if (Settings) {
+                    if (Talent.NodeType === 2)
+                        console.log(TextureSettings)
+
                     FrameData.TextureIcon.SetDesaturated(Settings.Desaturate)
                     FrameData.BorderTexture.SetTexCoord(Settings.Coords.minX, Settings.Coords.maxX, Settings.Coords.minY, Settings.Coords.maxY)
                 }
