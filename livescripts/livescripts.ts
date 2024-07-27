@@ -1,3 +1,4 @@
+import { ClientCallbackOperations, SimpleMessagePayload } from "../shared/Messages";
 import { DHPointType } from "./classes";
 import { wClassLevelSpells, wTalentTrees } from "./dh-cachedata/dh-worlddata";
 import { DHCommonMessage } from "./dh-message/dh-cmsg";
@@ -87,6 +88,8 @@ export function Main(events: TSEvents) {
                     Spec.SpecTabId = SpecToActivate
                     QueryCharactersAsync(`update forge_character_specs set charspec = ${SpecToActivate} where guid = ${Player.GetGUID().GetCounter()}`)
                     mDHDMsg.SendSpecInfo(Player)
+                    let ClientCallback = new SimpleMessagePayload(ClientCallbackOperations.ACTIVATE_CLASS_SPEC, 'Finished Setting Spec')
+                    ClientCallback.write().SendToPlayer(Player)
                 }
             }
             Player.SetUInt(`SpecActivation`, 0)

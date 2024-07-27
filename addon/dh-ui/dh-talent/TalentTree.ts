@@ -653,6 +653,7 @@ export function TalentTreeUI() {
                     if (self.GetText() === 'Activate') {
                         CurrentTab = Tree
                         SendCallbackToServer(ClientCallbackOperations.ACTIVATE_CLASS_SPEC, Tree.TabId)
+                        ClassSpecWindowLockout.Show()
                     }
                 })
 
@@ -1109,7 +1110,6 @@ export function TalentTreeUI() {
                                     let OtherReq = FindSpellInTab(Tab, Prereq.Talent)
                                     SumDependency += TreeCache.Spells[Prereq.TabId][OtherReq.NodeIndex]
                                 })
-                                console.log(SumDependency, Talent.NumRanks, PreventDerank)
                                 PreventDerank ||= SumDependency - Talent.NumRanks == 0
                             }
 
@@ -1484,6 +1484,7 @@ export function TalentTreeUI() {
     }
 
     function DeselectAllTalents() {
+        ClassSpecWindowLockout.Show()
         let SpecTab: TalentTreeLayout = TalentTree.SelectedTab
         let ClassTab: TalentTreeLayout = TalentTree.ClassTab
         TreeCache.PointsSpent[SpecTab.TabId] = 0
@@ -1515,6 +1516,7 @@ export function TalentTreeUI() {
                 FrameStatusLookup[Row][Col] = FrameStatus
             }
         })
+        ClassSpecWindowLockout.Hide()
     }
 
     function BuildLoadoutString() {
@@ -1588,6 +1590,11 @@ export function TalentTreeUI() {
     OnCustomPacket(ClientCallbackOperations.GET_TALENTS, pkt => {
         let Loadout = pkt.ReadString()
         LoadTalentString(Loadout)
+    })
+    OnCustomPacket(ClientCallbackOperations.ACTIVATE_CLASS_SPEC, pkt => {
+        TalentFrame.Show()
+        ClassSpecWindowLockout.Hide()
+        ClassSpecWindow.Hide()
     })
 
     SendCallbackToServer(ClientCallbackOperations.TALENT_TREE_LAYOUT, '-1')
