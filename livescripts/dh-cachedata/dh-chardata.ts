@@ -6,7 +6,7 @@ export let cCharPoints: TSDictionary<uint64 /*owner*/, TSDictionary<uint16/*poin
 export let cMaxPointDefaults: TSDictionary<uint16, DHCharacterPoint> = CreateDictionary<uint16, DHCharacterPoint>({})
 export let cSpecs: TSDictionary<uint64 /*owner*/, TSDictionary<uint8/*spec*/, DHPlayerSpec>> = CreateDictionary<uint64, TSDictionary<uint8, DHPlayerSpec>>({})
 export let cLoadouts: TSDictionary<uint64 /*owner*/, TSDictionary<uint32/*tab*/, TSDictionary<uint8/*id*/, DHPlayerLoadout>>> = CreateDictionary<uint64, TSDictionary<uint32, TSDictionary<uint8, DHPlayerLoadout>>>({})
-export let cActiveLoadouts: TSDictionary<uint64, DHPlayerLoadout> = CreateDictionary<uint64, DHPlayerLoadout>({})
+export let cActiveLoadouts: TSDictionary<uint64, TSDictionary<uint8, DHPlayerLoadout>> = CreateDictionary<uint64, TSDictionary<uint8, DHPlayerLoadout>>({})
 
 export function LoadCharacterData() {
     console.log("\tLoading character actionbars...\n")
@@ -154,7 +154,7 @@ class CharacterTalentLoadouts {
             let loadout = new DHPlayerLoadout(id, tabId, name, talentString, !!active)
 
             if (active)
-                cActiveLoadouts[owner] = loadout
+                cActiveLoadouts[owner][tabId] = loadout
 
             cLoadouts[owner][tabId][id] = loadout
 

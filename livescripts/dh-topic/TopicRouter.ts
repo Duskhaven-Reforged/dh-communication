@@ -26,4 +26,14 @@ export function RouteTopics(events: TSEvents) {
         mDHDMsg.cache.TrySaveNewLoadout(Player, CustomPacket.message)
         mDHDMsg.SendSpecInfo(Player)
     })
+
+    events.CustomPacket.OnReceive(ClientCallbackOperations.ACTIVATE_CLASS_SPEC, (Opcode, Packet, Player) => {
+        let CustomPacket = new SimpleMessagePayload(Opcode, '')
+        CustomPacket.read(Packet)
+        if (parseInt(CustomPacket.message)) {
+            console.log(`Activate Spec ${CustomPacket.message}`)
+            mDHDMsg.cache.ActivateSpec(Player, parseInt(CustomPacket.message))
+        }
+        
+    })
 }

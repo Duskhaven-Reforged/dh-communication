@@ -66,17 +66,32 @@ export function Main(events: TSEvents) {
         }
     }) 
 
-    events.Player.OnSpellCast((who, spell, skip) => {
-        if (spell.GetEntry() === 80900) {
-            console.log(`Player ${who.GetGUID().GetCounter()} is activating spec.`)
-        }
+    events.Unit.OnCastCancelled((who, spell) => {
+        if (who.IsPlayer() && spell.GetEntry() === 63645)
+            who.SetUInt(`SpecActivation`, 0)
     })
 
-    events.Unit.OnCastCancelled((who, spell) => {
-        if (who.IsPlayer()) {
-            if (spell.GetEntry() === 80900)
-                console.log(`Player ${who.GetGUID().GetCounter()} cancelled activate spec.`)
+    events.Spell.OnAfterCast(63645, (Spell, Cancel) => {
+        if (Spell.GetCaster().IsPlayer()) {
+            let Player = Spell.GetCaster().ToPlayer()
+            let SpecToActivate = Player.GetUInt(`SpecActivation`)
+            
+            let Tab = mDHDMsg.cache.TryGetTalentTab(Player, SpecToActivate)
+            let Spec = mDHDMsg.cache.TryGetCharacterActiveSpec(Player)
+            if (wTalentTrees.contains(SpecToActivate)) {
+                let Tree = wTalentTrees[SpecToActivate]
+                if (!Tab.IsNull() && !Spec.IsNull() && Tree.TalentType === DHPointType.TALENT) {
+                    mDHDMsg.cache.ForgetTalents(Player, Spec, DHPointType.CLASS)
+                    mDHDMsg.cache.ForgetTalents(Player, Spec, DHPointType.TALENT)
+
+                    Spec.SpecTabId = SpecToActivate
+                    QueryCharactersAsync(`update forge_character_specs set charspec = ${SpecToActivate} where guid = ${Player.GetGUID().GetCounter()}`)
+                    mDHDMsg.SendSpecInfo(Player)
+                }
+            }
+            Player.SetUInt(`SpecActivation`, 0)
         }
+
     })
 
     events.Spell.OnLearn((spell, player, active, disables, superceded, from_skill) => {
@@ -111,14 +126,4 @@ export function LearnSpellsForLevel(player: TSPlayer) {
             })
         })
     }
-}
-
-export function isDigit(input: string) : bool {
-    let chars = input.split('')
-    let out = input.length ? true : false
-    chars.forEach((c) => {
-        out = out && (c >= '0' && c <= '9');
-    })
-
-    return out
 }

@@ -32,7 +32,8 @@ let TreeCache = {
     IndexToFrame: [],
     ChoiceNodes: [],
     Unlocks: [],
-    UnlockCounts: []
+    UnlockCounts: [],
+    PrereqLines: [],
 }
 
 let FrameData = {
@@ -45,6 +46,7 @@ export let PlayerTalentFrame
 export let PlayerSpecFrame
 export let GridTalentTalents = []
 export let GridTalentTalentsNodes = []
+
 let FrameStatusLookup = []
 let ChoiceTalentData = []
 let TalentFrameContainerBackground
@@ -363,6 +365,15 @@ export function TalentTreeUI() {
     increaseButton.SetScript('OnClick', function() {
         UpdateScale(0.01)
     })
+
+    function HideAllNodes() {
+        let gridRows = 11
+        let totalGridCols = 23
+        for (let i = 0; i < gridRows; i++)
+            for (let j = 1; j < totalGridCols; j++) {
+                GridTalentTalents[i][j].Frame.Hide()
+            }
+    }
 
     let TalentFrameGridTalent
     function InitializeGridForTalents() {
@@ -777,23 +788,38 @@ export function TalentTreeUI() {
         let CX = (x1 + x2)/2
         let CY = (y1 + y2)/2
 
-        let Node = CreateFrame('Frame', `NodeLine:${Talent.TabId}:${Talent.SpellId}:${RequiredTalent.SpellId}`, TalentFrameGridTalent)
-        Node.SetSize(Length, 12)
-        Node.SetPoint('CENTER', CX, CY)
+        if (!TreeCache.PrereqLines[RequiredTalent.Row])
+            TreeCache.PrereqLines[RequiredTalent.Row] = []
 
-        Node.SetBackdrop({
-            bgFile: LineTex
-        })
-        
-        let Animation = Node.CreateAnimationGroup()
-        let Spin = Animation.CreateAnimation('Rotation')
-        Spin.SetOrder(1)
-        Spin.SetDuration(0)
-        Spin.SetDegrees(Angle)
-        Spin.SetEndDelay(999999)
+        if (!TreeCache.PrereqLines[RequiredTalent.Row][RequiredTalent.Col])
+            TreeCache.PrereqLines[RequiredTalent.Row][RequiredTalent.Col] = []
 
-        Animation.Stop()
-        Animation.Play()
+        if (!TreeCache.PrereqLines[RequiredTalent.Row][RequiredTalent.Col][Talent.SpellId]) {
+            let Node = CreateFrame('Frame', `NodeLine:${Talent.TabId}:${Talent.SpellId}:${RequiredTalent.SpellId}`, TalentFrameContainer)
+            Node.SetSize(Length, 12)
+            Node.SetPoint('CENTER', CX, CY)
+            Node.SetBackdrop({
+                bgFile: LineTex
+            })
+            
+            let Animation = Node.CreateAnimationGroup(`Spin`)
+            let Spin = Animation.CreateAnimation('Rotation')
+            Spin.SetOrder(1)
+            Spin.SetDuration(0)
+            Spin.SetDegrees(Angle)
+            Spin.SetEndDelay(999999999)
+            Spin.SetMaxFramerate(400)
+            Animation.SetLooping('NONE')
+            Animation.Stop()
+            Animation.Play()
+
+            let LineData = {
+                Line: Node,
+                Animation: Animation,
+            }
+
+            TreeCache.PrereqLines[RequiredTalent.Row][RequiredTalent.Col][Talent.SpellId] = LineData
+        }
     }
 
     function InitializePrereqsAndLines(Talent: TTLPTalent, Tab: TalentTreeLayout) {
@@ -806,7 +832,7 @@ export function TalentTreeUI() {
                 }
                 
                 let count = TreeCache.UnlockCounts[Required.SpellId] 
-                TreeCache.Unlocks[Required.SpellId][count] = Talent.NodeIndex
+                TreeCache.Unlocks[Required.SpellId][count] = Talent.SpellId
 
                 TreeCache.UnlockCounts[Required.SpellId]++
 
@@ -823,9 +849,6 @@ export function TalentTreeUI() {
                 let ThisFrame = GridTalentTalents[Talent.Row -1][Talent.Col + offset].Frame
                 
                 let LineTexturePath = CONSTANTS.UI.CONNECTOR_DISABLED
-
-                if (IsNodeUnlocked(Prereq, TreeCache.Spells[Tab.TabId][Talent.NodeIndex]))
-                    LineTexturePath = CONSTANTS.UI.CONNECTOR
 
                 let StartPos = GetPositionXY(ThisFrame)
                 let EndPos = GetPositionXY(PrevFrame)
@@ -877,6 +900,9 @@ export function TalentTreeUI() {
                 if (!Frame)
                     return
 
+                if (Talent.PrereqCount > 0)
+                    InitializePrereqsAndLines(Talent, Tab)
+
                 let FrameStatus = {
                     CanUpRank: false,
                     CanDeRank: false,
@@ -894,10 +920,6 @@ export function TalentTreeUI() {
                 ChoiceTalents.SetPoint('CENTER')
                 ChoiceTalents.Hide()
 
-                if (Talent.PrereqCount) {
-                    InitializePrereqsAndLines(Talent, Tab)
-                }
-
                 FrameStatus.Init = true
                 if (!FrameStatus[Row])
                     FrameStatusLookup[Row] = []
@@ -910,6 +932,26 @@ export function TalentTreeUI() {
                     FrameData.Border.Hide()
                     FrameData.TextureIcon.SetTexture(Icon)
                 }
+
+                Frame.SetScript('OnHide', function() {
+                    Talent.Prereqs.forEach((Req) => {
+                        let Required = FindSpellInTab(Tab, Req.Talent)
+                        if (Required) {
+                            let LineData = TreeCache.PrereqLines[Required.Row][Required.Col][Talent.SpellId]
+                            LineData.Line.Hide()
+                        }
+                    })
+                })
+
+                Frame.SetScript('OnShow', function() {
+                    Talent.Prereqs.forEach((Req) => {
+                        let Required = FindSpellInTab(Tab, Req.Talent)
+                        if (Required) {
+                            let LineData = TreeCache.PrereqLines[Required.Row][Required.Col][Talent.SpellId]
+                            LineData.Line.Show()
+                        }
+                    })
+                })
 
                 Frame.SetScript('OnEnter', function() {
                     if (TreeCache.Points[Tab.TabType] < Talent.RankCost || TreeCache.PointsSpent[Tab.TabId] < Talent.TabPointReq|| UnitLevel('player') < Talent.ReqLevel || !FrameStatus.ReqsMet) {
@@ -1016,6 +1058,7 @@ export function TalentTreeUI() {
                 Frame.SetScript('OnMouseDown', function(self, input) {
                     let SpellRank = TreeCache.Spells[Tab.TabId][Talent.NodeIndex]
                     let Change = false
+
                     if (input === 'LeftButton' && FrameStatus.CanUpRank && Talent.NodeType < 2) {
                         if (SpellRank < nRanks) {
                             TreeCache.Spells[Tab.TabId][Talent.NodeIndex] = SpellRank + 1
@@ -1048,23 +1091,44 @@ export function TalentTreeUI() {
                 })
 
                 Frame.SetScript('OnUpdate', function() {
-                    let Allow = true
                     ShowTalentPointType(Tab.TabType, Tab.TabId)
 
                     if (Talent.NodeType < 2)
                         FrameData.RankText.SetText(TreeCache.Spells[Tab.TabId][Talent.NodeIndex])
 
+                    let PreventDerank = false
                     if (TreeCache.Unlocks[Talent.SpellId]) {
                         let RequiredBy : TSArray<number> = TreeCache.Unlocks[Talent.SpellId]
-                        RequiredBy.forEach((Val, i) => {
-                            console.log(Val, i)
-                            let Dependancy = TreeCache.Spells[Tab.TabId][Val]
-                            Allow &&= Dependancy < 1
-                            if (!Allow)
-                                console.log(`${Tab.TabId} ${Talent.SpellId} ${Val} ${Allow}`)
+                        RequiredBy.forEach((Spell) => {
+                            let By = FindSpellInTab(Tab, Spell)
+                            let Dependency = TreeCache.Spells[Tab.TabId][By.NodeIndex]
+                            if (Dependency > 0) {
+                                console.log(Dependency, By.PrereqCount)
+                                let SumDependency = 0
+                                By.Prereqs.forEach((Prereq) => {
+                                    let OtherReq = FindSpellInTab(Tab, Prereq.Talent)
+                                    SumDependency += TreeCache.Spells[Prereq.TabId][OtherReq.NodeIndex]
+                                })
+                                console.log(SumDependency, Talent.NumRanks, PreventDerank)
+                                PreventDerank ||= SumDependency - Talent.NumRanks == 0
+                            }
+
+                            if (TreeCache.PrereqLines[Talent.Row]) {
+                                if (TreeCache.PrereqLines[Talent.Row][Talent.Col]) {
+                                    if (TreeCache.PrereqLines[Talent.Row][Talent.Col][By.SpellId]) {
+                                        let Line : WoWAPI.Frame = TreeCache.PrereqLines[Talent.Row][Talent.Col][By.SpellId].Line
+                                        if (Talent.NumRanks === TreeCache.Spells[Tab.TabId][Talent.NodeIndex]) {
+                                            Line.SetBackdropColor(165/255, 142/255, 17/255, 1) 
+                                        } else {
+                                            Line.SetBackdropColor(82/255, 82/255, 82/255, 1) 
+                                        }
+                                    }
+                                }
+                            }
                         })
                     }
-                    FrameStatus.CanDeRank = Allow
+
+                    FrameStatus.CanDeRank = !PreventDerank
 
                     if (Talent.NodeType === 2) {
                         // TODO Add IsMouseOverFrame if ()
@@ -1133,8 +1197,9 @@ export function TalentTreeUI() {
                             if (TreeCache.PrereqUnlocks[Prereq.TabId] && !Met) {
                                 let ReqUnlocked = TreeCache.PrereqUnlocks[Prereq.TabId][Prereq.Talent]
                                 if (ReqUnlocked) {
-                                    if (ReqUnlocked >= Prereq.ReqRank)
+                                    if (ReqUnlocked >= Prereq.ReqRank) {
                                         Met = true
+                                    }
                                     else
                                         Met = false
                                 } else {
@@ -1312,6 +1377,8 @@ export function TalentTreeUI() {
 
     let LastPushedTabId = null
     function SelectTab(Tab: TalentTreeLayout) {
+        HideAllNodes()
+
         TalentTree.SelectedTab = Tab
 
         if (Tab.TabType === 0) {
@@ -1320,8 +1387,6 @@ export function TalentTreeUI() {
             TreeCache.Spells[Tab.TabId] = []
 
             TreeCache.PrereqUnlocks[Tab.TabId] = []
-
-            InitializeGridForTalents()
 
             if (Tab.TalentsCount) {
                 PopulateGridFromTab(Tab)
@@ -1368,7 +1433,6 @@ export function TalentTreeUI() {
 
     function LoadTalentString(Talents: string, force: bool = false) {
         let ToggleFrame = !PlayerTalentFrame.IsVisible()
-        
         if (ToggleFrame)
             TalentMicroButton.Click()
 
@@ -1377,6 +1441,7 @@ export function TalentTreeUI() {
         let Class = Util.alpha.indexOf(Talents[2])
         if (Type === 0 && Talents.length > 3 && Spec === TalentTree.SelectedSpec && Class == GetClassId(UnitClass('player')[1]) ) {
             if (TalentTree.ActiveString !== Talents) {
+                SelectTab(TalentTree.TalentTrees[Spec])
                 let SpecTab: TalentTreeLayout = TalentTree.SelectedTab
                 let ClassTab: TalentTreeLayout = TalentTree.ClassTab
  
@@ -1397,6 +1462,7 @@ export function TalentTreeUI() {
                     TreeCache.Points[7] -= Rank * Cost
                     TreeCache.PointsSpent[ClassTab.TabId] += Rank * Cost
                     TreeCache.Spells[Talent.TabId][Talent.NodeIndex] = Rank
+                    TreeCache.PrereqUnlocks[Talent.TabId][Talent.SpellId] = Rank
                 })
 
                 let SpecString = Talents.substring(3 + ClassTreeLen)
@@ -1407,6 +1473,7 @@ export function TalentTreeUI() {
                     TreeCache.Points[Type] -= Rank * Cost
                     TreeCache.PointsSpent[SpecTab.TabId] += Rank * Cost
                     TreeCache.Spells[Talent.TabId][Talent.NodeIndex] = Rank
+                    TreeCache.PrereqUnlocks[Talent.TabId][Talent.SpellId] = Rank
                 })
 
                 TalentTree.ActiveString = Talents
@@ -1569,7 +1636,13 @@ export function SendCallbackToServer(op: ClientCallbackOperations, msg: string) 
 export function OnTalentError(pkt: TSPacketRead) {
     let customPacket = new SimpleMessagePayload(ClientCallbackOperations.TALENT_TREE_LAYOUT, "")
     customPacket.read(pkt)
-    console.log("Talent learn error: "+customPacket.message)
+    console.log(customPacket.message)
+}
+
+export function OnSpecError(pkt: TSPacketRead) {
+    let customPacket = new SimpleMessagePayload(ClientCallbackOperations.ACTIVATE_SPEC_ERROR, "")
+    customPacket.read(pkt)
+    console.log(customPacket.message)
 }
 
 export function GetTalentTreeLayout(pkt: TSPacketRead) {

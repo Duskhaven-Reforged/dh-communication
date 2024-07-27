@@ -1,6 +1,6 @@
 import { ClientCallbackOperations, SimpleMessagePayload } from '../../shared/Messages';
 import { ACOUNT_WIDE_KEY, DHCharacterPoint, DHCharacterTalent, DHNodeType, DHPlayerLoadout, DHPlayerSpec, DHPointType, DHTalentTab, DHTreeMetaData, TALENT_POINT_TYPES, base64_char } from '../classes';
-import { LoadCharacterData, cActiveLoadouts, cCharPoints, cLoadouts, cMaxPointDefaults, cSpecs } from './dh-chardata';
+import { LoadCharacterData, cActiveLoadouts, cCharPoints, cLoadouts, cSpecs } from './dh-chardata';
 import { LoadWorldData, wClassNodeToSpell, wRaceClassTabMap, wPointTypeToTabs, wSpecNodeToSpell, wSpellToTab, wTabToSpell, wTalentTrees, wChoiceNodesRev, wTreeMetaData, wClassNodeToClassTree, wChoiceNodes } from './dh-worlddata';
 
 export class DHCache {
@@ -75,7 +75,7 @@ export class DHCache {
                 let plo = new DHPlayerLoadout(1, tab.Id, 'Default', loadout, true)
 
                 cLoadouts[owner][tab.Id][plo.Id] = plo
-                cActiveLoadouts[owner] = plo
+                cActiveLoadouts[owner][tab.Id] = plo
 
                 const res = QueryCharacters(`insert into \`forge_character_talent_loadouts\` (\`guid\`, \`id\`, \`talentTabId\`, \`name\`, \`talentString\`, \`active\`) values (${owner}, ${plo.Id}, ${tab.Id}, '${plo.Name}', '${loadout}', 1)`)
             })
@@ -180,10 +180,10 @@ export class DHCache {
                             }
                         })
                         this.UpdateCharSpec(Player, Spec)
-                        let Loadout = cActiveLoadouts[Player.GetGUID().GetCounter()]
+                        let Loadout = cActiveLoadouts[Player.GetGUID().GetCounter()][PlayerSpec]
                         Loadout.TalentString = LoadoutString
                         cLoadouts[Player.GetGUID().GetCounter()][Loadout.TabId][Loadout.Id] = Loadout
-                        cActiveLoadouts[Player.GetGUID().GetCounter()] = Loadout
+                        cActiveLoadouts[Player.GetGUID().GetCounter()][PlayerSpec] = Loadout
                     } else
                         return
 
@@ -200,7 +200,7 @@ export class DHCache {
         }
     }
 
-    private VerifyFlatTable(Player: TSPlayer, SpecTab: DHTalentTab) : bool{
+    private VerifyFlatTable(Player: TSPlayer, SpecTab: DHTalentTab) : bool {
         this.ToLearn = CreateArray<DHCharacterTalent>([])
         this.Unlocks = CreateArray<uint32>([])
         if (SpecTab.Classmask == Player.GetClassMask()) {
@@ -259,6 +259,20 @@ export class DHCache {
             return true
         }
         return false
+    }
+
+    public ActivateSpec(Player: TSPlayer, Spec: number) {
+        const ACTIVATE_SPEC_SPELL = 63645
+        let ERROR = new SimpleMessagePayload(ClientCallbackOperations.ACTIVATE_SPEC_ERROR, 'Spec Activation Error: ')
+        if (!Player.IsInCombat() && !Player.IsDead()) {
+            let Info = GetSpellInfo(ACTIVATE_SPEC_SPELL)
+            Player.SetUInt(`SpecActivation`, Spec)
+            Player.CastSpell(Player, ACTIVATE_SPEC_SPELL)
+        } else {
+            ERROR.message += `Now isn't the time for that.`
+            ERROR.write().SendToPlayer(Player)
+            return
+        }
     }
 
     public TryGetTabIdForSpell(player: TSPlayer, spell: number) : number {

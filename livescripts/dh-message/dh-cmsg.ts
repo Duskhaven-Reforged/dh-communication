@@ -1,8 +1,7 @@
 import { ClientCallbackOperations, SimpleMessagePayload } from '../../shared/Messages';
-import { DHPointType, DHTalentTab, TALENT_POINT_TYPES, base64_char } from '../classes';
+import { DHPointType, DHTalentTab, TALENT_POINT_TYPES } from '../classes';
 import { DHCache } from '../dh-cachedata/dh-cache';
 import { cActiveLoadouts, cLoadouts } from '../dh-cachedata/dh-chardata';
-import { wClassNodeToClassTree, wClassNodeToSpell, wSpecNodeToSpell } from '../dh-cachedata/dh-worlddata';
 import { GetTalentTreeLayoutPayload, TTLPTalent, TTLPTalentPrereq, TTLPTalentRank, TalentTreeLayout, TalentTreeLayoutPayload } from '../../shared/Payloads/TalentTreeLayoutPayload';
 import { CPSSpec, CSPPointSpend, CSPPoints, CharacterSpecsPayload, GetCharacterSpecsPayload } from '../../shared/Payloads/GetCharacterSpecsPayload';
 
@@ -112,7 +111,7 @@ export class DHCommonMessage {
     public SendTalents(player: TSPlayer) {
         let spec = this.cache.TryGetCharacterActiveSpec(player)
         if (spec) {
-            let Loadout = cActiveLoadouts[player.GetGUID().GetCounter()]
+            let Loadout = cActiveLoadouts[player.GetGUID().GetCounter()][spec.SpecTabId]
             let Output = Loadout.TalentString
             let pkt = new SimpleMessagePayload(ClientCallbackOperations.GET_TALENTS, Output);
             pkt.write().SendToPlayer(player)
