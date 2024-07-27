@@ -10,7 +10,6 @@ export function Main(events: TSEvents) {
 
     events.Player.OnLogin((player, first) => {
         LearnSpellsForLevel(player)
-        player.SendShopMail("Hello", "Hello")
 
         //todo load actions and maybe account bonuses
         // maybe unlearn flagged too
@@ -36,11 +35,11 @@ export function Main(events: TSEvents) {
         let spec = mDHDMsg.cache.TryGetCharacterActiveSpec(player)
         if (!spec.IsNull()) {
             let curLevel = player.GetLevel()
-            if (curLevel > 9) {
+            if (curLevel > 10) {
                 if (oldLevel < curLevel) {
                     let levelDiff = curLevel - oldLevel
-                    if (oldLevel < 10 && levelDiff > 1)
-                        levelDiff -= 9 - oldLevel
+                    if (oldLevel < 11 && levelDiff > 1)
+                        levelDiff -= 10 - oldLevel
 
                     if (levelDiff > 1) {
                         let div = Math.floor(levelDiff / 2)

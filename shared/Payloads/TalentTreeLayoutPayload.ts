@@ -21,6 +21,7 @@ export class TTLPTalent {
     TabPointReq: number
     PrereqType: number
     NodeType: number
+    Starter: number
     NodeIndex: number
 
     NumRanks: number
@@ -80,6 +81,7 @@ export class GetTalentTreeLayoutPayload {
                 Talent.TabPointReq = read.ReadDouble()
                 Talent.PrereqType = read.ReadDouble()
                 Talent.NodeType = read.ReadDouble()
+                Talent.Starter = read.ReadDouble()
                 Talent.NodeIndex = read.ReadDouble()
 
                 Talent.NumRanks = read.ReadDouble()
@@ -140,6 +142,7 @@ export class GetTalentTreeLayoutPayload {
                 packet.WriteDouble(Talent.TabPointReq)
                 packet.WriteDouble(Talent.PrereqType)
                 packet.WriteDouble(Talent.NodeType)
+                packet.WriteDouble(Talent.Starter)
                 packet.WriteDouble(Talent.NodeIndex)
 
                 packet.WriteDouble(Talent.NumRanks)

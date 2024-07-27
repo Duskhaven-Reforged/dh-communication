@@ -28,10 +28,11 @@ let TreeCache = {
     PointsSpent: [],
     TotalInvests: [],
     PrereqUnlocks: [],
-    PrereqRev: [],
     Points: [],
     IndexToFrame: [],
-    ChoiceNodes: []
+    ChoiceNodes: [],
+    Unlocks: [],
+    UnlockCounts: []
 }
 
 let FrameData = {
@@ -734,12 +735,13 @@ export function TalentTreeUI() {
     }
 
     function FindSpellInTab(Tab: TalentTreeLayout, SpellId: number) : TTLPTalent {
+        let out = null
         Tab.Talents.forEach((Talent) => {
-            if (Talent.SpellId == SpellId)
-                return Talent
+            if (Talent.SpellId === SpellId)
+                out = Talent
         })
 
-        return null
+        return out
     }
 
     function IsNodeUnlocked(Talent: TTLPTalentPrereq, Rank) {
@@ -759,7 +761,9 @@ export function TalentTreeUI() {
         return Radians * (180/Math.PI)
     }
 
-    function DrawNode(StartPos, EndPos, PrevFrame: WoWAPI.Frame, Talent: TTLPTalent, RequiredTalent: TTLPTalent) {
+    function DrawNode(StartPos, EndPos, PrevFrame: WoWAPI.Frame, Talent: TTLPTalent, RequiredTalent: TTLPTalent, LineTex: string) {
+        let [a, b, c, xOfs, yOfs] = PrevFrame.GetPoint(0)
+        
         let x1 = StartPos.x
         let y1 = StartPos.y
         let x2 = EndPos.x
@@ -767,20 +771,21 @@ export function TalentTreeUI() {
 
         let DX = x1 - x2
         let DY = y1 - y2
-        let Angle = Degrees(Math.atan2(DY, DX))
-        let Length = Math.sqrt((x2 - x1)**2 + (y2 - y2)**2)
+        let Angle = Degrees(Math.atan2(DY, DX)) + 360
+        let Length = Math.sqrt(Math.abs(x2 - x1)**2 + Math.abs(y2 - y1)**2)
 
         let CX = (x1 + x2)/2
         let CY = (y1 + y2)/2
 
-        if (DY !== 0 && DX == 0)
-            CX -= 1
-
-        let Node = CreateFrame('Frame', 'NodeLine', PrevFrame)
-        Node.SetSize(Length - 30, 12)
+        let Node = CreateFrame('Frame', `NodeLine:${Talent.TabId}:${Talent.SpellId}:${RequiredTalent.SpellId}`, TalentFrameGridTalent)
+        Node.SetSize(Length, 12)
         Node.SetPoint('CENTER', CX, CY)
+
+        Node.SetBackdrop({
+            bgFile: LineTex
+        })
         
-        let Animation = PrevFrame.CreateAnimationGroup()
+        let Animation = Node.CreateAnimationGroup()
         let Spin = Animation.CreateAnimation('Rotation')
         Spin.SetOrder(1)
         Spin.SetDuration(0)
@@ -795,47 +800,54 @@ export function TalentTreeUI() {
         Talent.Prereqs.forEach((Prereq) => {
             let Required = FindSpellInTab(Tab, Prereq.Talent)
             if (Required) {
-                let PrevFrame = TalentFrameGridTalent[Required.Row][Required.Col]
-                let ThisFrame = TalentFrameGridTalent[Talent.Row][Talent.Col]
-
-                let LineTexture = TalentFrameContainer.CreateTexture(`LineTexture:${Prereq.Talent}:${Required.SpellId}`, 'OVERLAY')
-                LineTexture.SetDrawLayer('ARTWORK', 7)
-                let Width = 10
-
-                if (IsNodeUnlocked(Prereq, TreeCache.Spells[Tab.TabId][Talent.NodeIndex])) {
-                    LineTexture.SetTexture(CONSTANTS.UI.CONNECTOR)
-                } else {
-                    LineTexture.SetTexture(CONSTANTS.UI.CONNECTOR_DISABLED)
+                if (!TreeCache.Unlocks[Required.SpellId]) {
+                    TreeCache.Unlocks[Required.SpellId] = []
+                    TreeCache.UnlockCounts[Required.SpellId] = 1
                 }
+                
+                let count = TreeCache.UnlockCounts[Required.SpellId] 
+                TreeCache.Unlocks[Required.SpellId][count] = Talent.NodeIndex
+
+                TreeCache.UnlockCounts[Required.SpellId]++
+
+                if (TreeCache.PrereqUnlocks[Prereq.TabId] == null)
+                    TreeCache.PrereqUnlocks[Prereq.TabId] = []
+
+                TreeCache.PrereqUnlocks[Prereq.TabId][Prereq.Talent] = 0
+
+                let offset = 0
+                if (Tab.TabType === 0)
+                    offset += 11
+
+                let PrevFrame = GridTalentTalents[Required.Row -1][Required.Col + offset].Frame
+                let ThisFrame = GridTalentTalents[Talent.Row -1][Talent.Col + offset].Frame
+                
+                let LineTexturePath = CONSTANTS.UI.CONNECTOR_DISABLED
+
+                if (IsNodeUnlocked(Prereq, TreeCache.Spells[Tab.TabId][Talent.NodeIndex]))
+                    LineTexturePath = CONSTANTS.UI.CONNECTOR
 
                 let StartPos = GetPositionXY(ThisFrame)
                 let EndPos = GetPositionXY(PrevFrame)
-                DrawNode(StartPos, EndPos, PrevFrame, Talent, Required)
+                DrawNode(StartPos, EndPos, PrevFrame, Talent, Required, LineTexturePath)
             }
         })
     }
 
     function CreateTooltip(Talent: TTLPTalent, NextSpellId: uint32, TFrame: WoWAPI.Frame) {
-        let Rank = TreeCache.Spells[Talent.TabId][Talent.NodeIndex]
-        
         FirstRankToolTip.SetOwner(TFrame, 'ANCHOR_RIGHT')
         SecondRankToolTip.SetOwner(FirstRankToolTip, 'ANCHOR_BOTTOM')
 
         FirstRankToolTip.SetHyperlink(`spell:${Talent.SpellId}`)
-
-        if (Talent.RankCost > 0 && Rank < Talent.NumRanks) {
-            FirstRankToolTip.AddLine(`Cost: ${Talent.RankCost}`, 1, 1, 1)
-            FirstRankToolTip.AddLine(`Required Level: ${Talent.ReqLevel}`, 1, 1, 1)
-        }
 
         if (NextSpellId) {
             SecondRankToolTip.AddLine(`Next Rank: ${NextSpellId}`, 1, 1, 1)
             SecondRankToolTip.SetBackdropColor(0, 0, 0, 0,)
             SecondRankToolTip.AddLine('')
             SecondRankToolTip.SetPoint('TOP', FirstRankToolTip, 'TOP', 0, -(FirstRankToolTip.GetHeight() + 25))
-            FirstRankToolTip.SetSize(FirstRankToolTip.GetWidth(), FirstRankToolTip.GetHeight() + SecondRankToolTip.GetHeight() + 30)
+            FirstRankToolTip.SetSize(FirstRankToolTip.GetWidth(), FirstRankToolTip.GetHeight())
         } else {
-            FirstRankToolTip.SetSize(FirstRankToolTip.GetWidth(), FirstRankToolTip.GetHeight() + 40)
+            FirstRankToolTip.SetSize(FirstRankToolTip.GetWidth(), FirstRankToolTip.GetHeight())
         }
     }
 
@@ -935,14 +947,6 @@ export function TalentTreeUI() {
                                         let CurRank = TreeCache.Spells[Tab.TabId][Talent.NodeIndex]
 
                                         TreeCache.PrereqUnlocks[Tab.TabId][Talent.SpellId] = CurRank
-                                        TreeCache.PrereqRev[Talent.SpellId] = []
-
-                                        if (Talent.PrereqCount) {
-                                            Talent.Prereqs.forEach((Prereq) => {
-                                                if (TreeCache.PrereqRev[Prereq.Talent] && Prereq.ReqRank <= TreeCache.PrereqUnlocks[Prereq.TabId][Prereq.Talent])
-                                                    TreeCache.PrereqRev[Prereq.Talent][Talent.SpellId] = true
-                                            })
-                                        }
 
                                         if (WasZero)
                                             TreeCache.Points[Tab.TabType] -= 1
@@ -1014,17 +1018,11 @@ export function TalentTreeUI() {
                     let Change = false
                     if (input === 'LeftButton' && FrameStatus.CanUpRank && Talent.NodeType < 2) {
                         if (SpellRank < nRanks) {
-                            TreeCache.Spells[Tab.TabId][Talent.NodeIndex] += 1
+                            TreeCache.Spells[Tab.TabId][Talent.NodeIndex] = SpellRank + 1
                             TreeCache.PointsSpent[Tab.TabId] += Talent.RankCost
 
                             TreeCache.PrereqUnlocks[Tab.TabId][Talent.SpellId] = TreeCache.Spells[Tab.TabId][Talent.NodeIndex]
-                            TreeCache.PrereqRev[Talent.SpellId] = []
-                            if (Talent.PrereqCount > 0) {
-                                Talent.Prereqs.forEach((Prereq) => {
-                                    if (TreeCache.PrereqRev[Prereq.Talent] && Prereq.ReqRank <= TreeCache.PrereqUnlocks[Prereq.TabId][Prereq.Talent])
-                                        TreeCache.PrereqRev[Prereq.Talent][Talent.SpellId] = true
-                                })
-                            }
+
                             TreeCache.Points[Tab.TabType] -= Talent.RankCost
                             Change = true
                         }
@@ -1039,12 +1037,6 @@ export function TalentTreeUI() {
 
                             TreeCache.PrereqUnlocks[Tab.TabId][Talent.SpellId] = TreeCache.Spells[Tab.TabId][Talent.NodeIndex]
 
-                            if (Talent.PrereqCount) {
-                                Talent.Prereqs.forEach((Prereq) => {
-                                    if (TreeCache.PrereqRev[Prereq.Talent] && TreeCache.Spells[Tab.TabId][Talent.NodeIndex] < 1)
-                                        TreeCache.PrereqRev[Prereq.Talent][Talent.SpellId] = null
-                                })
-                            }
                             TreeCache.Points[Tab.TabType] += Talent.RankCost
                             Change = true
                         }
@@ -1056,19 +1048,23 @@ export function TalentTreeUI() {
                 })
 
                 Frame.SetScript('OnUpdate', function() {
-                    let Allow = false
+                    let Allow = true
                     ShowTalentPointType(Tab.TabType, Tab.TabId)
 
                     if (Talent.NodeType < 2)
                         FrameData.RankText.SetText(TreeCache.Spells[Tab.TabId][Talent.NodeIndex])
 
-
-                    if (TreeCache.PrereqRev[Talent.SpellId]) {
-                        if (TreeCache.PrereqRev[Talent.SpellId].length)
-                            Allow = true
+                    if (TreeCache.Unlocks[Talent.SpellId]) {
+                        let RequiredBy : TSArray<number> = TreeCache.Unlocks[Talent.SpellId]
+                        RequiredBy.forEach((Val, i) => {
+                            console.log(Val, i)
+                            let Dependancy = TreeCache.Spells[Tab.TabId][Val]
+                            Allow &&= Dependancy < 1
+                            if (!Allow)
+                                console.log(`${Tab.TabId} ${Talent.SpellId} ${Val} ${Allow}`)
+                        })
                     }
-                    
-                    FrameStatus.CanDeRank = !Allow
+                    FrameStatus.CanDeRank = Allow
 
                     if (Talent.NodeType === 2) {
                         // TODO Add IsMouseOverFrame if ()
@@ -1132,21 +1128,21 @@ export function TalentTreeUI() {
                         FrameData.BorderTexture.SetVertexColor(1, 1, 0, 1)
 
                     if (Talent.PrereqCount > 0) {
+                        let Met = false
                         Talent.Prereqs.forEach((Prereq) => {
-                            if (TreeCache.PrereqUnlocks[Prereq.TabId]) {
+                            if (TreeCache.PrereqUnlocks[Prereq.TabId] && !Met) {
                                 let ReqUnlocked = TreeCache.PrereqUnlocks[Prereq.TabId][Prereq.Talent]
                                 if (ReqUnlocked) {
                                     if (ReqUnlocked >= Prereq.ReqRank)
-                                        FrameStatus.ReqsMet = true
+                                        Met = true
                                     else
-                                        FrameStatus.ReqsMet = false
+                                        Met = false
                                 } else {
-                                    FrameStatus.ReqsMet = false
+                                    Met = false
                                 }
-                            } else {
-                                FrameStatus.ReqsMet = false
                             }
                         })
+                        FrameStatus.ReqsMet = Met
                     } else {
                         FrameStatus.ReqsMet = true
                     }
@@ -1431,6 +1427,7 @@ export function TalentTreeUI() {
             let FrameStatus = FrameStatusLookup[Row][Col]
             if (FrameStatus && TreeCache.Spells[Talent.TabId][Talent.NodeIndex] > 0) {
                 TreeCache.Spells[Talent.TabId][Talent.NodeIndex] = 0
+                TreeCache.PrereqUnlocks[Talent.TabId][Talent.SpellId] = 0
 
                 FrameStatus.Update = true
                 FrameStatusLookup[Row][Col] = FrameStatus
@@ -1445,6 +1442,8 @@ export function TalentTreeUI() {
             let FrameStatus = FrameStatusLookup[Row][Col]
             if (FrameStatus && TreeCache.Spells[Talent.TabId][Talent.NodeIndex] > 0) {
                 TreeCache.Spells[Talent.TabId][Talent.NodeIndex] = 0
+                TreeCache.PrereqUnlocks[Talent.TabId][Talent.SpellId] = 0
+
                 FrameStatus.Update = true
                 FrameStatusLookup[Row][Col] = FrameStatus
             }
@@ -1462,11 +1461,18 @@ export function TalentTreeUI() {
         let ClassTab: TalentTreeLayout = TalentTree.ClassTab
         for (let i = 1; i < ClassTab.TalentsCount + 1; i++) {
             let Rank = TreeCache.Spells[ClassTab.TabId][i]
+            if (Rank == null) {
+                TreeCache.Spells[ClassTab.TabId][i] = 0
+                Rank = 0
+            }
             out += Util.alpha.charAt(Rank + 1)
         }
-
         for (let i = 1; i < SpecTab.TalentsCount + 1; i++) {
             let Rank = TreeCache.Spells[SpecTab.TabId][i]
+            if (Rank == null) {
+                TreeCache.Spells[SpecTab.TabId][i] = 0
+                Rank = 0
+            }
             out += Util.alpha.charAt(Rank + 1)
         }
 
@@ -1514,7 +1520,6 @@ export function TalentTreeUI() {
     })
     OnCustomPacket(ClientCallbackOperations.GET_TALENTS, pkt => {
         let Loadout = pkt.ReadString()
-        console.log(`Reading: ${Loadout}`)
         LoadTalentString(Loadout)
     })
 
@@ -1550,9 +1555,10 @@ export function AdjustFrameScale(frame: WoWAPI.Frame) {
 }
 
 let ValidTabs: TSArray<number> = [
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
-    16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
-    29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42,
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 
+    18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+
+    64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51
 ]
 
 export function SendCallbackToServer(op: ClientCallbackOperations, msg: string) {

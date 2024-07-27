@@ -135,9 +135,10 @@ export class DHTalent {
     NodeIndex: uint8
     NumberOfRanks: uint8
     PreReqType: uint8
+    Starter: uint8
 
     constructor(SpellId: uint32, TalentTabId: uint32, ColumnIndex: uint32, RowIndex: uint32, RankCost: uint8, TabPointReq: uint16, 
-        RequiredLevel: uint8, TalentType: uint8, NodeType: uint8, NodeIndex: uint8, NumberOfRanks: uint8, PrereqType: DHPrereqType) {
+        RequiredLevel: uint8, TalentType: uint8, NodeType: uint8, NodeIndex: uint8, NumberOfRanks: uint8, PrereqType: DHPrereqType, Starter: uint8) {
             this.SpellId = SpellId
             this.TalentTabId = TalentTabId
             this.RowIndex = RowIndex
@@ -150,6 +151,7 @@ export class DHTalent {
             this.NodeIndex = NodeIndex
             this.NumberOfRanks = NumberOfRanks
             this.PreReqType = PrereqType
+            this.Starter = Starter
     }
 
     Prereqs: TSArray<DHTalentPrereq> = CreateArray<DHTalentPrereq>([])
@@ -247,5 +249,5 @@ export class DHTreeMetaData {
     NodeLocation: TSDictionary<uint32, DHNodeMetaData> = CreateDictionary<uint32, DHNodeMetaData>({})
 }
 
-export const base64_char : string = "|ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+export const base64_char : string = "|ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 export const ACOUNT_WIDE_KEY = 0xfffffffe

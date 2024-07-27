@@ -487,12 +487,11 @@ export class DHCache {
         let fcp = this.GetSpecPoints(player, type, spec.Id)
         let amount = 0
         let level = player.GetLevel()
-        if (level >= 10)
-            level -= 9
+        if (level > 10)
+            level -= 10
 
         amount = Math.floor(level/2)
         let IsTalentPoint = type === DHPointType.TALENT && (level % 2) > 0
-        console.log(`Is Talent? ${IsTalentPoint}\n`)
         if (IsTalentPoint)
             amount += 1;
 

@@ -47,6 +47,7 @@ export class DHCommonMessage {
                 Talent.TabPointReq = talent.TabPointReq
                 Talent.PrereqType = talent.PreReqType
                 Talent.NodeType = talent.NodeType
+                Talent.Starter = talent.Starter
                 Talent.NodeIndex = talent.NodeIndex
 
                 Talent.NumRanks = talent.NumberOfRanks
@@ -57,6 +58,7 @@ export class DHCommonMessage {
                     Talent.Ranks.push(Rank)
                 })
 
+                Talent.PrereqCount = talent.Prereqs.length
                 talent.Prereqs.forEach((prereq) => {
                     let Prereq = new TTLPTalentPrereq()
                     Prereq.Talent = prereq.Talent
@@ -65,9 +67,12 @@ export class DHCommonMessage {
                     Talent.Prereqs.push(Prereq)
                 })
 
+                Talent.UnlearnsCount = talent.UnlearnSpells.length
                 talent.UnlearnSpells.forEach((spellId) => {
                     Talent.Unlearns.push(spellId)
                 })
+
+                Talent.ChoicesCount = talent.Choices.get_length()
                 talent.Choices.forEach((num, choice) => {
                     Talent.Choices.push(choice.SpellId)
                 })

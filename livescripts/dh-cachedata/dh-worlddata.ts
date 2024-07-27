@@ -148,13 +148,14 @@ class CustomTalents {
             let PreReqType = res.GetUInt8(8)
             let TabPointReq = res.GetUInt8(9)
             let NodeType = res.GetUInt8(10)
+            let Starter = res.GetUInt8(11)
 
             if (prevTab !== TalentTabId) {
                 prevTab = TalentTabId
                 i = 1
             }
             let NodeIndex = i++;
-            let talent = new DHTalent(SpellId, TalentTabId, ColumnIndex, RowIndex, RankCost, TabPointReq, RequiredLevel, TalentType, NodeType, NodeIndex, NumberOfRanks, PreReqType)
+            let talent = new DHTalent(SpellId, TalentTabId, ColumnIndex, RowIndex, RankCost, TabPointReq, RequiredLevel, TalentType, NodeType, NodeIndex, NumberOfRanks, PreReqType, Starter)
             
             if (wTalentTrees.contains(talent.TalentTabId)) {
                 let tab = wTalentTrees[talent.TalentTabId]
@@ -196,14 +197,13 @@ class CustomTalentPrereqs {
 
         const res = QueryWorld('SELECT * FROM `forge_talent_prereq`')
         while (res.GetRow()) {
-            let Id = res.GetUInt32(0)
-            let ReqSpellId = res.GetUInt32(1)
-            let ReqSpellTab = res.GetUInt32(2)
-            let Talent = res.GetUInt32(3)
-            let TalentTabId = res.GetUInt32(4)
-            let RequiredRank = res.GetUInt32(5)
+            let ReqSpellId = res.GetUInt32(0)
+            let ReqSpellTab = res.GetUInt32(1)
+            let Talent = res.GetUInt32(2)
+            let TalentTabId = res.GetUInt32(3)
+            let RequiredRank = res.GetUInt32(4)
 
-            let prereq = new DHTalentPrereq(TalentTabId, Talent, Id, RequiredRank)
+            let prereq = new DHTalentPrereq(TalentTabId, Talent, count, RequiredRank)
             if (wTalentTrees.contains(ReqSpellTab)) {
                 if (wTalentTrees[ReqSpellTab].Talents.contains(ReqSpellId)) {
                     wTalentTrees[ReqSpellTab].Talents[ReqSpellId].Prereqs.push(prereq)
