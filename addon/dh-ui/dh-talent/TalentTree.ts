@@ -1500,25 +1500,24 @@ export function TalentTreeUI() {
                 ClassTab.Talents.forEach((Talent) => {
                     TreeCache.Spells[Talent.TabId][Talent.NodeIndex] = 0
                     let Rank = Util.alpha.indexOf(ClassString[Talent.NodeIndex-1]) - 1
-                    let Cost = Talent.RankCost
-                    TreeCache.Points[7] -= Rank * Cost
-                    TreeCache.PointsSpent[ClassTab.TabId] += Rank * Cost
+                    let Cost = Talent.RankCost * Rank
+                    if (Talent.NodeType == 2 && Rank > 0)
+                        Cost = Talent.RankCost
+                    TreeCache.Points[7] -= Cost
+                    TreeCache.PointsSpent[ClassTab.TabId] += Cost
                     TreeCache.Spells[Talent.TabId][Talent.NodeIndex] = Rank
                     TreeCache.PrereqUnlocks[Talent.TabId][Talent.SpellId] = Rank
-
-                    if (Talent.NodeType == 2) {
-                        let Frame : WoWAPI.Button = GridTalentTalents[Talent.Row][Talent.Col].Frame 
-                        Frame.SetAlpha(1)
-                    }
                 })
 
                 let SpecString = Talents.substring(3 + ClassTreeLen)
                 SpecTab.Talents.forEach((Talent) => {
                     TreeCache.Spells[Talent.TabId][Talent.NodeIndex] = 0
                     let Rank = Util.alpha.indexOf(SpecString[Talent.NodeIndex-1]) - 1
-                    let Cost = Talent.RankCost
-                    TreeCache.Points[Type] -= Rank * Cost
-                    TreeCache.PointsSpent[SpecTab.TabId] += Rank * Cost
+                    let Cost = Rank * Talent.RankCost
+                    if (Talent.NodeType == 2 && Rank > 0)
+                        Cost = Talent.RankCost
+                    TreeCache.Points[Type] -= Cost
+                    TreeCache.PointsSpent[SpecTab.TabId] += Cost
                     TreeCache.Spells[Talent.TabId][Talent.NodeIndex] = Rank
                     TreeCache.PrereqUnlocks[Talent.TabId][Talent.SpellId] = Rank
                 })
