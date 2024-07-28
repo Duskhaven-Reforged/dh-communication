@@ -1,7 +1,7 @@
 import { ClientCallbackOperations, SimpleMessagePayload } from '../../shared/Messages';
 import { ACOUNT_WIDE_KEY, DHCharacterPoint, DHCharacterTalent, DHNodeType, DHPlayerLoadout, DHPlayerSpec, DHPointType, DHTalentTab, DHTreeMetaData, TALENT_POINT_TYPES, base64_char } from '../classes';
 import { LoadCharacterData, cActiveLoadouts, cCharPoints, cLoadouts, cSpecs } from './dh-chardata';
-import { LoadWorldData, wClassNodeToSpell, wRaceClassTabMap, wPointTypeToTabs, wSpecNodeToSpell, wSpellToTab, wTabToSpell, wTalentTrees, wChoiceNodesRev, wTreeMetaData, wClassNodeToClassTree, wChoiceNodes } from './dh-worlddata';
+import { LoadWorldData, wClassNodeToSpell, wRaceClassTabMap, wPointTypeToTabs, wSpecNodeToSpell, wSpellToTab, wTabToSpell, wTalentTrees, wChoiceNodesRev, wTreeMetaData, wClassNodeToClassTree, wChoiceNodes, wDefaultLoadoutStrings } from './dh-worlddata';
 
 export class DHCache {
     
@@ -57,19 +57,7 @@ export class DHCache {
         let tabs = this.TryGetCustomTalentTabs(player, DHPointType.TALENT)
         if (tabs.length) {
             tabs.forEach((tab) => {
-                let loadout = 'A'
-                loadout += base64_char.charAt(tab.Id)
-                loadout += base64_char.charAt(player.GetClass())
-
-                let classMap = wClassNodeToSpell[player.GetClassMask()]
-                classMap.forEach(() => {
-                    loadout += base64_char.charAt(1)
-                })
-
-                let specMap = wSpecNodeToSpell[tab.Id]
-                specMap.forEach(() => {
-                    loadout += base64_char.charAt(1)
-                })
+                let loadout = wDefaultLoadoutStrings[player.GetClass()][tab.Id]
 
                 let owner = player.GetGUID().GetCounter()
                 let plo = new DHPlayerLoadout(1, tab.Id, 'Default', loadout, true)
@@ -100,10 +88,11 @@ export class DHCache {
                 if (Player.GetClass() === PlayerClass && PlayerSpec === Spec.SpecTabId) {
                     let Tab = this.TryGetTalentTab(Player, PlayerSpec)
                     if (!Tab.IsNull()) {
+                        console.log(`${wDefaultLoadoutStrings[PlayerClass][PlayerSpec]} === ${LoadoutString}`)
                         let Ranks = LoadoutString.substring(3)
                         let ClassMap = wClassNodeToSpell[Player.GetClassMask()]
                         let SpecMap = wSpecNodeToSpell[PlayerSpec]
-                        let TreeLen = ClassMap.get_length() + SpecMap.get_length()
+                        let TreeLen = wDefaultLoadoutStrings[PlayerClass][PlayerSpec].length - 3
                         if (TreeLen === Ranks.length) {
                             let TabId = 0
                             let SpellId = 0
@@ -236,9 +225,11 @@ export class DHCache {
                                                 if (Talent.RequiredLevel > Player.GetLevel() || Node.PointReq >> Spend[TabId])
                                                     return false
 
-                                                Spend[TabId] += ChoiceNode ? Talent.RankCost : Rank - 1 * Talent.RankCost
-                                                if (Spend[Tab.Id] > Points.Max)
-                                                    return false;
+                                                if (Talent.Starter < 1) {
+                                                    Spend[TabId] += ChoiceNode ? Talent.RankCost : Rank - 1 * Talent.RankCost
+                                                    if (Spend[Tab.Id] > Points.Max)
+                                                        return false;
+                                                }
 
                                                 Node.Unlocks.forEach((Unlock) => {
                                                     this.Unlocks.push(Unlock.SpellId)
@@ -265,7 +256,6 @@ export class DHCache {
         const ACTIVATE_SPEC_SPELL = 63645
         let ERROR = new SimpleMessagePayload(ClientCallbackOperations.ACTIVATE_SPEC_ERROR, 'Spec Activation Error: ')
         if (!Player.IsInCombat() && !Player.IsDead()) {
-            let Info = GetSpellInfo(ACTIVATE_SPEC_SPELL)
             Player.SetUInt(`SpecActivation`, Spec)
             Player.CastSpell(Player, ACTIVATE_SPEC_SPELL)
         } else {

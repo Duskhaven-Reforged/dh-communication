@@ -2,7 +2,7 @@ import { ReloadArmsWarrTree } from "../TalentTrees/Warrior/Arms"
 import { ReloadFuryWarrTree } from "../TalentTrees/Warrior/Fury"
 import { ReloadProtWarrTree } from "../TalentTrees/Warrior/Protection"
 import { ReloadWarrTree } from "../TalentTrees/Warrior/warrior"
-import { DHNodeMetaData, DHPointType, DHTalent, DHTalentChoice, DHTalentPrereq, DHTalentTab, DHTreeMetaData } from "../classes"
+import { DHNodeMetaData, DHPointType, DHTalent, DHTalentChoice, DHTalentPrereq, DHTalentTab, DHTreeMetaData, base64_char } from "../classes"
 
 /* Cache tables */
 export let wTreeMetaData: TSDictionary<uint32, DHTreeMetaData> = CreateDictionary<uint32, DHTreeMetaData>({})
@@ -20,6 +20,7 @@ export let wChoiceNodesRev: TSDictionary<uint32, uint32> = CreateDictionary<uint
 export let wChoiceNodeIndexLookup: TSDictionary<uint8, uint32> = CreateDictionary<uint8, uint32>({})
 export let wSpellToTab: TSDictionary<uint32, uint32> = CreateDictionary<uint32, uint32>({})
 export let wTabToSpell: TSDictionary<uint32, uint32> = CreateDictionary<uint32, uint32>({})
+export let wDefaultLoadoutStrings: TSDictionary<uint32, TSDictionary<uint32, string>> = CreateDictionary<uint32, TSDictionary<uint32, string>>({})
 
 export function LoadWorldData() {
     console.log(`\tLoading talent trees...\n`) 
@@ -36,6 +37,9 @@ export function LoadWorldData() {
 
     console.log("\tLoading talents into trees...\n")
     console.log(new CustomTalents().Load())
+
+    console.log("\tLoading default talent strings...\n")
+    console.log(new DefaultTalentStrings().Load())
 
     console.log("\tLoading talent prereqs...\n")
     console.log(new CustomTalentPrereqs().Load())
@@ -204,6 +208,49 @@ class CustomTalents {
             }
         }
         return `\t\tLoaded ${count} entries.\n`
+    }
+}
+
+class DefaultTalentStrings {
+    Load () : string {
+        let count = 0
+
+        let ClassTabs: TSDictionary<uint32, uint32> = CreateDictionary<uint32, uint32>({
+            14:64, 13:63, 12:62, 11:61, 10:60, 9:59, 8:58, 7:57, 6:56, 5:55, 4:54, 3:53, 2:52, 1:51
+        })
+
+        let Specs: TSDictionary<uint32, TSArray<uint32>> = CreateDictionary<uint32, TSArray<uint32>>({
+            51 : CreateArray<uint32>([1, 2, 3]),  52 : CreateArray<uint32>([4, 5, 6]),  53 : CreateArray<uint32>([7, 8, 9]),  54 : CreateArray<uint32>([10, 11, 12]), 
+            55 : CreateArray<uint32>([13, 14, 15]), 56 : CreateArray<uint32>([16, 17, 18]),  57 : CreateArray<uint32>([19, 20, 21, 32]),  58 : CreateArray<uint32>([22, 23, 24]), 
+            59 : CreateArray<uint32>([25, 26, 27]), 60 : CreateArray<uint32>([]),61 : CreateArray<uint32>([28, 29, 30, 31]), 62 : CreateArray<uint32>([]), 
+            63 : CreateArray<uint32>([]), 64 : CreateArray<uint32>([])
+        })
+
+        ClassTabs.forEach((ClassId, ClassTabId) => {
+            if (Specs.contains(ClassTabId)) {
+                let Tabs = Specs[ClassTabId]
+                let ClassTab = wTalentTrees[ClassTabId]
+                let ClassMap = wClassNodeToSpell[ClassTab.Classmask]
+                Tabs.forEach((SpecId) => {
+                    let Default = 'A' + base64_char.charAt(SpecId) + base64_char.charAt(ClassId)
+                    ClassMap.forEach((K, V) => {
+                        let Talent = ClassTab.Talents[V]
+                        Default += Talent.Starter ? base64_char.charAt(Talent.NumberOfRanks + 1) : base64_char.charAt(1)
+                    })
+                    let SpecTab = wTalentTrees[SpecId]
+                    let SpecMap = wSpecNodeToSpell[SpecId]
+                    console.log(`${ClassMap} + ${SpecMap}\n`)
+                    SpecMap.forEach((K, V) => {
+                        let Talent = SpecTab.Talents[V]
+                        Default += Talent.Starter ? base64_char.charAt(Talent.NumberOfRanks + 1) : base64_char.charAt(1)
+                    })
+
+                    wDefaultLoadoutStrings[ClassId][SpecId] = Default
+                })
+            }
+        })
+
+        return `\t\t Loaded ${count} entries.\n`
     }
 }
 

@@ -4,14 +4,18 @@ import { wClassLevelSpells, wTalentTrees } from "./dh-cachedata/dh-worlddata";
 import { DHCommonMessage } from "./dh-message/dh-cmsg";
 import { RouteTopics } from "./dh-topic/TopicRouter";
 
-export const mDHDMsg = new DHCommonMessage()
+export let mDHDMsg : DHCommonMessage
 
 export function Main(events: TSEvents) {
+    mDHDMsg = new DHCommonMessage()
     RouteTopics(events)
 
     events.Player.OnLogin((player, first) => {
         LearnSpellsForLevel(player)
-
+        let spec = mDHDMsg.cache.TryGetCharacterActiveSpec(player)
+        if (!spec.IsNull()) {
+            player.SetUInt(`Spec`, spec.SpecTabId)
+        }
         //todo load actions and maybe account bonuses
         // maybe unlearn flagged too
     })
@@ -59,7 +63,6 @@ export function Main(events: TSEvents) {
                     }
                 }
             }
-            //mDHDMsg.SendTalents(player)
             mDHDMsg.cache.UpdateCharSpec(player, spec)
             mDHDMsg.SendSpecInfo(player)
             LearnSpellsForLevel(player)
@@ -86,6 +89,7 @@ export function Main(events: TSEvents) {
                     mDHDMsg.cache.ForgetTalents(Player, Spec, DHPointType.TALENT)
 
                     Spec.SpecTabId = SpecToActivate
+                    Player.SetUInt(`Spec`, Spec.SpecTabId)
                     QueryCharactersAsync(`update forge_character_specs set charspec = ${SpecToActivate} where guid = ${Player.GetGUID().GetCounter()}`)
                     mDHDMsg.SendSpecInfo(Player)
                     let ClientCallback = new SimpleMessagePayload(ClientCallbackOperations.ACTIVATE_CLASS_SPEC, 'Finished Setting Spec')

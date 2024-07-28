@@ -25,7 +25,8 @@ export function ReloadWarrTree() {
     SetChoiceNode(Talent, TAB, 5, 3, 0, true, CreateArray<uint32>([Talent, GetID(`Spell`, 'dh-spells', 'warr-gen-blood-craze')]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, 'warr-gen-rallying-cry')]: 1}), EmptySpellArray)
     Talent = GetID(`Spell`, 'dh-spells', 'warr-gen-blood-and-thunder')
     SetTalentNode(Talent, TAB, 6, 3, 0, true, false, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, 'warr-gen-heroic-entrance')]: 1}), EmptySpellArray, EmptySpellArray)
-    // TODO add charge bonus
+    Talent = GetID(`Spell`, 'dh-spells', 'warr-gen-chargepositive')
+    SetTalentNode(Talent, TAB, 8, 3, 0, true, false, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, 'warr-gen-blitz')]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, 'dh-spells', 'warr-gen-quick-and-heavy')
     SetTalentNode(Talent, TAB, 3, 4, 0, true, false, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `warr-gen-war-machine`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, 'dh-spells', 'warr-gen-svens-stormbolt')
@@ -33,6 +34,6 @@ export function ReloadWarrTree() {
     Talent = GetID(`Spell`, 'dh-spells', 'warr-gen-bloodletting')
     SetTalentNode(Talent, TAB, 6, 4, 0, true, false, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `warr-gen-blood-and-thunder`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, 'dh-spells', 'warr-gen-the-wall')
-    SetTalentNode(Talent, TAB, 7, 4, 0, true, false, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `warr-gen-blood-and-thunder`)]: 1, [GetID(`Spell`, `dh-spells`, `warr-gen-blitz`)]: 1}), EmptySpellArray, EmptySpellArray)
+    SetTalentNode(Talent, TAB, 7, 4, 0, true, false, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `warr-gen-blood-and-thunder`)]: 1, [GetID(`Spell`, `dh-spells`, `warr-gen-blitz`)]: 1, [GetID(`Spell`,  'dh-spells', 'warr-gen-chargepositive')]: 1}), EmptySpellArray, EmptySpellArray)
     
 }

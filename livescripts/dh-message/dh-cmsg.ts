@@ -4,6 +4,7 @@ import { DHCache } from '../dh-cachedata/dh-cache';
 import { cActiveLoadouts, cLoadouts } from '../dh-cachedata/dh-chardata';
 import { GetTalentTreeLayoutPayload, TTLPTalent, TTLPTalentPrereq, TTLPTalentRank, TalentTreeLayout, TalentTreeLayoutPayload } from '../../shared/Payloads/TalentTreeLayoutPayload';
 import { CPSSpec, CSPPointSpend, CSPPoints, CharacterSpecsPayload, GetCharacterSpecsPayload } from '../../shared/Payloads/GetCharacterSpecsPayload';
+import { wDefaultLoadoutStrings } from '../dh-cachedata/dh-worlddata';
 
 export class DHCommonMessage {
     cache: DHCache
@@ -115,6 +116,13 @@ export class DHCommonMessage {
         if (spec) {
             let Loadout = cActiveLoadouts[player.GetGUID().GetCounter()][spec.SpecTabId]
             let Output = Loadout.TalentString
+            let TestString = wDefaultLoadoutStrings[player.GetClass()][spec.SpecTabId]
+
+            if (Output.length != TestString.length) {
+                this.cache.ForgetTalents(player, spec, DHPointType.TALENT)
+                Output = TestString
+            }
+
             let pkt = new SimpleMessagePayload(ClientCallbackOperations.GET_TALENTS, Output);
             pkt.write().SendToPlayer(player)
         }

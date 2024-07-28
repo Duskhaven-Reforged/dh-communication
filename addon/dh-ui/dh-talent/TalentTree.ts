@@ -992,37 +992,39 @@ export function TalentTreeUI() {
                     FrameData.RankText.Hide()
 
                 Frame.SetScript('OnMouseDown', function(self, input) {
-                    let SpellRank = TreeCache.Spells[Tab.TabId][Talent.NodeIndex]
-                    let Change = false
+                    if (Talent.Starter < 1) {
+                        let SpellRank = TreeCache.Spells[Tab.TabId][Talent.NodeIndex]
+                        let Change = false
 
-                    if (input === 'LeftButton' && FrameStatus.CanUpRank && Talent.NodeType < 2) {
-                        if (SpellRank < nRanks) {
-                            TreeCache.Spells[Tab.TabId][Talent.NodeIndex] = SpellRank + 1
-                            TreeCache.PointsSpent[Tab.TabId] += Talent.RankCost
+                        if (input === 'LeftButton' && FrameStatus.CanUpRank && Talent.NodeType < 2) {
+                            if (SpellRank < nRanks) {
+                                TreeCache.Spells[Tab.TabId][Talent.NodeIndex] = SpellRank + 1
+                                TreeCache.PointsSpent[Tab.TabId] += Talent.RankCost
 
-                            TreeCache.PrereqUnlocks[Tab.TabId][Talent.SpellId] = TreeCache.Spells[Tab.TabId][Talent.NodeIndex]
+                                TreeCache.PrereqUnlocks[Tab.TabId][Talent.SpellId] = TreeCache.Spells[Tab.TabId][Talent.NodeIndex]
 
-                            TreeCache.Points[Tab.TabType] -= Talent.RankCost
-                            Change = true
-                        }
-                    } else if (input !== 'LeftButton' && FrameStatus.CanDeRank) {
-                        if (TreeCache.Spells[Tab.TabId][Talent.NodeIndex] > 0) {
-                            if (Talent.NodeType === 2) {
-                                TreeCache.Spells[Tab.TabId][Talent.NodeIndex] = 0
-                            } else {
-                                TreeCache.Spells[Tab.TabId][Talent.NodeIndex] = SpellRank - 1
+                                TreeCache.Points[Tab.TabType] -= Talent.RankCost
+                                Change = true
                             }
-                            TreeCache.PointsSpent[Tab.TabId] -= Talent.RankCost
+                        } else if (input !== 'LeftButton' && FrameStatus.CanDeRank) {
+                            if (TreeCache.Spells[Tab.TabId][Talent.NodeIndex] > 0) {
+                                if (Talent.NodeType === 2) {
+                                    TreeCache.Spells[Tab.TabId][Talent.NodeIndex] = 0
+                                } else {
+                                    TreeCache.Spells[Tab.TabId][Talent.NodeIndex] = SpellRank - 1
+                                }
+                                TreeCache.PointsSpent[Tab.TabId] -= Talent.RankCost
 
-                            TreeCache.PrereqUnlocks[Tab.TabId][Talent.SpellId] = TreeCache.Spells[Tab.TabId][Talent.NodeIndex]
+                                TreeCache.PrereqUnlocks[Tab.TabId][Talent.SpellId] = TreeCache.Spells[Tab.TabId][Talent.NodeIndex]
 
-                            TreeCache.Points[Tab.TabType] += Talent.RankCost
-                            Change = true
+                                TreeCache.Points[Tab.TabType] += Talent.RankCost
+                                Change = true
+                            }
                         }
-                    }
-                    if (Change) {
-                        FrameStatus.Update = true
-                        FrameStatusLookup[Row][Col] = FrameStatus
+                        if (Change) {
+                            FrameStatus.Update = true
+                            FrameStatusLookup[Row][Col] = FrameStatus
+                        }
                     }
                 })
 
@@ -1501,10 +1503,12 @@ export function TalentTreeUI() {
                     TreeCache.Spells[Talent.TabId][Talent.NodeIndex] = 0
                     let Rank = Util.alpha.indexOf(ClassString[Talent.NodeIndex-1]) - 1
                     let Cost = Talent.RankCost * Rank
-                    if (Talent.NodeType == 2 && Rank > 0)
-                        Cost = Talent.RankCost
-                    TreeCache.Points[7] -= Cost
-                    TreeCache.PointsSpent[ClassTab.TabId] += Cost
+                    if (Talent.Starter < 1) {
+                        if (Talent.NodeType == 2 && Rank > 0)
+                            Cost = Talent.RankCost
+                        TreeCache.Points[7] -= Cost
+                        TreeCache.PointsSpent[ClassTab.TabId] += Cost
+                    }
                     TreeCache.Spells[Talent.TabId][Talent.NodeIndex] = Rank
                     TreeCache.PrereqUnlocks[Talent.TabId][Talent.SpellId] = Rank
                 })
@@ -1514,10 +1518,12 @@ export function TalentTreeUI() {
                     TreeCache.Spells[Talent.TabId][Talent.NodeIndex] = 0
                     let Rank = Util.alpha.indexOf(SpecString[Talent.NodeIndex-1]) - 1
                     let Cost = Rank * Talent.RankCost
-                    if (Talent.NodeType == 2 && Rank > 0)
-                        Cost = Talent.RankCost
-                    TreeCache.Points[Type] -= Cost
-                    TreeCache.PointsSpent[SpecTab.TabId] += Cost
+                    if (Talent.Starter < 1) {
+                        if (Talent.NodeType == 2 && Rank > 0)
+                            Cost = Talent.RankCost
+                        TreeCache.Points[Type] -= Cost
+                        TreeCache.PointsSpent[SpecTab.TabId] += Cost
+                    }
                     TreeCache.Spells[Talent.TabId][Talent.NodeIndex] = Rank
                     TreeCache.PrereqUnlocks[Talent.TabId][Talent.SpellId] = Rank
                 })
@@ -1536,30 +1542,34 @@ export function TalentTreeUI() {
         TreeCache.PointsSpent[SpecTab.TabId] = 0
         TreeCache.Points[0] = TalentTree.MaxPoints[0]
         SpecTab.Talents.forEach((Talent: TTLPTalent) => {
-            let Row = Talent.Row - 1
-            let Col = Talent.Col + 11
-            let FrameStatus = FrameStatusLookup[Row][Col]
-            if (FrameStatus && TreeCache.Spells[Talent.TabId][Talent.NodeIndex] > 0) {
-                TreeCache.Spells[Talent.TabId][Talent.NodeIndex] = 0
-                TreeCache.PrereqUnlocks[Talent.TabId][Talent.SpellId] = 0
+            if (Talent.Starter < 1) {
+                let Row = Talent.Row - 1
+                let Col = Talent.Col + 11
+                let FrameStatus = FrameStatusLookup[Row][Col]
+                if (FrameStatus && TreeCache.Spells[Talent.TabId][Talent.NodeIndex] > 0) {
+                    TreeCache.Spells[Talent.TabId][Talent.NodeIndex] = 0
+                    TreeCache.PrereqUnlocks[Talent.TabId][Talent.SpellId] = 0
 
-                FrameStatus.Update = true
-                FrameStatusLookup[Row][Col] = FrameStatus
+                    FrameStatus.Update = true
+                    FrameStatusLookup[Row][Col] = FrameStatus
+                }
             }
         })
 
         TreeCache.PointsSpent[ClassTab.TabId] = 0
         TreeCache.Points[7] = TalentTree.MaxPoints[7]
         ClassTab.Talents.forEach((Talent) => {
-            let Row = Talent.Row - 1
-            let Col = Talent.Col
-            let FrameStatus = FrameStatusLookup[Row][Col]
-            if (FrameStatus && TreeCache.Spells[Talent.TabId][Talent.NodeIndex] > 0) {
-                TreeCache.Spells[Talent.TabId][Talent.NodeIndex] = 0
-                TreeCache.PrereqUnlocks[Talent.TabId][Talent.SpellId] = 0
+            if (Talent.Starter < 1) {
+                let Row = Talent.Row - 1
+                let Col = Talent.Col
+                let FrameStatus = FrameStatusLookup[Row][Col]
+                if (FrameStatus && TreeCache.Spells[Talent.TabId][Talent.NodeIndex] > 0) {
+                    TreeCache.Spells[Talent.TabId][Talent.NodeIndex] = 0
+                    TreeCache.PrereqUnlocks[Talent.TabId][Talent.SpellId] = 0
 
-                FrameStatus.Update = true
-                FrameStatusLookup[Row][Col] = FrameStatus
+                    FrameStatus.Update = true
+                    FrameStatusLookup[Row][Col] = FrameStatus
+                }
             }
         })
         ClassSpecWindowLockout.Hide()
