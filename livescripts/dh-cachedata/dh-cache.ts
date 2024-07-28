@@ -165,13 +165,13 @@ export class DHCache {
                                     Player.RemoveSpell(UnlearnSpellId, false, false)
                                 })
 
-                                let RankedSpell = TTab.Talents[Talent.SpellId].Ranks[Talent.CurrentRank]
                                 if (!Player.HasSpell(Talent.SpellId)) {
                                     if (ChoiceNode) {
                                         let Choice = wChoiceNodes[Talent.SpellId][Talent.CurrentRank-1]
                                         Player.LearnSpell(Choice)
                                         Spec.ChoiceNodesChosen[Talent.SpellId] = Choice
                                     } else {
+                                        let RankedSpell = TTab.Talents[Talent.SpellId].Ranks[Talent.CurrentRank]
                                         Player.LearnSpell(RankedSpell)
                                     }
 

@@ -36,46 +36,48 @@ export class DHCommonMessage {
 
             Layout.TalentsCount = tab.Talents.get_length()
             tab.Talents.forEach((spell, talent) => {
-                let Talent = new TTLPTalent()
-                Talent.TabId = tab.Id
-                Talent.SpellId = talent.SpellId
-                Talent.Col = talent.ColumnIndex
-                Talent.Row = talent.RowIndex
-                Talent.RankCost = talent.RankCost
-                Talent.ReqLevel = talent.RequiredLevel
-                Talent.TabPointReq = talent.TabPointReq
-                Talent.PrereqType = talent.PreReqType
-                Talent.NodeType = talent.NodeType
-                Talent.Starter = talent.Starter
-                Talent.NodeIndex = talent.NodeIndex
+                if (talent.SpellId > 0) {
+                    let Talent = new TTLPTalent()
+                    Talent.TabId = tab.Id
+                    Talent.SpellId = talent.SpellId
+                    Talent.Col = talent.ColumnIndex
+                    Talent.Row = talent.RowIndex
+                    Talent.RankCost = talent.RankCost
+                    Talent.ReqLevel = talent.RequiredLevel
+                    Talent.TabPointReq = talent.TabPointReq
+                    Talent.PrereqType = talent.PreReqType
+                    Talent.NodeType = talent.NodeType
+                    Talent.Starter = talent.Starter
+                    Talent.NodeIndex = talent.NodeIndex
 
-                Talent.NumRanks = talent.NumberOfRanks
-                talent.Ranks.forEach((rank, spellId) => {
-                    let Rank = new TTLPTalentRank()
-                    Rank.Rank = rank
-                    Rank.Spell = spellId
-                    Talent.Ranks.push(Rank)
-                })
+                    Talent.NumRanks = talent.NumberOfRanks
+                    talent.Ranks.forEach((rank, spellId) => {
+                        let Rank = new TTLPTalentRank()
+                        Rank.Rank = rank
+                        Rank.Spell = spellId
+                        Talent.Ranks.push(Rank)
+                    })
 
-                Talent.PrereqCount = talent.Prereqs.length
-                talent.Prereqs.forEach((prereq) => {
-                    let Prereq = new TTLPTalentPrereq()
-                    Prereq.Talent = prereq.Talent
-                    Prereq.TabId = prereq.TabId
-                    Prereq.ReqRank = prereq.ReqRank
-                    Talent.Prereqs.push(Prereq)
-                })
+                    Talent.PrereqCount = talent.Prereqs.length
+                    talent.Prereqs.forEach((prereq) => {
+                        let Prereq = new TTLPTalentPrereq()
+                        Prereq.Talent = prereq.Talent
+                        Prereq.TabId = prereq.TabId
+                        Prereq.ReqRank = prereq.ReqRank
+                        Talent.Prereqs.push(Prereq)
+                    })
 
-                Talent.UnlearnsCount = talent.UnlearnSpells.length
-                talent.UnlearnSpells.forEach((spellId) => {
-                    Talent.Unlearns.push(spellId)
-                })
+                    Talent.UnlearnsCount = talent.UnlearnSpells.length
+                    talent.UnlearnSpells.forEach((spellId) => {
+                        Talent.Unlearns.push(spellId)
+                    })
 
-                Talent.ChoicesCount = talent.Choices.length
-                talent.Choices.forEach((choice) => {
-                    Talent.Choices.push(choice)
-                })
-                Layout.Talents.push(Talent)
+                    Talent.ChoicesCount = talent.Choices.length
+                    talent.Choices.forEach((choice) => {
+                        Talent.Choices.push(choice)
+                    })
+                    Layout.Talents.push(Talent)
+                }
             })
             out.Tabs.push(Layout)
         })
