@@ -72,7 +72,6 @@ export class DHCommonMessage {
                 })
 
                 Talent.ChoicesCount = talent.Choices.length
-                console.log(`${Talent.SpellId} : ${Talent.ChoicesCount}\n`)
                 talent.Choices.forEach((choice) => {
                     Talent.Choices.push(choice)
                 })
