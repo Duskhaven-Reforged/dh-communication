@@ -2,7 +2,7 @@ import { EmptyPrereqs, EmptySpellArray, SetChoiceNode, SetSpecAutolearn, SetTale
 
 export function ReloadArmsWarrTree() {
     let TAB = 1
-    let CLASS = 1
+    let CLASS = Class.WARRIOR
 
     QueryWorld(`delete from character_spec_autolearn where \`class\` = ${CLASS} and \`spec\` = ${TAB}`)
     SetSpecAutolearn(CLASS, TAB, 16, GetID(`Spell`, 'dh-spells', 'warr-gen-traumatize'))
