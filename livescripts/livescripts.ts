@@ -103,10 +103,6 @@ export function Main(events: TSEvents) {
         }
 
     })
-
-    events.Spell.OnLearn((spell, player, active, disables, superceded, from_skill) => {
-        // learn extra spells
-    })
 }
 
 export function SetAllSkillsToLevel(Player: TSPlayer) {
