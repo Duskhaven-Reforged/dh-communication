@@ -9,8 +9,6 @@ export let cLoadouts: TSDictionary<uint64 /*owner*/, TSDictionary<uint32/*tab*/,
 export let cActiveLoadouts: TSDictionary<uint64, TSDictionary<uint8, DHPlayerLoadout>> = CreateDictionary<uint64, TSDictionary<uint8, DHPlayerLoadout>>({})
 
 export function LoadCharacterData() {
-    console.log("\tLoading character actionbars...\n")
-    console.log(new CharacterActions().Load())
 
     console.log("\tLoading character choice node choices...\n")
     console.log(new CharacterChoiceNodeChoices().Load())
@@ -45,7 +43,7 @@ export class CharacterSpecAction {
 class CharacterActions {
     Load() : string {
         let count = 0
-        const res = QueryCharacters('select * from `forge_character_action`')
+        const res = QueryCharacters('select * from `character_actions`')
         while (res.GetRow()) {
             let owner = res.GetUInt64(0)
             let spec = res.GetUInt8(1)
@@ -66,7 +64,7 @@ class CharacterChoiceNodeChoices {
     Load() : string {
         let count = 0
 
-        const res = QueryCharacters('select * from `forge_character_node_choices`')
+        const res = QueryCharacters('select * from `character_node_choices`')
         while (res.GetRow()) {
             let owner = res.GetUInt64(0)
             let spec = res.GetUInt8(1)
@@ -91,7 +89,7 @@ class CharacterChoiceNodeChoices {
 class CharacterPoints {
     Load() : string {
         let count = 0
-        const res = QueryCharacters('select * from `forge_character_points`')
+        const res = QueryCharacters('select * from `character_points`')
         while (res.GetRow()) {
             let owner = res.GetUInt64(0)  
             let type = res.GetUInt16(1)
@@ -116,7 +114,7 @@ class CharacterSpecs {
     Load() : string {
         let count = 0
 
-        const res = QueryCharacters('select * from `forge_character_specs`')
+        const res = QueryCharacters('select * from `character_specs`')
         while (res.GetRow()) {
             let owner = res.GetUInt64(1)
             let id = res.GetUInt32(0)
@@ -142,7 +140,7 @@ class CharacterTalentLoadouts {
     Load() : string {
         let count = 0
 
-        const res = QueryCharacters('select * from `forge_character_talent_loadouts`')
+        const res = QueryCharacters('select * from `character_talent_loadouts`')
         while (res.GetRow()) {
             let owner = res.GetUInt64(0)  
             let id = res.GetUInt8(1)
@@ -170,7 +168,7 @@ class CharacterTalents {
     Load() : string {
         let count = 0
 
-        const res = QueryCharacters('select * from `forge_character_talents`')
+        const res = QueryCharacters('select * from `character_talents`')
         while (res.GetRow()) {
             let owner = res.GetUInt64(0)  
             let spec = res.GetUInt32(1)
@@ -178,7 +176,7 @@ class CharacterTalents {
             let tab = res.GetUInt32(3)
             let currentRank = res.GetUInt8(4)
 
-            let talent = new DHCharacterTalent(spell, tab, currentRank)
+            let talent = new DHCharacterTalent(spell, tab, currentRank, false)
             if (wTalentTrees.contains(tab)) {
                 if (wTalentTrees[tab].Talents.contains(spell)) {
                     talent.Type = wTalentTrees[tab].Talents[spell].NodeType
@@ -197,7 +195,7 @@ class CharacterTalentsSpent {
     Load() : string {
         let count = 0
 
-        const res = QueryCharacters('select * from `forge_character_talents_spent`')
+        const res = QueryCharacters('select * from `character_talents_spent`')
         while (res.GetRow()) {
             let Owner = res.GetUInt64(0) 
             let Spec = res.GetUInt32(1)

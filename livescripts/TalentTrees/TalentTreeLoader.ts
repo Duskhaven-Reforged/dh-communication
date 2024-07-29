@@ -1,4 +1,16 @@
-export function SetTalentNode( id: uint32, Tab: uint8, Col: uint8, Row: uint8, PointReq: uint16, Passive: bool, Starter: bool, Ranks: TSArray<uint32>, Prereqs: TSDictionary<uint32, uint8>, Unlearn: TSArray<uint32>, Additionals: TSArray<uint32> )  {
+export class StarterData {
+    Starter : bool = false
+    SpecMask : uint8 = 0
+    ApplicableClass : uint8 = 0
+
+    constructor(ApplicableClass: int8, Starter: bool = false, SpecMask: uint64 = 0) {
+        this.ApplicableClass = ApplicableClass
+        this.Starter = Starter
+        this.SpecMask = SpecMask
+    }
+}
+
+export function SetTalentNode( id: uint32, Tab: uint8, Col: uint8, Row: uint8, PointReq: uint16, Passive: bool, StarterData: StarterData, Ranks: TSArray<uint32>, Prereqs: TSDictionary<uint32, uint8>, Unlearn: TSArray<uint32>, Additionals: TSArray<uint32> )  {
     let TalentType = 0
     let ClassTabs: TSArray<number> = [
         64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51
@@ -16,7 +28,11 @@ export function SetTalentNode( id: uint32, Tab: uint8, Col: uint8, Row: uint8, P
     }
 
     const res = QueryWorld(`replace into forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, Starter)
-    VALUES(${id}, ${Tab}, ${Col}, ${Row}, 1, 1, ${TalentType}, ${Ranks.length}, 1, ${PointReq}, ${Passive ? 0 : 1}, ${Starter})`)
+    VALUES(${id}, ${Tab}, ${Col}, ${Row}, 1, 1, ${TalentType}, ${Ranks.length}, 1, ${PointReq}, ${Passive ? 0 : 1}, ${StarterData.Starter})`)
+
+    if (StarterData.SpecMask > 0) {
+        const res = QueryWorld(`replace into conditional_starter_data (\`Class\`, \`SpellId\`, \`SpecId\`) VALUES(${StarterData.ApplicableClass}, ${id}, ${StarterData.SpecMask})`)
+    }
 
     Ranks.forEach((Spell, i) => {
         let Rank = i + 1
@@ -78,6 +94,10 @@ export function SetChoiceNode( id: uint32, Tab: uint8, Col: uint8, Row: uint8, P
             const res = QueryWorld(`REPLACE INTO forge_talent_unlearn (\`talentTabId\` \`talentSpellId\`, \`unlearnSpell\`) VALUES(${Tab}, ${id}, ${Spell})`)
         })
     }
+}
+
+export function SetSpecAutolearn (Class: uint8, Spec: uint8, Level: uint8, Spell: uint32) {
+    const res = QueryWorld(`REPLACE INTO character_spec_autolearn (\`class\`, \`spec\`, \`level\`, \`spell\`) VALUES(${Class}, ${Spec}, ${Level}, ${Spell})`)
 }
 
 export const EmptyPrereqs : TSDictionary<uint32, uint8> = CreateDictionary<uint32, uint8>({})

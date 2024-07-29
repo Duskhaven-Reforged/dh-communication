@@ -50,11 +50,13 @@ export class DHCharacterTalent {
     TabId: uint32
     CurrentRank: uint8
     Type: uint8 = 0
+    Starter: bool = false
 
-    constructor(spell: number, tab: number, currentRank: number) {
+    constructor(spell: number, tab: number, currentRank: number, Starter: bool) {
         this.SpellId = spell
         this.TabId = tab
         this.CurrentRank = currentRank
+        this.Starter = Starter
     }
 
     public IsNull() : bool {
@@ -62,7 +64,7 @@ export class DHCharacterTalent {
     }
 
     public static Empty() : DHCharacterTalent {
-        return new DHCharacterTalent(0, 0, 0)
+        return new DHCharacterTalent(0, 0, 0, false)
     }
 }
 
