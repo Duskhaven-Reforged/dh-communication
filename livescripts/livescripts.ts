@@ -93,7 +93,7 @@ export function Main(events: TSEvents) {
 
                     Spec.SpecTabId = SpecToActivate
                     Player.SetUInt(`Spec`, Spec.SpecTabId)
-                    QueryCharactersAsync(`update forge_character_specs set charspec = ${SpecToActivate} where guid = ${Player.GetGUID().GetCounter()}`)
+                    QueryCharactersAsync(`update character_specs set charspec = ${SpecToActivate} where guid = ${Player.GetGUID().GetCounter()}`)
                     mDHDMsg.SendSpecInfo(Player)
                     let ClientCallback = new SimpleMessagePayload(ClientCallbackOperations.ACTIVATE_CLASS_SPEC, 'Finished Setting Spec')
                     ClientCallback.write().SendToPlayer(Player)
