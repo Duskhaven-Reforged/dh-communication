@@ -48,7 +48,7 @@ export class DHCommonMessage {
                     Talent.TabPointReq = talent.TabPointReq
                     Talent.PrereqType = talent.PreReqType
                     Talent.NodeType = talent.NodeType
-                    Talent.Starter = talent.Starter
+                    Talent.Starter = talent.Starter ? 1 : 0
                     Talent.NodeIndex = talent.NodeIndex
 
                     Talent.NumRanks = talent.NumberOfRanks

@@ -1,7 +1,7 @@
 import { ClientCallbackOperations, SimpleMessagePayload } from '../../shared/Messages';
-import { ACOUNT_WIDE_KEY, DHCharacterPoint, DHCharacterTalent, DHNodeType, DHPlayerLoadout, DHPlayerSpec, DHPointType, DHTalentTab, DHTreeMetaData, TALENT_POINT_TYPES, base64_char } from '../classes';
+import { ACOUNT_WIDE_KEY, DHCharacterPoint, DHCharacterTalent, DHNodeType, DHPlayerLoadout, DHPlayerSpec, DHPointType, DHTalent, DHTalentTab, DHTreeMetaData, TALENT_POINT_TYPES, base64_char } from '../classes';
 import { LoadCharacterData, cActiveLoadouts, cCharPoints, cLoadouts, cSpecs } from './dh-chardata';
-import { LoadWorldData, wClassNodeToSpell, wRaceClassTabMap, wPointTypeToTabs, wSpecNodeToSpell, wSpellToTab, wTabToSpell, wTalentTrees, wChoiceNodesRev, wTreeMetaData, wClassNodeToClassTree, wChoiceNodes, wDefaultLoadoutStrings } from './dh-worlddata';
+import { LoadWorldData, wClassNodeToSpell, wRaceClassTabMap, wPointTypeToTabs, wSpecNodeToSpell, wSpellToTab, wTabToSpell, wTalentTrees, wChoiceNodesRev, wTreeMetaData, wClassNodeToClassTree, wChoiceNodes, wDefaultLoadoutStrings, wStarterTalentConditions } from './dh-worlddata';
 
 export class DHCache {
     
@@ -65,7 +65,7 @@ export class DHCache {
                 cLoadouts[owner][tab.Id][plo.Id] = plo
                 cActiveLoadouts[owner][tab.Id] = plo
 
-                const res = QueryCharacters(`insert into \`forge_character_talent_loadouts\` (\`guid\`, \`id\`, \`talentTabId\`, \`name\`, \`talentString\`, \`active\`) values (${owner}, ${plo.Id}, ${tab.Id}, '${plo.Name}', '${loadout}', 1)`)
+                const res = QueryCharacters(`insert into \`character_talent_loadouts\` (\`guid\`, \`id\`, \`talentTabId\`, \`name\`, \`talentString\`, \`active\`) values (${owner}, ${plo.Id}, ${tab.Id}, '${plo.Name}', '${loadout}', 1)`)
             })
         }
     }
@@ -147,9 +147,10 @@ export class DHCache {
                             if (Talent.CurrentRank > 0) {
                                 let TTab = this.TryGetTalentTab(Player, Talent.TabId)
                                 let Points = this.GetSpecPoints(Player, TTab.TalentType)
-                                Spec.PointsSpent[Talent.TabId] += Talent.CurrentRank * TTab.Talents[Talent.SpellId].RankCost
-                                Points.Sum -= Talent.CurrentRank * TTab.Talents[Talent.SpellId].RankCost
-
+                                if (!Talent.Starter) {
+                                    Spec.PointsSpent[Talent.TabId] += Talent.CurrentRank * TTab.Talents[Talent.SpellId].RankCost
+                                    Points.Sum -= Talent.CurrentRank * TTab.Talents[Talent.SpellId].RankCost
+                                }
                                 TTab.Talents[Talent.SpellId].UnlearnSpells.forEach((UnlearnSpellId) => {
                                     Player.RemoveSpell(UnlearnSpellId, false, false)
                                 })
@@ -209,6 +210,7 @@ export class DHCache {
                                         let Node = Meta.Nodes[RowId][ColId]
                                         if (Tab.Talents.contains(Node.SpellId)) {
                                             let Talent = Tab.Talents[Node.SpellId]
+                                            let Starter = this.IsStarter(Player, Talent)
                                             let ChoiceNode = Talent.NodeType === CustomNodeType.CHOICE
                                             if (Rank > 0) {
                                                 if (ChoiceNode) {
@@ -225,7 +227,7 @@ export class DHCache {
                                                 if (Talent.RequiredLevel > Player.GetLevel() || Node.PointReq >> Spend[TabId])
                                                     return false
 
-                                                if (Talent.Starter < 1) {
+                                                if (!Starter) {
                                                     Spend[TabId] += ChoiceNode ? Talent.RankCost : Rank - 1 * Talent.RankCost
                                                     if (Spend[Tab.Id] > Points.Max)
                                                         return false;
@@ -235,7 +237,7 @@ export class DHCache {
                                                     this.Unlocks.push(Unlock.SpellId)
                                                 })
                                             }
-                                            let CharacterTalent =  new DHCharacterTalent(Talent.SpellId, TabId, Rank)
+                                            let CharacterTalent =  new DHCharacterTalent(Talent.SpellId, TabId, Rank, Starter)
                                             CharacterTalent.Type = Talent.NodeType
                                             this.ToLearn.push(CharacterTalent)
                                         }
@@ -250,6 +252,19 @@ export class DHCache {
             return true
         }
         return false
+    }
+
+    public IsStarter(Player: TSPlayer, Talent: DHTalent) : bool {
+        let pClass = Player.GetClass()
+        let Spell = Talent.SpellId
+
+        let IsStarter = Talent.Starter > 0
+        if (wStarterTalentConditions.contains(pClass)) {
+            if (wStarterTalentConditions[pClass].contains(Spell)) {
+                IsStarter = wStarterTalentConditions[pClass][Spell].includes(Player.GetUInt(`Spec`))
+            }
+        }
+        return IsStarter
     }
 
     public ActivateSpec(Player: TSPlayer, Spec: number) {
@@ -331,7 +346,7 @@ export class DHCache {
             }
         }
 
-        let fcp = new DHCharacterPoint(pointType, spec, 0, pointType === DHPointType.TALENT ? 26 : 25)
+        let fcp = new DHCharacterPoint(pointType, spec, 0, 25)
         return this.UpdateCharPoints(player, fcp)
     }
 
@@ -340,7 +355,7 @@ export class DHCache {
 
         cCharPoints[guid][point.Type][point.SpecId] = point
 
-        const res = QueryCharacters('REPLACE INTO `forge_character_points` (`guid`,`type`,`spec`,`sum`,`max`) VALUES ('+guid+','+point.Type+','+point.SpecId+','+point.Sum+','+point.Max+')')
+        const res = QueryCharacters('REPLACE INTO `character_points` (`guid`,`type`,`spec`,`sum`,`max`) VALUES ('+guid+','+point.Type+','+point.SpecId+','+point.Sum+','+point.Max+')')
         return point
     }
 
@@ -376,10 +391,10 @@ export class DHCache {
     public SaveSpec(spec: DHPlayerSpec) {
         let guid = spec.CharGuid
 
-        const res = QueryCharacters('REPLACE INTO `forge_character_specs` (`id`,`guid`,`name`,`description`,`active`,`spellicon`,`visability`,`charSpec`) VALUES ('+spec.Id+','+guid+',\''+spec.Name+'\',\''+spec.Description+'\','+spec.Active+','+spec.SpellIconId+',1,'+spec.SpecTabId+')')
+        const res = QueryCharacters('REPLACE INTO `character_specs` (`id`,`guid`,`name`,`description`,`active`,`spellicon`,`visability`,`charSpec`) VALUES ('+spec.Id+','+guid+',\''+spec.Name+'\',\''+spec.Description+'\','+spec.Active+','+spec.SpellIconId+',1,'+spec.SpecTabId+')')
 
         spec.PointsSpent.forEach((key, val) => {
-            const res = QueryCharacters('REPLACE INTO forge_character_talents_spent(`guid`,`spec`,`tabid`,`spent`) VALUES('+guid+', '+spec.Id+', '+key+', '+val+')')
+            const res = QueryCharacters('REPLACE INTO character_talents_spent(`guid`,`spec`,`tabid`,`spent`) VALUES('+guid+', '+spec.Id+', '+key+', '+val+')')
         })
         spec.Talents.forEach((tab, talents) => {
             talents.forEach((spellId, talent) => {
@@ -389,11 +404,11 @@ export class DHCache {
     }
 
     public SaveTalent(guid: number, specId: number, talent: DHCharacterTalent) {
-        QueryCharacters('REPLACE INTO `forge_character_talents` (`guid`,`spec`,`spellid`,`tabId`,`currentrank`) VALUES ('+guid+','+specId+','+talent.SpellId+','+talent.TabId+','+talent.CurrentRank+')')
+        QueryCharacters('REPLACE INTO `character_talents` (`guid`,`spec`,`spellid`,`tabId`,`currentrank`) VALUES ('+guid+','+specId+','+talent.SpellId+','+talent.TabId+','+talent.CurrentRank+')')
     }
 
     public GetMaxPointDefaults(type: DHPointType) : DHCharacterPoint {
-        return new DHCharacterPoint(type, 4294967295, 0, type === DHPointType.TALENT ? 26 : 25)
+        return new DHCharacterPoint(type, 4294967295, 0, 25)
     }
 
     public TryGetTabPointType(tab: number) : DHPointType {
@@ -422,7 +437,7 @@ export class DHCache {
         if (tabs.length) {
             tabs.forEach((tab) => {
                 tab.Talents.forEach((spell, talent) => {
-                    let newTalent = new DHCharacterTalent(talent.SpellId, tab.Id, 0)
+                    let newTalent = new DHCharacterTalent(talent.SpellId, tab.Id, 0, this.IsStarter(player, talent))
                     newTalent.Type = talent.NodeType
                     spec.Talents[tab.Id][newTalent.SpellId] = newTalent
                 })
@@ -432,7 +447,7 @@ export class DHCache {
         if (tabs.length) {
             tabs.forEach((tab) => {
                 tab.Talents.forEach((spell, talent) => {
-                    let newTalent = new DHCharacterTalent(talent.SpellId, tab.Id, 0)
+                    let newTalent = new DHCharacterTalent(talent.SpellId, tab.Id, 0, this.IsStarter(player, talent))
                     newTalent.Type = talent.NodeType
                     spec.Talents[tab.Id][newTalent.SpellId] = newTalent
                 })
@@ -451,39 +466,41 @@ export class DHCache {
     }
 
     public HandleDeleteCharacter(guid: uint64) {
-        QueryCharacters(`DELETE FROM forge_character_specs WHERE guid = ${guid}`)
-        QueryCharacters(`DELETE FROM forge_character_points WHERE guid = ${guid} AND spec != ${ACOUNT_WIDE_KEY}`)
-        QueryCharacters(`DELETE FROM forge_character_talents WHERE guid = ${guid} AND spec != ${ACOUNT_WIDE_KEY}`)
-        QueryCharacters(`DELETE FROM forge_character_talents_spent WHERE guid = ${guid} AND spec != ${ACOUNT_WIDE_KEY}`)
+        QueryCharacters(`DELETE FROM character_specs WHERE guid = ${guid}`)
+        QueryCharacters(`DELETE FROM character_points WHERE guid = ${guid} AND spec != ${ACOUNT_WIDE_KEY}`)
+        QueryCharacters(`DELETE FROM character_talents WHERE guid = ${guid} AND spec != ${ACOUNT_WIDE_KEY}`)
+        QueryCharacters(`DELETE FROM character_talents_spent WHERE guid = ${guid} AND spec != ${ACOUNT_WIDE_KEY}`)
     }
 
     public ForgetTalents(player: TSPlayer, spec: DHPlayerSpec, type: DHPointType) {
         let tabs = this.TryGetCustomTalentTabs(player, type)
         tabs.forEach((tab) => {
             tab.Talents.forEach((spellId, talent) => {
-                if (talent.NodeType == DHNodeType.CHOICE) {
-                    wChoiceNodesRev.forEach((spell, nodeIndex) => {
-                        if (player.HasSpell(spell))
-                            player.RemoveSpell(spell, false, false)
-                    })
-                }
-                else {
-                    talent.Ranks.forEach((rank, spell) => {
-                        let info = GetSpellInfo(spell)
-                        for (let eff = SpellEffIndex.EFFECT_0; eff <= SpellEffIndex.EFFECT_2; eff++) {
-                            let effect = info.GetEffect(eff)
-                            if (effect.GetType() === SpellEffects.LEARN_SPELL) {
-                                player.RemoveSpell(effect.GetTriggerSpell(), false, false)
+                if (!talent.Starter) {
+                    if (talent.NodeType == DHNodeType.CHOICE) {
+                        wChoiceNodesRev.forEach((spell, nodeIndex) => {
+                            if (player.HasSpell(spell))
+                                player.RemoveSpell(spell, false, false)
+                        })
+                    }
+                    else {
+                        talent.Ranks.forEach((rank, spell) => {
+                            let info = GetSpellInfo(spell)
+                            for (let eff = SpellEffIndex.EFFECT_0; eff <= SpellEffIndex.EFFECT_2; eff++) {
+                                let effect = info.GetEffect(eff)
+                                if (effect.GetType() === SpellEffects.LEARN_SPELL) {
+                                    player.RemoveSpell(effect.GetTriggerSpell(), false, false)
+                                }
+
+                                player.RemoveSpell(spell, false, false)
                             }
+                        })
+                    }
 
-                            player.RemoveSpell(spell, false, false)
-                        }
-                    })
+                    if (spec.Talents.contains(tab.Id))
+                        if (spec.Talents[tab.Id].contains(spellId))
+                            spec.Talents[tab.Id][spellId].CurrentRank = 0
                 }
-
-                if (spec.Talents.contains(tab.Id))
-                    if (spec.Talents[tab.Id].contains(spellId))
-                        spec.Talents[tab.Id][spellId].CurrentRank = 0
             })
         })
         this.UpdateCharSpec(player, spec)
@@ -491,7 +508,7 @@ export class DHCache {
         let fcp = this.GetSpecPoints(player, type, spec.Id)
         let amount = 0
         let level = player.GetLevel()
-        if (level > 10)
+        if (level > 9)
             level -= 10
 
         amount = Math.floor(level/2)

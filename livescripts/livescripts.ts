@@ -1,6 +1,6 @@
 import { ClientCallbackOperations, SimpleMessagePayload } from "../shared/Messages";
 import { DHPointType } from "./classes";
-import { wClassLevelSpells, wTalentTrees } from "./dh-cachedata/dh-worlddata";
+import { wDefaultLoadoutStrings, wSpecAutolearn, wTalentTrees } from "./dh-cachedata/dh-worlddata";
 import { DHCommonMessage } from "./dh-message/dh-cmsg";
 import { RouteTopics } from "./dh-topic/TopicRouter";
 
@@ -11,10 +11,10 @@ export function Main(events: TSEvents) {
     RouteTopics(events)
 
     events.Player.OnLogin((player, first) => {
-        LearnSpellsForLevel(player)
         let spec = mDHDMsg.cache.TryGetCharacterActiveSpec(player)
         if (!spec.IsNull()) {
             player.SetUInt(`Spec`, spec.SpecTabId)
+            LearnSpellsForLevel(player)
         }
         //todo load actions and maybe account bonuses
         // maybe unlearn flagged too
@@ -40,6 +40,9 @@ export function Main(events: TSEvents) {
         let spec = mDHDMsg.cache.TryGetCharacterActiveSpec(player)
         if (!spec.IsNull()) {
             let curLevel = player.GetLevel()
+            if (oldLevel < 10 && curLevel > 9)
+                mDHDMsg.cache.TrySaveNewLoadout(player, wDefaultLoadoutStrings[player.GetClass()][player.GetUInt(`Spec`)])
+            
             if (curLevel > 10) {
                 if (oldLevel < curLevel) {
                     let levelDiff = curLevel - oldLevel
@@ -115,22 +118,18 @@ export function SetAllSkillsToLevel(Player: TSPlayer) {
 }
 
 export function LearnSpellsForLevel(player: TSPlayer) {
-    //if (player.HasUnitState(0x00000001))
-    // TODO add remove by effect
-
-    if (wClassLevelSpells.contains(player.GetClass())) {
-        let pClass = wClassLevelSpells[player.GetClass()]
-        pClass.forEach((race, levelmap) => {
-            levelmap.forEach((level, spells) => {
-                if (level <= player.GetLevel()) {
-                    spells.forEach((spell) => {
-                        if (player.HasSpell(spell))
-                            return;
-
-                        player.LearnSpell(spell)
+    if (wSpecAutolearn.contains(player.GetClass())) {
+        let Spec = player.GetUInt(`Spec`)
+        if (wSpecAutolearn[player.GetClass()].contains(Spec)) {
+            let Levels = wSpecAutolearn[player.GetClass()][Spec]
+            Levels.forEach((Level, Spells) => {
+                if (player.GetLevel() >= Level) {
+                    Spells.forEach((Spell) => {
+                        if (!player.HasSpell(Spell))
+                            player.LearnSpell(Spell)
                     })
                 }
             })
-        })
+        }
     }
 }

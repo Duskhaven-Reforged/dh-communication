@@ -10,7 +10,7 @@ export let wSpecNodeToSpell: TSDictionary<uint32, TSDictionary<uint8, uint32>> =
 export let wClassNodeToSpell: TSDictionary<uint32, TSDictionary<uint8, uint32>> = CreateDictionary<uint32, TSDictionary<uint8, uint32>>({})
 export let wPointTypeToTabs: TSDictionary<uint8, TSArray<uint32>> = CreateDictionary<uint8, TSArray<uint32>>({})
 export let wRaceClassTabMap: TSDictionary<uint32, TSDictionary<uint32, TSArray<uint32>>> = CreateDictionary<uint32, TSDictionary<uint32, TSArray<uint32>>>({})
-export let wClassLevelSpells: TSDictionary<uint8, TSDictionary<uint32, TSDictionary<uint8, TSArray<uint32>>>> = CreateDictionary<uint8, TSDictionary<uint32, TSDictionary<uint8, TSArray<uint32>>>>({})
+export let wSpecAutolearn: TSDictionary<uint8, TSDictionary<uint8, TSDictionary<uint8, TSArray<uint32>>>> = CreateDictionary<uint8, TSDictionary<uint8, TSDictionary<uint8, TSArray<uint32>>>>({})
 export let wSpellLearnAdditionalSpells: TSDictionary<uint32, TSArray<uint32>> = CreateDictionary<uint32, TSArray<uint32>>({})
 export let wClassFirstSpec: TSDictionary<uint32, uint32> = CreateDictionary<uint32, uint32>({})
 export let wClassNodeToClassTree: TSDictionary<uint32, uint32> = CreateDictionary<uint32, uint32>({})
@@ -21,13 +21,14 @@ export let wChoiceNodeIndexLookup: TSDictionary<uint8, uint32> = CreateDictionar
 export let wSpellToTab: TSDictionary<uint32, uint32> = CreateDictionary<uint32, uint32>({})
 export let wTabToSpell: TSDictionary<uint32, uint32> = CreateDictionary<uint32, uint32>({})
 export let wDefaultLoadoutStrings: TSDictionary<uint32, TSDictionary<uint32, string>> = CreateDictionary<uint32, TSDictionary<uint32, string>>({})
+export let wStarterTalentConditions: TSDictionary<uint8, TSDictionary<uint32, TSArray<uint8>>> = CreateDictionary<uint8, TSDictionary<uint32, TSArray<uint8>>>({})
 
 export function LoadWorldData() {
     console.log(`\tLoading talent trees...\n`) 
     RefillTrees(1 << Class.WARRIOR)
 
     console.log("\tLoading class level spell map...\n")
-    console.log(new PlayerClassLevelSpells().Load())
+    console.log(new SpecAutolearn().Load())
 
     console.log("\tLoading talent additional spells...\n")
     console.log(new SpellLearnAdditionalSpells().Load())
@@ -52,6 +53,9 @@ export function LoadWorldData() {
 
     console.log("\tLoading talent spell unlearns...\n")
     console.log(new CustomTalentUnlearns().Load())
+
+    console.log("\tLoading starter talent conditions...\n")
+    console.log(new StarterTalentConditions().Load())
 }
 
 export function RefillTrees(ClassMask: uint32) {
@@ -63,17 +67,17 @@ export function RefillTrees(ClassMask: uint32) {
     }
 }
 
-class PlayerClassLevelSpells {
+class SpecAutolearn {
     Load() : string {
         let count = 0
-        const res = QueryWorld('select * from `forge_character_spec_spells` order by `class` asc, `race` asc, `level` asc, `spell` asc')
+        const res = QueryWorld('select * from `character_spec_autolearn` order by `class` asc, `spec` asc, `level` asc, `spell` asc')
         while (res.GetRow()) {
             let pClass = res.GetUInt8(0)
-            let race = res.GetUInt32(1)
+            let spec = res.GetUInt8(1)
             let level = res.GetUInt8(2)
             let spell = res.GetUInt32(3)
 
-            wClassLevelSpells[pClass][race][level].push(spell)
+            wSpecAutolearn[pClass][spec][level].push(spell)
             count++
         }
 
@@ -239,7 +243,6 @@ class DefaultTalentStrings {
                     })
                     let SpecTab = wTalentTrees[SpecId]
                     let SpecMap = wSpecNodeToSpell[SpecId]
-                    console.log(`${ClassMap} + ${SpecMap}\n`)
                     SpecMap.forEach((K, V) => {
                         let Talent = SpecTab.Talents[V]
                         Default += Talent.Starter ? base64_char.charAt(Talent.NumberOfRanks + 1) : base64_char.charAt(1)
@@ -355,6 +358,26 @@ class CustomTalentUnlearns {
                     wTalentTrees[TalentTabId].Talents[SpellId].UnlearnSpells.push(UnlearnedSpellId)
                     count++
                 }
+            }
+        }
+
+        return `\t\tLoaded ${count} entries.\n`
+    }
+}
+
+class StarterTalentConditions {
+    Load() : string {
+        let count = 0;
+
+        const res = QueryWorld('SELECT * FROM `conditional_starter_data`')
+        while (res.GetRow()) {
+            let pClass = res.GetUInt8(0)
+            let SpellId = res.GetUInt32(1)
+            let SpecId = res.GetUInt64(2)
+
+            if (wTalentTrees.contains(SpecId)) {
+                wStarterTalentConditions[pClass][SpellId].push(SpecId)
+                count++
             }
         }
 
