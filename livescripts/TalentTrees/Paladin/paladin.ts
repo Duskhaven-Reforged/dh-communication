@@ -4,6 +4,7 @@ export function ReloadPaladinTree() {
     let TAB = 52
     let CLASS = 2
 
+    QueryWorld(`Delete from forge_talents where talentTabId = ${TAB}`)
     let Talent : uint32 = GetID(`Spell`, `dh-spells`, `pal-gen-loh`)
     SetTalentNode(Talent, TAB, 2, 1, 0, false, new StarterData(CLASS, true, 0), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `pal-gen-divinesteed`)

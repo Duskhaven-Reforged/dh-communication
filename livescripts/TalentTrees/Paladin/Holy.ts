@@ -10,7 +10,6 @@ export function ReloadHolyPalTree() {
     SetSpecAutolearn(CLASS, TAB, 16, GetID(`Spell`, 'dh-spells', 'pal-holy-presenceofaltruism'))
 
     QueryWorld(`Delete from forge_talents where talentTabId = ${TAB}`)
-
     let Talent : uint32 = GetID(`Spell`, 'dh-spells', 'pal-holy-holyshock')
     SetTalentNode(Talent, TAB, 5, 1, 0, false, new StarterData(CLASS, true, 0), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, 'dh-spells', 'pal-holy-infusionoflight')

@@ -114,7 +114,6 @@ export class DHCommonMessage {
     public SendTalents(Player: TSPlayer) {
         let spec = this.cache.TryGetCharacterActiveSpec(Player)
         if (spec) {
-            console.log(spec.SpecTabId)
             let Loadout = cActiveLoadouts[Player.GetGUID().GetCounter()][spec.SpecTabId]
             if (Loadout == null) {
                 this.cache.AddDefaultLoadout(Player)

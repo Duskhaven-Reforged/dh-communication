@@ -94,6 +94,7 @@ export function Main(events: TSEvents) {
                     Spec.SpecTabId = SpecToActivate
                     mDHDMsg.cache.UpdateCharSpec(Player, Spec)
                     LearnSpecSpecificSkills(Player, Spec.SpecTabId)
+                    LearnSpellsForLevel(Player)
 
                     Player.SetUInt(`Spec`, Spec.SpecTabId)
                     mDHDMsg.SendSpecInfo(Player)
@@ -129,7 +130,7 @@ export function LearnSpellsForLevel(player: TSPlayer) {
                     }
                 } else {
                     Spells.forEach((Spell) => {
-                        player.RemoveSpell(Spell)
+                        player.RemoveSpell(Spell, false, false)
                     })
                 }
             })

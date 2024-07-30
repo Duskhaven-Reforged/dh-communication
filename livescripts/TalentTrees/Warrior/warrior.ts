@@ -4,6 +4,7 @@ export function ReloadWarrTree() {
     let TAB = 51
     let CLASS = 1
 
+    QueryWorld(`Delete from forge_talents where talentTabId = ${TAB}`)
     let Talent : uint32 = GetID(`Spell`, `dh-spells`, `warr-gen-victory-rush`)
     SetTalentNode(Talent, TAB, 4, 1, 0, false, new StarterData(CLASS, true, 0), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, 'dh-spells', 'warr-gen-heroic-leap')
