@@ -1396,6 +1396,7 @@ export function TalentTreeUI() {
     function UpdateActiveSpecButton(Tab: TalentTreeLayout) {
         let LeftData = FrameData.PlayerTalentFrameTabsLeftData[Tab.TabId]
         if (LeftData) {
+            console.log(Tab.TabId, TalentTree.SelectedSpec)
             let TabSelected = Tab.TabId === TalentTree.SelectedSpec
             let Button = LeftData.SpecButton
 
@@ -1472,9 +1473,9 @@ export function TalentTreeUI() {
             TalentFrameContainerBackground.SetTexture(BGPath)
         }
 
-        TalentTree.TalentTrees.forEach((Layout : TalentTreeLayout) => {
-            if (Layout)
-                UpdateActiveSpecButton(Layout)
+        TalentTree.Tabs.forEach((TabId) => {
+            let Layout = TalentTree.TalentTrees[TabId+1]
+            UpdateActiveSpecButton(Layout)
         })
     }
 
