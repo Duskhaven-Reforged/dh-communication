@@ -47,13 +47,13 @@ export function SetTalentNode( id: uint32, Tab: uint8, Col: uint8, Row: uint8, P
 
     if (Unlearn.length > 0) {
         Unlearn.forEach((Spell) => {
-            const res = QueryWorld(`REPLACE INTO forge_talent_unlearn (\`talentTabId\` \`talentSpellId\`, \`unlearnSpell\`) VALUES(${Tab}, ${id}, ${Spell})`)
+            const res = QueryWorld(`REPLACE INTO forge_talent_unlearn (\`talentTabId\`, \`talentSpellId\`, \`unlearnSpell\`) VALUES(${Tab}, ${id}, ${Spell})`)
         })
     }
 
     if (Additionals.length > 0) {
         Additionals.forEach((Spell) => {
-            const res = QueryWorld(`REPLACE INTO forge_talent_learn_additional_spell (\`spell\` \`addedSpell\`) VALUES(${id}, ${Spell})`)
+            const res = QueryWorld(`REPLACE INTO forge_talent_learn_additional_spell (\`spell\`, \`addedSpell\`) VALUES(${id}, ${Spell})`)
         })
     }
 }
@@ -91,7 +91,7 @@ export function SetChoiceNode( id: uint32, Tab: uint8, Col: uint8, Row: uint8, P
 
     if (Unlearn.length > 0) {
         Unlearn.forEach((Spell) => {
-            const res = QueryWorld(`REPLACE INTO forge_talent_unlearn (\`talentTabId\` \`talentSpellId\`, \`unlearnSpell\`) VALUES(${Tab}, ${id}, ${Spell})`)
+            const res = QueryWorld(`REPLACE INTO forge_talent_unlearn (\`talentTabId\`, \`talentSpellId\`, \`unlearnSpell\`) VALUES(${Tab}, ${id}, ${Spell})`)
         })
     }
 }

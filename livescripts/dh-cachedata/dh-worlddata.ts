@@ -1,3 +1,7 @@
+import { ReloadBloodDKTree } from "../TalentTrees/DeathKnight/Blood"
+import { ReloadFrostDKTree } from "../TalentTrees/DeathKnight/Frost"
+import { ReloadUnholyDKTree } from "../TalentTrees/DeathKnight/Unholy"
+import { ReloadDKTree } from "../TalentTrees/DeathKnight/deathknight"
 import { ReloadHolyPalTree } from "../TalentTrees/Paladin/Holy"
 import { ReloadProtPalTree } from "../TalentTrees/Paladin/Protection"
 import { ReloadRetPalTree } from "../TalentTrees/Paladin/Retribution"
@@ -87,7 +91,12 @@ export function RefillTrees(ClassMask: uint32) {
         ReloadSubRogueTree()
     }
     if (ClassMask & (1 << Class.PRIEST)) {}
-    if (ClassMask & (1 << Class.DEATH_KNIGHT)) {}
+    if (ClassMask & (1 << Class.DEATH_KNIGHT)) {
+        ReloadDKTree()
+        ReloadBloodDKTree()
+        ReloadFrostDKTree()
+        ReloadUnholyDKTree()
+    }
     if (ClassMask & (1 << Class.SHAMAN)) {}
     if (ClassMask & (1 << Class.MAGE)) {}
     if (ClassMask & (1 << Class.WARLOCK)) {}
