@@ -33,7 +33,7 @@ export function ReloadPaladinTree() {
     Talent = GetID(`Spell`, `dh-spells`, `pal-gen-seals-of-the-just`)
     SetTalentNode(Talent, TAB, 8, 4, 0, true, new StarterData(CLASS, false, 0), CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `pal-gen-crusade`)]: 1, [GetID(`Spell`, `dh-spells`, `pal-gen-evil-be-judged`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `pal-gen-no-mercy-for-the-wicked`)
-    SetTalentNode(Talent, TAB, 7, 4, 0, true, new StarterData(CLASS, false, 0), CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `pal-gen-rebuke`)]: 1, [GetID(`Spell`, `dh-spells`, `pal-gen-crusade`)]: 1}), EmptySpellArray, EmptySpellArray)
+    SetTalentNode(Talent, TAB, 6, 4, 0, true, new StarterData(CLASS, false, 0), CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `pal-gen-rebuke`)]: 1, [GetID(`Spell`, `dh-spells`, `pal-gen-crusade`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `pal-gen-punishment`)
     SetChoiceNode(Talent, TAB, 5, 4, 0, true, CreateArray<uint32>([Talent, GetID(`Spell`, `dh-spells`, `pal-gen-example`)]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, 'dh-spells', 'pal-gen-rebuke')]: 1}), EmptySpellArray)
 
