@@ -9,8 +9,7 @@ export function ReloadCorRogueTree() {
     SetSpecAutolearn(CLASS, TAB, 10, GetID(`Spell`, 'dh-spells', 'rog-cor-parley'))
 
     QueryWorld(`Delete from forge_talents where talentTabId = ${TAB}`)
-
-    let Talent : uint32 = GetID(`Spell`, 'dh-spell', 'rog-cor-sinisteropportunities')
+    let Talent : uint32 = GetID(`Spell`, 'dh-spells', 'rog-cor-sinisteropportunities')
     SetTalentNode(Talent, TAB, 5, 1, 0, true, new StarterData(CLASS, true, 0), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `rog-cor-neptulonslockes`)
     SetTalentNode(Talent, TAB, 3, 2, 0, false, new StarterData(CLASS, false, 0), CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `rog-cor-sinisteropportunities`)]: 1}), EmptySpellArray, EmptySpellArray)

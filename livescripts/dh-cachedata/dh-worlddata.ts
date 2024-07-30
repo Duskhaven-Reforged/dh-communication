@@ -2,6 +2,10 @@ import { ReloadHolyPalTree } from "../TalentTrees/Paladin/Holy"
 import { ReloadProtPalTree } from "../TalentTrees/Paladin/Protection"
 import { ReloadRetPalTree } from "../TalentTrees/Paladin/Retribution"
 import { ReloadPaladinTree } from "../TalentTrees/Paladin/paladin"
+import { ReloadAssRogueTree } from "../TalentTrees/Rogue/Assassination"
+import { ReloadCorRogueTree } from "../TalentTrees/Rogue/Corsair"
+import { ReloadSubRogueTree } from "../TalentTrees/Rogue/Subtlety"
+import { ReloadRogueTree } from "../TalentTrees/Rogue/rogue"
 import { ReloadArmsWarrTree } from "../TalentTrees/Warrior/Arms"
 import { ReloadFuryWarrTree } from "../TalentTrees/Warrior/Fury"
 import { ReloadProtWarrTree } from "../TalentTrees/Warrior/Protection"
@@ -75,6 +79,19 @@ export function RefillTrees(ClassMask: uint32) {
         ReloadRetPalTree()
         ReloadProtPalTree()
     }
+    if (ClassMask & (1 << Class.HUNTER)) {}
+    if (ClassMask & (1 << Class.ROGUE)) {
+        ReloadRogueTree()
+        ReloadAssRogueTree()
+        ReloadCorRogueTree()
+        ReloadSubRogueTree()
+    }
+    if (ClassMask & (1 << Class.PRIEST)) {}
+    if (ClassMask & (1 << Class.DEATH_KNIGHT)) {}
+    if (ClassMask & (1 << Class.SHAMAN)) {}
+    if (ClassMask & (1 << Class.MAGE)) {}
+    if (ClassMask & (1 << Class.WARLOCK)) {}
+    if (ClassMask & (1 << Class.DRUID)) {}
 }
 
 class SpecAutolearn {

@@ -10,7 +10,6 @@ export function ReloadAssRogueTree() {
     SetSpecAutolearn(CLASS, TAB, 10, GetID(`Spell`, 'dh-spells', 'rog-ass-envenom'))
 
     QueryWorld(`Delete from forge_talents where talentTabId = ${TAB}`)
-
     let Talent : uint32 = GetID(`Spell`, 'dh-spells', 'rog-ass-poisonbomb')
     SetTalentNode(Talent, TAB, 5, 1, 0, false, new StarterData(CLASS, true, 0), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `rog-ass-deadlypoison`)

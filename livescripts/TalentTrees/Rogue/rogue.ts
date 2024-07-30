@@ -4,6 +4,7 @@ export function ReloadRogueTree() {
     let TAB = 54
     let CLASS = Class.ROGUE
 
+    QueryWorld(`Delete from forge_talents where talentTabId = ${TAB}`)
     let Talent : uint32 = GetID(`Spell`, `dh-spells`, `rog-gen-shiv`)
     SetTalentNode(Talent, TAB, 2, 1, 0, false, new StarterData(CLASS, true, 0), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `rog-gen-crimsonvial`)
