@@ -122,7 +122,7 @@ class CharacterSpecs {
             let description = res.GetString(3)
             let active = res.GetUInt8(4)
             let spellIcon = res.GetUInt32(5)
-            let specTabId = res.GetUInt32(6)
+            let specTabId = res.GetUInt32(7)
 
             let spec = new DHPlayerSpec(owner, id, name, description, !!active, spellIcon, specTabId);
 

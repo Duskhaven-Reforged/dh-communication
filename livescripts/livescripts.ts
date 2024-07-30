@@ -96,7 +96,6 @@ export function Main(events: TSEvents) {
                     LearnSpecSpecificSkills(Player, Spec.SpecTabId)
 
                     Player.SetUInt(`Spec`, Spec.SpecTabId)
-                    QueryCharactersAsync(`update character_specs set charspec = ${SpecToActivate} where guid = ${Player.GetGUID().GetCounter()}`)
                     mDHDMsg.SendSpecInfo(Player)
                     let ClientCallback = new SimpleMessagePayload(ClientCallbackOperations.ACTIVATE_CLASS_SPEC, 'Finished Setting Spec')
                     ClientCallback.write().SendToPlayer(Player)
