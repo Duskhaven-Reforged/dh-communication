@@ -92,6 +92,9 @@ export function Main(events: TSEvents) {
                     mDHDMsg.cache.ForgetTalents(Player, Spec, DHPointType.TALENT)
 
                     Spec.SpecTabId = SpecToActivate
+                    mDHDMsg.cache.UpdateCharSpec(Player, Spec)
+                    LearnSpecSpecificSkills(Player, Spec.SpecTabId)
+
                     Player.SetUInt(`Spec`, Spec.SpecTabId)
                     QueryCharactersAsync(`update character_specs set charspec = ${SpecToActivate} where guid = ${Player.GetGUID().GetCounter()}`)
                     mDHDMsg.SendSpecInfo(Player)
@@ -128,4 +131,12 @@ export function LearnSpellsForLevel(player: TSPlayer) {
             })
         }
     }
+}
+
+function LearnSpecSpecificSkills(Player: TSPlayer, SpecId: number) {
+    let DualWieldSpecs = [2]
+    if (DualWieldSpecs.includes(SpecId))
+        Player.SetSkill(118, 1, 1, 1)
+    else
+        Player.SetSkill(118, 0, 0, 0)
 }

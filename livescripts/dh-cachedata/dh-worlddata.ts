@@ -1,3 +1,7 @@
+import { ReloadHolyPalTree } from "../TalentTrees/Paladin/Holy"
+import { ReloadProtPalTree } from "../TalentTrees/Paladin/Protection"
+import { ReloadRetPalTree } from "../TalentTrees/Paladin/Retribution"
+import { ReloadPaladinTree } from "../TalentTrees/Paladin/paladin"
 import { ReloadArmsWarrTree } from "../TalentTrees/Warrior/Arms"
 import { ReloadFuryWarrTree } from "../TalentTrees/Warrior/Fury"
 import { ReloadProtWarrTree } from "../TalentTrees/Warrior/Protection"
@@ -25,7 +29,7 @@ export let wStarterTalentConditions: TSDictionary<uint8, TSDictionary<uint32, TS
 
 export function LoadWorldData() {
     console.log(`\tLoading talent trees...\n`) 
-    RefillTrees(1 << Class.WARRIOR)
+    RefillTrees(0x7fffffff)
 
     console.log("\tLoading class level spell map...\n")
     console.log(new SpecAutolearn().Load())
@@ -64,6 +68,12 @@ export function RefillTrees(ClassMask: uint32) {
         ReloadArmsWarrTree()
         ReloadFuryWarrTree()
         ReloadProtWarrTree()
+    }
+    if (ClassMask & (1 << Class.PALADIN)) {
+        ReloadPaladinTree()
+        ReloadHolyPalTree()
+        ReloadRetPalTree()
+        ReloadProtPalTree()
     }
 }
 

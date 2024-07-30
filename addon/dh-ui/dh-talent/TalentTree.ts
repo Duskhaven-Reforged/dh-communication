@@ -474,17 +474,16 @@ export function TalentTreeUI() {
     function InitializeTabsLeft() {
         let tabsLeft = CreateFrame("Frame", "ClassSpecWindow_TabsLeft", ClassSpecWindow)
         tabsLeft.SetFrameLevel(5);
-        tabsLeft.SetSize(875, 875);
-        tabsLeft.SetPoint("TOPLEFT", -500, 300)
+        tabsLeft.SetSize(ClassSpecWindow.GetWidth()* 1.433, ClassSpecWindow.GetHeight());
+        tabsLeft.SetPoint('CENTER', -20, 0)
 
-        let TabCount = TalentTree.TalentTrees.length
-        let StartX = 73
-        if (TabCount >= 2)
-            StartX = 192
-        else if (TabCount >= 4)
-            StartX = 10
+        let TabCount = TalentTree.Tabs.length
+        let StartX = 0
 
-        TalentTree.TalentTrees.forEach((Tree) => {
+        let Width = (tabsLeft.GetWidth()) / TabCount
+        let i = 0
+        TalentTree.Tabs.forEach((TreeId) => {
+            let Tree = TalentTree.TalentTrees[TreeId+1]
             if (Tree) {
                 let ActiveSpec: CPSSpec = TalentTree.ActiveSpec
                 let PointSpent = 0
@@ -495,8 +494,8 @@ export function TalentTreeUI() {
                 let uClass = UnitClass('player')
 
                 let Spec = CreateFrame('Button', 'ClassSpecWindow_TabLefts_Spec'+Tree.Id, tabsLeft)
-                Spec.SetPoint('CENTER', StartX, -265)
-                Spec.SetSize(498, 795)
+                Spec.SetPoint('LEFT', StartX, 0)
+                Spec.SetSize(Width, ClassSpecWindow.GetHeight())
                 Spec.SetFrameLevel(5)
 
                 let NormalTex = Spec.CreateTexture("$parentNormalTexture", "ARTWORK")
@@ -678,21 +677,19 @@ export function TalentTreeUI() {
                 })
                 
                 if (TabCount <= 2) {
-                    StartX += 710
-                    NormalTex.SetSize(Spec.GetWidth() + 410, Spec.GetHeight() + 180)
-                    HilightTex.SetSize(Spec.GetWidth() + 410, Spec.GetHeight() + 180)
-                    PushedTex.SetSize(Spec.GetWidth() + 410, Spec.GetHeight() + 180)
+                    NormalTex.SetSize(Spec.GetWidth(), Spec.GetHeight() + 180)
+                    HilightTex.SetSize(Spec.GetWidth(), Spec.GetHeight() + 180)
+                    PushedTex.SetSize(Spec.GetWidth(), Spec.GetHeight() + 180)
                 } else if (TabCount === 3) {
-                    StartX += 472
-                    NormalTex.SetSize(Spec.GetWidth() + 103, Spec.GetHeight() + 180)
-                    HilightTex.SetSize(Spec.GetWidth() + 103, Spec.GetHeight() + 180)
-                    PushedTex.SetSize(Spec.GetWidth() + 103, Spec.GetHeight() + 180)
+                    NormalTex.SetSize(Spec.GetWidth(), Spec.GetHeight() + 180)
+                    HilightTex.SetSize(Spec.GetWidth(), Spec.GetHeight() + 180)
+                    PushedTex.SetSize(Spec.GetWidth(), Spec.GetHeight() + 180)
                 } else {
-                    StartX += 355
-                    NormalTex.SetSize(Spec.GetWidth() - 50, Spec.GetHeight() + 180)
-                    HilightTex.SetSize(Spec.GetWidth() - 50, Spec.GetHeight() + 180)
-                    PushedTex.SetSize(Spec.GetWidth() - 50, Spec.GetHeight() + 180)
+                    NormalTex.SetSize(Spec.GetWidth(), Spec.GetHeight() + 180)
+                    HilightTex.SetSize(Spec.GetWidth(), Spec.GetHeight() + 180)
+                    PushedTex.SetSize(Spec.GetWidth(), Spec.GetHeight() + 180)
                 }
+                StartX += Width
 
                 FrameData.PlayerTalentFrameTabsLeftData[Tree.TabId+1] = {Frame: Spec, SpecButton: ActivateSpecBtn}
             }
@@ -1053,7 +1050,7 @@ export function TalentTreeUI() {
                                 if (TreeCache.PrereqLines[Talent.Row][Talent.Col]) {
                                     if (TreeCache.PrereqLines[Talent.Row][Talent.Col][By.SpellId]) {
                                         let Line : WoWAPI.Frame = TreeCache.PrereqLines[Talent.Row][Talent.Col][By.SpellId].Line
-                                        if (Talent.NumRanks === TreeCache.Spells[Tab.TabId][Talent.NodeIndex]) {
+                                        if (Talent.NumRanks === TreeCache.Spells[Tab.TabId][Talent.NodeIndex] && (Talent.NodeType === 2 ? TreeCache.Spells[Tab.TabId][Talent.NodeIndex] > 0 : true)) {
                                             Line.SetBackdropColor(165/255, 142/255, 17/255, 1) 
                                         } else {
                                             Line.SetBackdropColor(82/255, 82/255, 82/255, 1) 
@@ -1152,7 +1149,6 @@ export function TalentTreeUI() {
 
                                 TreeCache.ChoiceNodes[Talent.NodeIndex][ChoiceSpellId] = ChoiceTalentButton
                             })
-                            ChoiceTalents.Show()
                             GridChoiceTalents[Row][Col] = ChoiceTalents
                         }
                     }
@@ -1250,7 +1246,7 @@ export function TalentTreeUI() {
                     }
 
                     if (Talent.NodeType === 2) {
-                        if (IsMouseOverFrame(Frame, 25) && FrameStatus.ReqsMet)
+                        if (IsMouseOverFrame(Frame, 25) && FrameStatus.ReqsMet && (TreeCache.Spells[Tab.TabId][Talent.NodeIndex] > 0 || TreeCache.Points[Tab.TabType] >= Talent.RankCost))
                             GridChoiceTalents[Row][Col].Show()
                         else
                             GridChoiceTalents[Row][Col].Hide()
@@ -1264,7 +1260,7 @@ export function TalentTreeUI() {
                             } 
                         }
                         FrameStatus.CanUpRank = false
-                    } else if (Talent.NumRanks > TreeCache.Spells[Tab.TabId][Talent.NodeIndex]) {
+                    } else if (Talent.NumRanks > TreeCache.Spells[Tab.TabId][Talent.NodeIndex] || (Talent.NodeType === 2 && TreeCache.Spells[Tab.TabId][Talent.NodeIndex] === 0)) {
                         FrameData.TextureIcon.SetDesaturated(false)
                         if (FrameData.Border && FrameData.BorderTexture) {
                             FrameData.BorderTexture.SetDesaturated(false)
@@ -1285,11 +1281,17 @@ export function TalentTreeUI() {
                     FrameData.TextureIcon.ClearAllPoints()
                     FrameData.TextureIcon.SetPoint('CENTER', FrameData.Border, 'CENTER')
                     FrameData.TextureIcon.SetSize(35, 35)
+                    FrameData.TextureIcon.Show()
+                    FrameData.TextureIconLeft.Hide()
+                    FrameData.TextureIconRight.Hide()
                 } else if (Talent.NodeType === 1) {
                     FrameData.TextureIcon.SetTexture(Icon)
                     FrameData.BorderTexture.ClearAllPoints()
                     FrameData.BorderTexture.SetPoint('CENTER', FrameData.Border, 'CENTER', 2, -3)
                     FrameData.BorderTexture.SetSize(59, 59)
+                    FrameData.TextureIcon.Show()
+                    FrameData.TextureIconLeft.Hide()
+                    FrameData.TextureIconRight.Hide()
                 }
 
                 if (Talent.NodeType == 2) {

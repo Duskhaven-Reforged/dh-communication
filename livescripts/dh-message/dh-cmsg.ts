@@ -1,5 +1,5 @@
 import { ClientCallbackOperations, SimpleMessagePayload } from '../../shared/Messages';
-import { DHPointType, DHTalentTab, TALENT_POINT_TYPES } from '../classes';
+import { DHPlayerLoadout, DHPointType, DHTalentTab, TALENT_POINT_TYPES } from '../classes';
 import { DHCache } from '../dh-cachedata/dh-cache';
 import { cActiveLoadouts, cLoadouts } from '../dh-cachedata/dh-chardata';
 import { GetTalentTreeLayoutPayload, TTLPTalent, TTLPTalentPrereq, TTLPTalentRank, TalentTreeLayout, TalentTreeLayoutPayload } from '../../shared/Payloads/TalentTreeLayoutPayload';
@@ -111,59 +111,64 @@ export class DHCommonMessage {
         }
     }
 
-    public SendTalents(player: TSPlayer) {
-        let spec = this.cache.TryGetCharacterActiveSpec(player)
+    public SendTalents(Player: TSPlayer) {
+        let spec = this.cache.TryGetCharacterActiveSpec(Player)
         if (spec) {
-            let Loadout = cActiveLoadouts[player.GetGUID().GetCounter()][spec.SpecTabId]
-            let Output = Loadout.TalentString
-            let TestString = wDefaultLoadoutStrings[player.GetClass()][spec.SpecTabId]
+            console.log(spec.SpecTabId)
+            let Loadout = cActiveLoadouts[Player.GetGUID().GetCounter()][spec.SpecTabId]
+            if (Loadout == null) {
+                this.cache.AddDefaultLoadout(Player)
+                Loadout = cActiveLoadouts[Player.GetGUID().GetCounter()][spec.SpecTabId]
+            }
+            let TestString = wDefaultLoadoutStrings[Player.GetClass()][spec.SpecTabId]
 
-            if (Output.length != TestString.length) {
-                this.cache.ForgetTalents(player, spec, DHPointType.TALENT)
-                Output = TestString
+            if (Loadout.TalentString.length != TestString.length) {
+                this.cache.ForgetTalents(Player, spec, DHPointType.TALENT)
+                Loadout.TalentString = TestString 
+                cActiveLoadouts[Player.GetGUID().GetCounter()][spec.SpecTabId] = Loadout
+                this.cache.SavePLO(Player, Loadout)
             }
 
-            let pkt = new SimpleMessagePayload(ClientCallbackOperations.GET_TALENTS, Output);
-            pkt.write().SendToPlayer(player)
+            let pkt = new SimpleMessagePayload(ClientCallbackOperations.GET_TALENTS, Loadout.TalentString);
+            pkt.write().SendToPlayer(Player)
         }
     }
 
     public SendSpecInfo(player: TSPlayer) {
         let out = new CharacterSpecsPayload()
-        let specs = this.cache.TryGetAllCharacterSpecs(player)
-        out.SpecCounts = specs.length
-        specs.forEach((spec) => {
-            let CPSS = new CPSSpec()
-            CPSS.Id = spec.Id
-            CPSS.Name = spec.Name
-            CPSS.Description = spec.Description
-            CPSS.Active = spec.Active ? 1 : 0
-            CPSS.SpellIcon = spec.SpellIconId
-            CPSS.SpecTabId = spec.SpecTabId
+        let spec = this.cache.TryGetAllCharacterSpecs(player)
+        out.SpecCounts = 1
+        let CPSS = new CPSSpec()
+        CPSS.Id = spec.Id
+        CPSS.Name = spec.Name
+        CPSS.Description = spec.Description
+        CPSS.Active = spec.Active ? 1 : 0
+        CPSS.SpellIcon = spec.SpellIconId
+        CPSS.SpecTabId = spec.SpecTabId
 
-            CPSS.PointsSpentCount = spec.PointsSpent.get_length()
-            spec.PointsSpent.forEach((Tab, Amount) => {
-                let Spend = new CSPPointSpend()
-                Spend.TabId = Tab
-                Spend.Amount = Amount
-                CPSS.PointsSpent.push(Spend)
-            })
-
-            CPSS.PointsCount = TALENT_POINT_TYPES.length
-            TALENT_POINT_TYPES.forEach((type) => {
-                let Point = new CSPPoints()
-                let cps = this.cache.GetSpecPoints(player, type, spec.Id)
-                
-                Point.Type = type
-                Point.SpecPointSum = cps.Sum
-                Point.SpecPointMax = cps.Max
-                Point.CommonPointSum = cps.Sum
-                Point.AbsoluteMax = cps.Max
-                CPSS.Points.push(Point)
-            })
-
-            out.Specs.push(CPSS)
+        CPSS.PointsSpentCount = spec.PointsSpent.get_length()
+        spec.PointsSpent.forEach((Tab, Amount) => {
+            let Spend = new CSPPointSpend()
+            Spend.TabId = Tab
+            Spend.Amount = Amount
+            CPSS.PointsSpent.push(Spend)
         })
+
+        CPSS.PointsCount = TALENT_POINT_TYPES.length
+        TALENT_POINT_TYPES.forEach((type) => {
+            let Point = new CSPPoints()
+            let cps = this.cache.GetSpecPoints(player, type, spec.Id)
+            
+            Point.Type = type
+            Point.SpecPointSum = cps.Sum
+            Point.SpecPointMax = cps.Max
+            Point.CommonPointSum = cps.Sum
+            Point.AbsoluteMax = cps.Max
+            CPSS.Points.push(Point)
+        })
+
+        out.Specs.push(CPSS)
+
 
         let pkt = new GetCharacterSpecsPayload().BuildPacket(out)
         pkt.SendToPlayer(player)

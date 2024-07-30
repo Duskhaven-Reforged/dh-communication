@@ -64,10 +64,13 @@ export class DHCache {
 
                 cLoadouts[owner][tab.Id][plo.Id] = plo
                 cActiveLoadouts[owner][tab.Id] = plo
-
-                const res = QueryCharacters(`insert into \`character_talent_loadouts\` (\`guid\`, \`id\`, \`talentTabId\`, \`name\`, \`talentString\`, \`active\`) values (${owner}, ${plo.Id}, ${tab.Id}, '${plo.Name}', '${loadout}', 1)`)
+                this.SavePLO(player, plo)
             })
         }
+    }
+
+    public SavePLO(Player: TSPlayer, plo: DHPlayerLoadout) {
+        const res = QueryCharacters(`replace into \`character_talent_loadouts\` (\`guid\`, \`id\`, \`talentTabId\`, \`name\`, \`talentString\`, \`active\`) values (${Player.GetGUID().GetCounter()}, ${plo.Id}, ${plo.TabId}, '${plo.Name}', '${plo.TalentString}', ${plo.Active})`)
     }
 
     LocalTreeMetaData: TSDictionary<uint32, DHTreeMetaData> = CreateDictionary<uint32, DHTreeMetaData>({})
@@ -174,6 +177,8 @@ export class DHCache {
                         Loadout.TalentString = LoadoutString
                         cLoadouts[Player.GetGUID().GetCounter()][Loadout.TabId][Loadout.Id] = Loadout
                         cActiveLoadouts[Player.GetGUID().GetCounter()][PlayerSpec] = Loadout
+
+                        this.SavePLO(Player, Loadout)
                     } else
                         return
 
@@ -302,25 +307,16 @@ export class DHCache {
         return CreateDictionary<uint32, DHCharacterTalent>({})
     }
 
-    public TryGetAllCharacterSpecs(player: TSPlayer) : TSArray<DHPlayerSpec> {
+    public TryGetAllCharacterSpecs(player: TSPlayer) : DHPlayerSpec {
         let out : TSArray<DHPlayerSpec> = CreateArray<DHPlayerSpec>([])
         let guid = player.GetGUID().GetCounter()
-        if (cSpecs.contains(guid)) {
-            cSpecs[guid].forEach((id, spec) => {
-                out.push(spec)
-            })
-        }
-
-        return out
+        return cSpecs[guid]
     }
 
     public TryGetCharacterActiveSpec(player: TSPlayer) : DHPlayerSpec {
         let guid = player.GetGUID().GetCounter()
         
-        if (cSpecs.contains(guid))
-            return cSpecs[guid][1]
-
-        return DHPlayerSpec.Empty()
+        return cSpecs[guid]
     }
 
     public GetTalent(player: TSPlayer, spell: number) : DHCharacterTalent {
@@ -362,7 +358,7 @@ export class DHCache {
     public UpdateCharSpec(player: TSPlayer, spec: DHPlayerSpec) {
         let owner = player.GetGUID().GetCounter()
         
-        cSpecs[owner][spec.Id] = spec
+        cSpecs[owner] = spec
         this.SaveSpec(spec)
     }
 
@@ -370,22 +366,21 @@ export class DHCache {
         let m = this.GetMaxPointDefaults(type)
 
         if (amount > 0) {
-            cSpecs[player.GetGUID().GetCounter()].forEach((specId, spec) => {
-                let sp = this.GetSpecPoints(player, type, specId)
-                if (sp.Sum < m.Max) {
-                    let NewAmount = sp.Sum + amount
-                    if (NewAmount > m.Max)
-                        amount = m.Max - sp.Sum
+            let spec = cSpecs[player.GetGUID().GetCounter()]
+            let sp = this.GetSpecPoints(player, type, spec.Id)
+            if (sp.Sum < m.Max) {
+                let NewAmount = sp.Sum + amount
+                if (NewAmount > m.Max)
+                    amount = m.Max - sp.Sum
 
-                    sp.Max += amount
-                    sp.Sum += amount
-                    this.UpdateCharPoints(player, sp)
+                sp.Max += amount
+                sp.Sum += amount
+                this.UpdateCharPoints(player, sp)
 
-                    let pkt = new SimpleMessagePayload(ClientCallbackOperations.LEVELUP, `|cff8FCE00You have been awarded ${amount} ${GetPointTypeName(type)} point${amount > 1 ? 's' : ''}.`);
-                    pkt.write().SendToPlayer(player)
-                }
-            })
-        }
+                let pkt = new SimpleMessagePayload(ClientCallbackOperations.LEVELUP, `|cff8FCE00You have been awarded ${amount} ${GetPointTypeName(type)} point${amount > 1 ? 's' : ''}.`);
+                pkt.write().SendToPlayer(player)
+            }
+        })
     }
 
     public SaveSpec(spec: DHPlayerSpec) {
@@ -434,8 +429,12 @@ export class DHCache {
     public CreateBaseSpec(player: TSPlayer) {
         let spec = new DHPlayerSpec(player.GetGUID().GetCounter(), 1, 'Base', 'Base spec used for everything', true, 133743, 1)
         let tabs = this.TryGetCustomTalentTabs(player, DHPointType.TALENT)
+        let LowestSpecId = 65
         if (tabs.length) {
             tabs.forEach((tab) => {
+                if (tab.Id < LowestSpecId)
+                    LowestSpecId = tab.Id
+
                 tab.Talents.forEach((spell, talent) => {
                     let newTalent = new DHCharacterTalent(talent.SpellId, tab.Id, 0, this.IsStarter(player, talent))
                     newTalent.Type = talent.NodeType
@@ -443,6 +442,8 @@ export class DHCache {
                 })
             })
         }
+        spec.SpecTabId = LowestSpecId
+
         tabs = this.TryGetCustomTalentTabs(player, DHPointType.CLASS)
         if (tabs.length) {
             tabs.forEach((tab) => {
@@ -470,6 +471,7 @@ export class DHCache {
         QueryCharacters(`DELETE FROM character_points WHERE guid = ${guid} AND spec != ${ACOUNT_WIDE_KEY}`)
         QueryCharacters(`DELETE FROM character_talents WHERE guid = ${guid} AND spec != ${ACOUNT_WIDE_KEY}`)
         QueryCharacters(`DELETE FROM character_talents_spent WHERE guid = ${guid} AND spec != ${ACOUNT_WIDE_KEY}`)
+        QueryCharacters(`DELETE FROM character_talent_loadouts where guid = ${guid}`)
     }
 
     public ForgetTalents(player: TSPlayer, spec: DHPlayerSpec, type: DHPointType) {

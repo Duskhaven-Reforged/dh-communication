@@ -4,7 +4,7 @@ import { wTalentTrees } from "./dh-worlddata";
 export let cActions: TSDictionary<uint64, TSDictionary<uint8, TSDictionary<uint8, CharacterSpecAction>>> = CreateDictionary<uint64, TSDictionary<uint8, TSDictionary<uint8, CharacterSpecAction>>>({})
 export let cCharPoints: TSDictionary<uint64 /*owner*/, TSDictionary<uint16/*pointType*/, TSDictionary<uint8/*spec*/, DHCharacterPoint>>> = CreateDictionary<uint64, TSDictionary<uint16, TSDictionary<uint8, DHCharacterPoint>>>({})
 export let cMaxPointDefaults: TSDictionary<uint16, DHCharacterPoint> = CreateDictionary<uint16, DHCharacterPoint>({})
-export let cSpecs: TSDictionary<uint64 /*owner*/, TSDictionary<uint8/*spec*/, DHPlayerSpec>> = CreateDictionary<uint64, TSDictionary<uint8, DHPlayerSpec>>({})
+export let cSpecs: TSDictionary<uint64 /*owner*/, DHPlayerSpec> = CreateDictionary<uint64, DHPlayerSpec>({})
 export let cLoadouts: TSDictionary<uint64 /*owner*/, TSDictionary<uint32/*tab*/, TSDictionary<uint8/*id*/, DHPlayerLoadout>>> = CreateDictionary<uint64, TSDictionary<uint32, TSDictionary<uint8, DHPlayerLoadout>>>({})
 export let cActiveLoadouts: TSDictionary<uint64, TSDictionary<uint8, DHPlayerLoadout>> = CreateDictionary<uint64, TSDictionary<uint8, DHPlayerLoadout>>({})
 
@@ -75,7 +75,7 @@ class CharacterChoiceNodeChoices {
             if (wTalentTrees.contains(tabId))
                 if (wTalentTrees[tabId].Talents.contains(node)) {
                     if (wTalentTrees[tabId].Talents[node].NodeType == DHNodeType.CHOICE) {
-                        cSpecs[owner][spec].ChoiceNodesChosen[node] = choice
+                        cSpecs[owner].ChoiceNodesChosen[node] = choice
             
                         count++
                     }
@@ -126,7 +126,7 @@ class CharacterSpecs {
 
             let spec = new DHPlayerSpec(owner, id, name, description, !!active, spellIcon, specTabId);
 
-            cSpecs[owner][id] = spec
+            cSpecs[owner] = spec
 
             count++
         }
@@ -180,7 +180,7 @@ class CharacterTalents {
             if (wTalentTrees.contains(tab)) {
                 if (wTalentTrees[tab].Talents.contains(spell)) {
                     talent.Type = wTalentTrees[tab].Talents[spell].NodeType
-                    cSpecs[owner][spec].Talents[tab][spell] = talent
+                    cSpecs[owner].Talents[tab][spell] = talent
                     count++
                 }
             }
@@ -202,7 +202,7 @@ class CharacterTalentsSpent {
             let TabId = res.GetUInt32(2)
             let Amount = res.GetUInt8(3)
 
-            cSpecs[Owner][Spec].PointsSpent[TabId] = Amount
+            cSpecs[Owner].PointsSpent[TabId] = Amount
             count++
         }
 
