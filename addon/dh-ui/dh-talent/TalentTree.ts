@@ -798,6 +798,9 @@ export function TalentTreeUI() {
         let CX = (x1 + x2)/2
         let CY = (y1 + y2)/2
 
+        if (CX === 0)
+            CX -= 12/2
+
         if (!TreeCache.PrereqLines[RequiredTalent.Row])
             TreeCache.PrereqLines[RequiredTalent.Row] = []
 
@@ -1043,7 +1046,7 @@ export function TalentTreeUI() {
                                     let OtherReq = FindSpellInTab(Tab, Prereq.Talent)
                                     SumDependency += OtherReq.NodeType === 2 ? Math.min(1, TreeCache.Spells[Prereq.TabId][OtherReq.NodeIndex]) : TreeCache.Spells[Prereq.TabId][OtherReq.NodeIndex]
                                 })
-                                let Value = Talent.NodeIndex === 2 ? 1 : Talent.NumRanks
+                                let Value = Talent.NodeIndex === 2 ? Math.min(1, TreeCache.Spells[Talent.TabId][Talent.NodeIndex]) : TreeCache.Spells[Talent.TabId][Talent.NodeIndex]
                                 PreventDerank ||= SumDependency - Value == 0
                             }
 
@@ -1051,7 +1054,7 @@ export function TalentTreeUI() {
                                 if (TreeCache.PrereqLines[Talent.Row][Talent.Col]) {
                                     if (TreeCache.PrereqLines[Talent.Row][Talent.Col][By.SpellId]) {
                                         let Line : WoWAPI.Frame = TreeCache.PrereqLines[Talent.Row][Talent.Col][By.SpellId].Line
-                                        if (Talent.NumRanks === TreeCache.Spells[Tab.TabId][Talent.NodeIndex] && (Talent.NodeType === 2 ? TreeCache.Spells[Tab.TabId][Talent.NodeIndex] > 0 : true)) {
+                                        if ((Talent.NumRanks === TreeCache.Spells[Tab.TabId][Talent.NodeIndex] && Talent.NodeType < 2) || (Talent.NodeType === 2 && TreeCache.Spells[Tab.TabId][Talent.NodeIndex] > 0)) {
                                             Line.SetBackdropColor(165/255, 142/255, 17/255, 1) 
                                         } else {
                                             Line.SetBackdropColor(82/255, 82/255, 82/255, 1) 
@@ -1331,6 +1334,7 @@ export function TalentTreeUI() {
                     let Settings = TextureSettings[Talent.NodeType]
 
                     if (Settings) {
+                        FrameData.BorderTexture.SetDesaturated(Settings.Desaturate)
                         FrameData.TextureIcon.SetDesaturated(Settings.Desaturate)
                         FrameData.BorderTexture.SetTexCoord(Settings.Coords.minX, Settings.Coords.maxX, Settings.Coords.minY, Settings.Coords.maxY)
                     }

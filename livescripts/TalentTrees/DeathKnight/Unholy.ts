@@ -9,7 +9,6 @@ export function ReloadUnholyDKTree() {
     SetSpecAutolearn(CLASS, TAB, 16, GetID(`Spell`, 'dh-spells', 'dk-unh-ebonplaguebringer'))
 
     QueryWorld(`Delete from forge_talents where talentTabId = ${TAB}`)
-
     let Talent : uint32 = GetID(`Spell`, 'dh-spells', 'dk-unh-festeringstrikes')
     SetTalentNode(Talent, TAB, 5, 1, 0, true, new StarterData(CLASS, true, 0), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `dk-unh-clawingshadows`)

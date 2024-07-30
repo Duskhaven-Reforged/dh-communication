@@ -2,7 +2,7 @@ export const PATH = 'Interface\\AddOns\\dh-ui-assets\\'
 
 export let CONSTANTS = { 
     classIcon: { 
-        ['DEATH KNIGHT']: 'Interface\\Icons\\spell_deathknight_classicon', 
+        DEATHKNIGHT: 'Interface\\Icons\\spell_deathknight_classicon', 
         DRUID: 'Interface\\Icons\\INV_Misc_MonsterClaw_04', 
         WARLOCK: 'Interface\\Icons\\Spell_Nature_FaerieFire', 
         HUNTER: 'Interface\\Icons\\INV_Weapon_Bow_07', 
