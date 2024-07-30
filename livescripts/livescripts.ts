@@ -118,22 +118,27 @@ export function SetAllSkillsToLevel(Player: TSPlayer) {
 export function LearnSpellsForLevel(player: TSPlayer) {
     if (wSpecAutolearn.contains(player.GetClass())) {
         let Spec = player.GetUInt(`Spec`)
-        if (wSpecAutolearn[player.GetClass()].contains(Spec)) {
-            let Levels = wSpecAutolearn[player.GetClass()][Spec]
+        wSpecAutolearn[player.GetClass()].forEach((SpecId, Levels) => {
             Levels.forEach((Level, Spells) => {
-                if (player.GetLevel() >= Level) {
+                if (SpecId === Spec) {
+                    if (player.GetLevel() >= Level) {
+                        Spells.forEach((Spell) => {
+                            if (!player.HasSpell(Spell))
+                                player.LearnSpell(Spell)
+                        })
+                    }
+                } else {
                     Spells.forEach((Spell) => {
-                        if (!player.HasSpell(Spell))
-                            player.LearnSpell(Spell)
+                        player.RemoveSpell(Spell)
                     })
                 }
             })
-        }
+        })
     }
 }
 
 function LearnSpecSpecificSkills(Player: TSPlayer, SpecId: number) {
-    let DualWieldSpecs = [2]
+    let DualWieldSpecs = [2, 20, 16, 17, 18]
     if (DualWieldSpecs.includes(SpecId))
         Player.SetSkill(118, 1, 1, 1)
     else
