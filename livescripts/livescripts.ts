@@ -12,10 +12,10 @@ export function Main(events: TSEvents) {
 
     events.Player.OnLogin((player, first) => {
         let spec = mDHDMsg.cache.TryGetCharacterActiveSpec(player)
-        if (!spec.IsNull()) {
-            player.SetUInt(`Spec`, spec.SpecTabId)
-            LearnSpellsForLevel(player)
-        }
+        console.log(`Login`)
+        player.SetUInt(`Spec`, spec.SpecTabId)
+        LearnSpellsForLevel(player)
+
         //todo load actions and maybe account bonuses
         // maybe unlearn flagged too
     })
@@ -74,8 +74,11 @@ export function Main(events: TSEvents) {
     }) 
 
     events.Unit.OnCastCancelled((who, spell) => {
-        if (who.IsPlayer() && spell.GetEntry() === 63645)
+        if (who.IsPlayer() && spell.GetEntry() === 63645) {
             who.SetUInt(`SpecActivation`, 0)
+            let ClientCallback = new SimpleMessagePayload(ClientCallbackOperations.ACTIVATE_CLASS_SPEC, 'Cancelled Setting Spec')
+            ClientCallback.write().SendToPlayer(who.ToPlayer())
+        }
     })
 
     events.Spell.OnAfterCast(63645, (Spell, Cancel) => {
@@ -92,11 +95,11 @@ export function Main(events: TSEvents) {
                     mDHDMsg.cache.ForgetTalents(Player, Spec, DHPointType.TALENT)
 
                     Spec.SpecTabId = SpecToActivate
+                    Player.SetUInt(`Spec`, Spec.SpecTabId)
                     mDHDMsg.cache.UpdateCharSpec(Player, Spec)
                     LearnSpecSpecificSkills(Player, Spec.SpecTabId)
                     LearnSpellsForLevel(Player)
 
-                    Player.SetUInt(`Spec`, Spec.SpecTabId)
                     mDHDMsg.SendSpecInfo(Player)
                     let ClientCallback = new SimpleMessagePayload(ClientCallbackOperations.ACTIVATE_CLASS_SPEC, 'Finished Setting Spec')
                     ClientCallback.write().SendToPlayer(Player)

@@ -1041,9 +1041,10 @@ export function TalentTreeUI() {
                                 let SumDependency = 0
                                 By.Prereqs.forEach((Prereq) => {
                                     let OtherReq = FindSpellInTab(Tab, Prereq.Talent)
-                                    SumDependency += TreeCache.Spells[Prereq.TabId][OtherReq.NodeIndex]
+                                    SumDependency += OtherReq.NodeType === 2 ? Math.min(1, TreeCache.Spells[Prereq.TabId][OtherReq.NodeIndex]) : TreeCache.Spells[Prereq.TabId][OtherReq.NodeIndex]
                                 })
-                                PreventDerank ||= SumDependency - Talent.NumRanks == 0
+                                let Value = Talent.NodeIndex === 2 ? 1 : Talent.NumRanks
+                                PreventDerank ||= SumDependency - Value == 0
                             }
 
                             if (TreeCache.PrereqLines[Talent.Row]) {
