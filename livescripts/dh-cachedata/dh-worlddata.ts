@@ -10,6 +10,11 @@ import { ReloadAssRogueTree } from "../TalentTrees/Rogue/Assassination"
 import { ReloadCorRogueTree } from "../TalentTrees/Rogue/Corsair"
 import { ReloadSubRogueTree } from "../TalentTrees/Rogue/Subtlety"
 import { ReloadRogueTree } from "../TalentTrees/Rogue/rogue"
+import { ReloadEleShamTree } from "../TalentTrees/Shaman/Elemental"
+import { ReloadEnhShamTree } from "../TalentTrees/Shaman/Enhancement"
+import { ReloadRestoShamTree } from "../TalentTrees/Shaman/Restoration"
+import { ReloadWatcherShamTree } from "../TalentTrees/Shaman/Watcher"
+import { ReloadShamanTree } from "../TalentTrees/Shaman/shaman"
 import { ReloadArmsWarrTree } from "../TalentTrees/Warrior/Arms"
 import { ReloadFuryWarrTree } from "../TalentTrees/Warrior/Fury"
 import { ReloadProtWarrTree } from "../TalentTrees/Warrior/Protection"
@@ -94,7 +99,13 @@ export function RefillTrees(ClassMask: uint32) {
         ReloadFrostDKTree()
         ReloadUnholyDKTree()
     }
-    if (ClassMask & (1 << Class.SHAMAN)) {}
+    if (ClassMask & (1 << Class.SHAMAN)) {
+        ReloadShamanTree()
+        ReloadEleShamTree()
+        ReloadEnhShamTree()
+        ReloadRestoShamTree()
+        ReloadWatcherShamTree()
+    }
     if (ClassMask & (1 << Class.MAGE)) {}
     if (ClassMask & (1 << Class.WARLOCK)) {}
     if (ClassMask & (1 << Class.DRUID)) {}
