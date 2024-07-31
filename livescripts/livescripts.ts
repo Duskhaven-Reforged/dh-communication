@@ -86,9 +86,6 @@ export function Main(events: TSEvents) {
             let Player = Spell.GetCaster().ToPlayer()
             let SpecToActivate = Player.GetUInt(`SpecActivation`)
 
-            let ClientCallback = new SimpleMessagePayload(ClientCallbackOperations.ACTIVATE_CLASS_SPEC, 'Show')
-            ClientCallback.write().SendToPlayer(Player)
-            
             let Tab = mDHDMsg.cache.TryGetTalentTab(Player, SpecToActivate)
             let Spec = mDHDMsg.cache.TryGetCharacterActiveSpec(Player)
             if (wTalentTrees.contains(SpecToActivate)) {

@@ -1674,7 +1674,9 @@ export function TalentTreeUI() {
         LoadTalentString(Loadout)
     })
     OnCustomPacket(ClientCallbackOperations.ACTIVATE_CLASS_SPEC, pkt => {
-        let Show = pkt.ReadString() === 'Show'
+        let Message = pkt.ReadString()
+        console.log(Message)
+        let Show = Message === 'Show'
         if (Show)
             ClassSpecWindowLockout.Show()
         else {

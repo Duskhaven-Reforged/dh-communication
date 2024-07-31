@@ -268,6 +268,9 @@ export class DHCache {
         const ACTIVATE_SPEC_SPELL = 63645
         let ERROR = new SimpleMessagePayload(ClientCallbackOperations.ACTIVATE_SPEC_ERROR, 'Spec Activation Error: ')
         if (!Player.IsInCombat() && !Player.IsDead()) {
+            let ClientCallback = new SimpleMessagePayload(ClientCallbackOperations.ACTIVATE_CLASS_SPEC, 'Show')
+            ClientCallback.write().SendToPlayer(Player)
+
             Player.SetUInt(`SpecActivation`, Spec)
             Player.CastSpell(Player, ACTIVATE_SPEC_SPELL)
         } else {
