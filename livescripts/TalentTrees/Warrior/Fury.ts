@@ -1,6 +1,6 @@
 import { EmptyPrereqs, EmptySpellArray, SetChoiceNode, SetSpecAutolearn, SetTalentNode, SpecTabs } from "../TalentTreeLoader"
 
-export function ReloadFuryWarrTree() {
+export function ReloadWarriorFuryTree() {
     let TAB: uint32 = SpecTabs.FURY
     let CLASS = Class.WARRIOR
 

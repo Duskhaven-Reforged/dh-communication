@@ -1,6 +1,6 @@
 import { EmptyPrereqs, EmptySpellArray, SetChoiceNode, SetSpecAutolearn, SetTalentNode, SpecTabs } from "../TalentTreeLoader"
 
-export function ReloadHolyPalTree() {
+export function ReloadPalHolyTree() {
     let TAB: uint32 = SpecTabs.HPAL
     let CLASS = 2
 

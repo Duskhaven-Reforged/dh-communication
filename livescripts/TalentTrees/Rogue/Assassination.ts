@@ -1,6 +1,6 @@
 import { EmptyPrereqs, EmptySpellArray, SetChoiceNode, SetSpecAutolearn, SetTalentNode, SpecTabs } from "../TalentTreeLoader"
 
-export function ReloadAssRogueTree() {
+export function ReloadRogueAssTree() {
     let TAB: uint32 = SpecTabs.ASSR
     let CLASS = Class.ROGUE
 

@@ -1,6 +1,6 @@
 import { EmptyPrereqs, EmptySpellArray, SetChoiceNode, SetSpecAutolearn, SetTalentNode, SpecTabs } from "../TalentTreeLoader"
 
-export function ReloadBloodDKTree() {
+export function ReloadDKBloodTree() {
     let TAB : uint32 = SpecTabs.BDK
     let CLASS = Class.DEATH_KNIGHT
 

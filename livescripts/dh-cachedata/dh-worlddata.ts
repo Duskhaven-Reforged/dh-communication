@@ -1,24 +1,28 @@
-import { ReloadBloodDKTree } from "../TalentTrees/DeathKnight/Blood"
-import { ReloadFrostDKTree } from "../TalentTrees/DeathKnight/Frost"
-import { ReloadUnholyDKTree } from "../TalentTrees/DeathKnight/Unholy"
+import { ReloadDKBloodTree } from "../TalentTrees/DeathKnight/Blood"
+import { ReloadDKFrostTree } from "../TalentTrees/DeathKnight/Frost"
+import { ReloadDKUnholyTree } from "../TalentTrees/DeathKnight/Unholy"
 import { ReloadDKTree } from "../TalentTrees/DeathKnight/deathknight"
-import { ReloadHolyPalTree } from "../TalentTrees/Paladin/Holy"
-import { ReloadProtPalTree } from "../TalentTrees/Paladin/Protection"
-import { ReloadRetPalTree } from "../TalentTrees/Paladin/Retribution"
-import { ReloadPaladinTree } from "../TalentTrees/Paladin/paladin"
-import { ReloadAssRogueTree } from "../TalentTrees/Rogue/Assassination"
-import { ReloadCorRogueTree } from "../TalentTrees/Rogue/Corsair"
-import { ReloadSubRogueTree } from "../TalentTrees/Rogue/Subtlety"
+import { ReloadMageArcaneTree } from "../TalentTrees/Mage/Arcane"
+import { ReloadMageFireTree } from "../TalentTrees/Mage/Fire"
+import { ReloadMageFrostTree } from "../TalentTrees/Mage/Frost"
+import { ReloadMageTree } from "../TalentTrees/Mage/mage"
+import { ReloadPalHolyTree } from "../TalentTrees/Paladin/Holy"
+import { ReloadPalProtTree } from "../TalentTrees/Paladin/Protection"
+import { ReloadPalRetTree } from "../TalentTrees/Paladin/Retribution"
+import { ReloadPalTree } from "../TalentTrees/Paladin/paladin"
+import { ReloadRogueAssTree } from "../TalentTrees/Rogue/Assassination"
+import { ReloadRogueCorsairTree } from "../TalentTrees/Rogue/Corsair"
+import { ReloadRogueSubTree } from "../TalentTrees/Rogue/Subtlety"
 import { ReloadRogueTree } from "../TalentTrees/Rogue/rogue"
-import { ReloadEleShamTree } from "../TalentTrees/Shaman/Elemental"
-import { ReloadEnhShamTree } from "../TalentTrees/Shaman/Enhancement"
-import { ReloadRestoShamTree } from "../TalentTrees/Shaman/Restoration"
-import { ReloadWatcherShamTree } from "../TalentTrees/Shaman/Watcher"
+import { ReloadShamanEleTree } from "../TalentTrees/Shaman/Elemental"
+import { ReloadShamanEnhTree } from "../TalentTrees/Shaman/Enhancement"
+import { ReloadShamanRestoTree } from "../TalentTrees/Shaman/Restoration"
+import { ReloadShamanWatcherTree } from "../TalentTrees/Shaman/Watcher"
 import { ReloadShamanTree } from "../TalentTrees/Shaman/shaman"
-import { ReloadArmsWarrTree } from "../TalentTrees/Warrior/Arms"
-import { ReloadFuryWarrTree } from "../TalentTrees/Warrior/Fury"
-import { ReloadProtWarrTree } from "../TalentTrees/Warrior/Protection"
-import { ReloadWarrTree } from "../TalentTrees/Warrior/warrior"
+import { ReloadWarriorArmsTree } from "../TalentTrees/Warrior/Arms"
+import { ReloadWarriorFuryTree } from "../TalentTrees/Warrior/Fury"
+import { ReloadWarriorProtTree } from "../TalentTrees/Warrior/Protection"
+import { ReloadWarriorTree } from "../TalentTrees/Warrior/warrior"
 import { DHNodeMetaData, DHPointType, DHTalent, DHTalentChoice, DHTalentPrereq, DHTalentTab, DHTreeMetaData, base64_char } from "../classes"
 
 /* Cache tables */
@@ -74,39 +78,44 @@ export function LoadWorldData() {
 
 export function RefillTrees(ClassMask: uint32) {
     if (ClassMask & (1 << Class.WARRIOR)) {
-        ReloadWarrTree()
-        ReloadArmsWarrTree()
-        ReloadFuryWarrTree()
-        ReloadProtWarrTree()
+        ReloadWarriorTree()
+        ReloadWarriorArmsTree()
+        ReloadWarriorFuryTree()
+        ReloadWarriorProtTree()
     }
     if (ClassMask & (1 << Class.PALADIN)) {
-        ReloadPaladinTree()
-        ReloadHolyPalTree()
-        ReloadRetPalTree()
-        ReloadProtPalTree()
+        ReloadPalTree()
+        ReloadPalHolyTree()
+        ReloadPalProtTree()
+        ReloadPalRetTree()
     }
     if (ClassMask & (1 << Class.HUNTER)) {}
     if (ClassMask & (1 << Class.ROGUE)) {
         ReloadRogueTree()
-        ReloadAssRogueTree()
-        ReloadCorRogueTree()
-        ReloadSubRogueTree()
+        ReloadRogueAssTree()
+        ReloadRogueCorsairTree()
+        ReloadRogueSubTree()
     }
     if (ClassMask & (1 << Class.PRIEST)) {}
     if (ClassMask & (1 << Class.DEATH_KNIGHT)) {
         ReloadDKTree()
-        ReloadBloodDKTree()
-        ReloadFrostDKTree()
-        ReloadUnholyDKTree()
+        ReloadDKBloodTree()
+        ReloadDKFrostTree()
+        ReloadDKUnholyTree()
     }
     if (ClassMask & (1 << Class.SHAMAN)) {
         ReloadShamanTree()
-        ReloadEleShamTree()
-        ReloadEnhShamTree()
-        ReloadRestoShamTree()
-        ReloadWatcherShamTree()
+        ReloadShamanEleTree()
+        ReloadShamanEnhTree()
+        ReloadShamanRestoTree()
+        ReloadShamanWatcherTree()
     }
-    if (ClassMask & (1 << Class.MAGE)) {}
+    if (ClassMask & (1 << Class.MAGE)) {
+        ReloadMageTree()
+        ReloadMageFrostTree()
+        ReloadMageFireTree()
+        ReloadMageArcaneTree()
+    }
     if (ClassMask & (1 << Class.WARLOCK)) {}
     if (ClassMask & (1 << Class.DRUID)) {}
 }

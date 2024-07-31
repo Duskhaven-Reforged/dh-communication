@@ -1,6 +1,6 @@
 import { EmptyPrereqs, EmptySpellArray, SetChoiceNode, SetSpecAutolearn, SetTalentNode, SpecTabs } from "../TalentTreeLoader"
 
-export function ReloadProtWarrTree() {
+export function ReloadWarriorProtTree() {
     let TAB: uint32 = SpecTabs.PWAR
     let CLASS = Class.WARRIOR
 

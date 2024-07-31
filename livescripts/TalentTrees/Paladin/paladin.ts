@@ -1,6 +1,6 @@
 import { EmptyPrereqs, EmptySpellArray, SetChoiceNode, SetTalentNode, SpecTabs } from "../TalentTreeLoader"
 
-export function ReloadPaladinTree() {
+export function ReloadPalTree() {
     let TAB: uint32 = 52
     let CLASS = 2
 

@@ -1,6 +1,6 @@
 import { EmptyPrereqs, EmptySpellArray, SetChoiceNode, SetSpecAutolearn, SetTalentNode, SpecTabs } from "../TalentTreeLoader"
 
-export function ReloadFrostDKTree() {
+export function ReloadDKFrostTree() {
     let TAB: uint32 = SpecTabs.FDK
     let CLASS = Class.DEATH_KNIGHT
 

@@ -1,7 +1,7 @@
 
 import { EmptyPrereqs, EmptySpellArray, SetChoiceNode, SetTalentNode, SpecTabs } from "../TalentTreeLoader"
 
-export function ReloadWarrTree() {
+export function ReloadWarriorTree() {
     let TAB = 51
     let ALLMASK = (1 << SpecTabs.ARMS - 1) | 1 << (SpecTabs.FURY - 1) | 1 << (SpecTabs.PWAR - 1)
 

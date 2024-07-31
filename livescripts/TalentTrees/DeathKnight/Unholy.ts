@@ -1,6 +1,6 @@
 import { EmptyPrereqs, EmptySpellArray, SetChoiceNode, SetSpecAutolearn, SetTalentNode, SpecTabs } from "../TalentTreeLoader"
 
-export function ReloadUnholyDKTree() {
+export function ReloadDKUnholyTree() {
     let TAB: uint32 = SpecTabs.UDK
     let CLASS = Class.DEATH_KNIGHT
 

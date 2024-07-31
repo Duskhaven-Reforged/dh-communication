@@ -1,6 +1,6 @@
 import { EmptyPrereqs, EmptySpellArray, SetChoiceNode, SetSpecAutolearn, SetTalentNode, SpecTabs } from "../TalentTreeLoader"
 
-export function ReloadEleShamTree() {
+export function ReloadShamanEleTree() {
     let TAB: uint32 = SpecTabs.ELEM
     let CLASS = Class.SHAMAN
 

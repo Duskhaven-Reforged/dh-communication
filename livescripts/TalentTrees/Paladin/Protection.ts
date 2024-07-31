@@ -1,6 +1,6 @@
 import { EmptyPrereqs, EmptySpellArray, SetChoiceNode, SetSpecAutolearn, SetTalentNode, SpecTabs } from "../TalentTreeLoader"
 
-export function ReloadProtPalTree() {
+export function ReloadPalProtTree() {
     let TAB: uint32 = SpecTabs.PPAL
     let CLASS = 2
 

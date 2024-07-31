@@ -1,6 +1,6 @@
 import { EmptyPrereqs, EmptySpellArray, SetChoiceNode, SetSpecAutolearn, SetTalentNode, SpecTabs } from "../TalentTreeLoader"
 
-export function ReloadCorRogueTree() {
+export function ReloadRogueCorsairTree() {
     let TAB: uint32 = SpecTabs.CORR
     let CLASS = Class.ROGUE
 

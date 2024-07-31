@@ -1,6 +1,6 @@
 import { EmptyPrereqs, EmptySpellArray, SetChoiceNode, SetSpecAutolearn, SetTalentNode, SpecTabs } from "../TalentTreeLoader"
 
-export function ReloadSubRogueTree() {
+export function ReloadRogueSubTree() {
     let TAB: uint32 = SpecTabs.SUBR
     let CLASS = Class.ROGUE
 
