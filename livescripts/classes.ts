@@ -50,7 +50,7 @@ export class DHCharacterTalent {
     TabId: uint32
     CurrentRank: uint8
     Type: uint8 = 0
-    Starter: bool = false
+    Starter: bool = true
 
     constructor(spell: number, tab: number, currentRank: number, Starter: bool) {
         this.SpellId = spell
@@ -137,10 +137,10 @@ export class DHTalent {
     NodeIndex: uint8
     NumberOfRanks: uint8
     PreReqType: uint8
-    Starter: uint8
+    Starter: TSArray<uint8>
 
     constructor(SpellId: uint32, TalentTabId: uint32, ColumnIndex: uint32, RowIndex: uint32, RankCost: uint8, TabPointReq: uint16, 
-        RequiredLevel: uint8, TalentType: uint8, NodeType: uint8, NodeIndex: uint8, NumberOfRanks: uint8, PrereqType: DHPrereqType, Starter: uint8) {
+        RequiredLevel: uint8, TalentType: uint8, NodeType: uint8, NodeIndex: uint8, NumberOfRanks: uint8, PrereqType: DHPrereqType, Starter: TSArray<uint8>) {
             this.SpellId = SpellId
             this.TalentTabId = TalentTabId
             this.RowIndex = RowIndex

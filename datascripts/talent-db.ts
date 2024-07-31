@@ -77,7 +77,7 @@ if (RebuildWorld) {
             \`preReqType\` TINYINT UNSIGNED NOT NULL,
             \`tabPointReq\` INT NOT null default 5,
             \`nodeType\` TINYINT NOT null default 0,
-            \`Starter\` TINYINT NOT NULL DEFAULT 0,
+            \`Starter\` BIGINT UNSIGNED NOT NULL DEFAULT 0,
             PRIMARY KEY (\`spellid\`, \`talentTabId\`, \`columnIndex\`, \`rowIndex\`),
             UNIQUE  KEY \`UniqueKey\` (\`talentTabId\`, \`columnIndex\`, \`rowIndex\`));
 

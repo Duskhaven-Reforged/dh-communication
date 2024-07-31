@@ -906,6 +906,8 @@ export function TalentTreeUI() {
                 if (Tab.TabType === 0)
                     Col += 11
 
+                let IsStarter = IsStarterForTab(Talent)
+
                 let FrameData = GridTalentTalents[Row][Col]
                 let Frame = FrameData.Frame 
 
@@ -992,7 +994,7 @@ export function TalentTreeUI() {
                     FrameData.RankText.Hide()
 
                 Frame.SetScript('OnMouseDown', function(self, input) {
-                    if (Talent.Starter < 1) {
+                    if (!IsStarter) {
                         let SpellRank = TreeCache.Spells[Tab.TabId][Talent.NodeIndex]
                         let Change = false
 
@@ -1065,6 +1067,13 @@ export function TalentTreeUI() {
                         })
                     }
                     FrameStatus.CanDeRank = !PreventDerank
+
+                    // if (Talent.StarterTabs > 0) {
+                    //     console.log('Spell: '+Talent.SpellId)
+                    //     Talent.Starter.forEach((Tap) => {
+                    //         console.log(Tap)
+                    //     })
+                    // }
 
                     if (Talent.NodeType == 2) { // Choice node
                         if (GridChoiceTalents[Row][Col] && !ChoiceTalentData[Talent.SpellId]) {
@@ -1510,7 +1519,7 @@ export function TalentTreeUI() {
                     TreeCache.Spells[Talent.TabId][Talent.NodeIndex] = 0
                     let Rank = Util.alpha.indexOf(ClassString[Talent.NodeIndex-1]) - 1
                     let Cost = Talent.RankCost * Rank
-                    if (Talent.Starter < 1) {
+                    if (!IsStarterForTab(Talent)) {
                         if (Talent.NodeType == 2 && Rank > 0)
                             Cost = Talent.RankCost
                         TreeCache.Points[7] -= Cost
@@ -1525,7 +1534,7 @@ export function TalentTreeUI() {
                     TreeCache.Spells[Talent.TabId][Talent.NodeIndex] = 0
                     let Rank = Util.alpha.indexOf(SpecString[Talent.NodeIndex-1]) - 1
                     let Cost = Rank * Talent.RankCost
-                    if (Talent.Starter < 1) {
+                    if (!IsStarterForTab(Talent)) {
                         if (Talent.NodeType == 2 && Rank > 0)
                             Cost = Talent.RankCost
                         TreeCache.Points[Type] -= Cost
@@ -1542,6 +1551,18 @@ export function TalentTreeUI() {
             TalentMicroButton.Click()
     }
 
+    function IsStarterForTab(Talent: TTLPTalent) : bool {
+        let out = false
+        if (Talent.StarterTabs > 0) {
+            Talent.Starter.forEach((TabId) => {
+                if (TalentTree.SelectedSpec === TabId)
+                    out = true
+            })
+        }
+
+        return out
+    }
+
     function DeselectAllTalents() {
         ClassSpecWindowLockout.Show()
         let SpecTab: TalentTreeLayout = TalentTree.SelectedTab
@@ -1549,7 +1570,7 @@ export function TalentTreeUI() {
         TreeCache.PointsSpent[SpecTab.TabId] = 0
         TreeCache.Points[0] = TalentTree.MaxPoints[0]
         SpecTab.Talents.forEach((Talent: TTLPTalent) => {
-            if (Talent.Starter < 1) {
+            if (!IsStarterForTab(Talent)) {
                 let Row = Talent.Row - 1
                 let Col = Talent.Col + 11
                 let FrameStatus = FrameStatusLookup[Row][Col]
@@ -1566,7 +1587,7 @@ export function TalentTreeUI() {
         TreeCache.PointsSpent[ClassTab.TabId] = 0
         TreeCache.Points[7] = TalentTree.MaxPoints[7]
         ClassTab.Talents.forEach((Talent) => {
-            if (Talent.Starter < 1) {
+            if (!IsStarterForTab(Talent)) {
                 let Row = Talent.Row - 1
                 let Col = Talent.Col
                 let FrameStatus = FrameStatusLookup[Row][Col]

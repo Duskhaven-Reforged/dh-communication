@@ -1,16 +1,4 @@
-export class StarterData {
-    Starter : bool = false
-    SpecMask : uint8 = 0
-    ApplicableClass : uint8 = 0
-
-    constructor(ApplicableClass: int8, Starter: bool = false, SpecMask: uint64 = 0) {
-        this.ApplicableClass = ApplicableClass
-        this.Starter = Starter
-        this.SpecMask = SpecMask
-    }
-}
-
-export function SetTalentNode( id: uint32, Tab: uint8, Col: uint8, Row: uint8, PointReq: uint16, Passive: bool, StarterData: StarterData, Ranks: TSArray<uint32>, Prereqs: TSDictionary<uint32, uint8>, Unlearn: TSArray<uint32>, Additionals: TSArray<uint32> )  {
+export function SetTalentNode( id: uint32, Tab: uint8, Col: uint8, Row: uint8, PointReq: uint16, Passive: bool, StarterData: uint64, Ranks: TSArray<uint32>, Prereqs: TSDictionary<uint32, uint8>, Unlearn: TSArray<uint32>, Additionals: TSArray<uint32> )  {
     let TalentType = 0
     let ClassTabs: TSArray<number> = [
         64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51
@@ -28,11 +16,7 @@ export function SetTalentNode( id: uint32, Tab: uint8, Col: uint8, Row: uint8, P
     }
 
     const res = QueryWorld(`replace into forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, Starter)
-    VALUES(${id}, ${Tab}, ${Col}, ${Row}, 1, 1, ${TalentType}, ${Ranks.length}, 1, ${PointReq}, ${Passive ? 0 : 1}, ${StarterData.Starter})`)
-
-    if (StarterData.SpecMask > 0) {
-        const res = QueryWorld(`replace into conditional_starter_data (\`Class\`, \`SpellId\`, \`SpecId\`) VALUES(${StarterData.ApplicableClass}, ${id}, ${StarterData.SpecMask})`)
-    }
+    VALUES(${id}, ${Tab}, ${Col}, ${Row}, 1, 1, ${TalentType}, ${Ranks.length}, 1, ${PointReq}, ${Passive ? 0 : 1}, ${StarterData})`)
 
     Ranks.forEach((Spell, i) => {
         let Rank = i + 1
@@ -102,3 +86,10 @@ export function SetSpecAutolearn (Class: uint8, Spec: uint8, Level: uint8, Spell
 
 export const EmptyPrereqs : TSDictionary<uint32, uint8> = CreateDictionary<uint32, uint8>({})
 export const EmptySpellArray : TSArray<uint32> = CreateArray<uint32>([])
+
+
+export enum SpecTabs {
+    ARMS = 1, FURY = 2, PWAR = 3, HPAL = 4, PPAL = 5, RPAL = 6, BMHU = 7, MMHU = 8, SVHU = 9, ASSR = 10, CORR = 11, SUBR = 12,
+    HPRI = 13, DISC = 14, SPRI  = 15, BDK = 16, FDK = 17, UDK = 18, ELEM = 19, ENHA = 20, RSHA = 21, ARCA = 22, FIRE = 23,
+    IMAG = 24, ALCK = 25, DEMO = 26, DEST = 27, BALD = 28, FERA = 29, RDRU = 30, GUAR = 31, WARD = 32
+}

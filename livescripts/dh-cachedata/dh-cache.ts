@@ -260,16 +260,8 @@ export class DHCache {
     }
 
     public IsStarter(Player: TSPlayer, Talent: DHTalent) : bool {
-        let pClass = Player.GetClass()
-        let Spell = Talent.SpellId
-
-        let IsStarter = Talent.Starter > 0
-        if (wStarterTalentConditions.contains(pClass)) {
-            if (wStarterTalentConditions[pClass].contains(Spell)) {
-                IsStarter = wStarterTalentConditions[pClass][Spell].includes(Player.GetUInt(`Spec`))
-            }
-        }
-        return IsStarter
+        let Spec : uint32 = Player.GetUInt(`Spec`)
+        return Talent.Starter.includes(Spec)
     }
 
     public ActivateSpec(Player: TSPlayer, Spec: number) {
@@ -380,7 +372,7 @@ export class DHCache {
                 let pkt = new SimpleMessagePayload(ClientCallbackOperations.LEVELUP, `|cff8FCE00You have been awarded ${amount} ${GetPointTypeName(type)} point${amount > 1 ? 's' : ''}.`);
                 pkt.write().SendToPlayer(player)
             }
-        })
+        }
     }
 
     public SaveSpec(spec: DHPlayerSpec) {
@@ -478,7 +470,7 @@ export class DHCache {
         let tabs = this.TryGetCustomTalentTabs(player, type)
         tabs.forEach((tab) => {
             tab.Talents.forEach((spellId, talent) => {
-                if (!talent.Starter) {
+                if (!this.IsStarter(player, talent)) {
                     if (talent.NodeType == DHNodeType.CHOICE) {
                         wChoiceNodesRev.forEach((spell, nodeIndex) => {
                             if (player.HasSpell(spell))

@@ -1,10 +1,10 @@
 import { ClientCallbackOperations, SimpleMessagePayload } from '../../shared/Messages';
-import { DHPlayerLoadout, DHPointType, DHTalentTab, TALENT_POINT_TYPES } from '../classes';
+import { DHPointType, DHTalentTab, TALENT_POINT_TYPES } from '../classes';
 import { DHCache } from '../dh-cachedata/dh-cache';
 import { cActiveLoadouts, cLoadouts } from '../dh-cachedata/dh-chardata';
 import { GetTalentTreeLayoutPayload, TTLPTalent, TTLPTalentPrereq, TTLPTalentRank, TalentTreeLayout, TalentTreeLayoutPayload } from '../../shared/Payloads/TalentTreeLayoutPayload';
 import { CPSSpec, CSPPointSpend, CSPPoints, CharacterSpecsPayload, GetCharacterSpecsPayload } from '../../shared/Payloads/GetCharacterSpecsPayload';
-import { wDefaultLoadoutStrings } from '../dh-cachedata/dh-worlddata';
+import { wDefaultLoadoutStrings, wStarterTalentConditions } from '../dh-cachedata/dh-worlddata';
 
 export class DHCommonMessage {
     cache: DHCache
@@ -48,7 +48,12 @@ export class DHCommonMessage {
                     Talent.TabPointReq = talent.TabPointReq
                     Talent.PrereqType = talent.PreReqType
                     Talent.NodeType = talent.NodeType
-                    Talent.Starter = talent.Starter ? 1 : 0
+
+                    Talent.StarterTabs = talent.Starter.length
+                    talent.Starter.forEach((Start) => {
+                        Talent.Starter.push(Start)
+                    })
+
                     Talent.NodeIndex = talent.NodeIndex
 
                     Talent.NumRanks = talent.NumberOfRanks

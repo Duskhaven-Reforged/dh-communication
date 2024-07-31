@@ -21,9 +21,10 @@ export class TTLPTalent {
     TabPointReq!: number
     PrereqType!: number
     NodeType!: number
-    Starter!: number
     NodeIndex!: number
 
+    StarterTabs!: number
+    Starter: TSArray<uint8> = []
     NumRanks!: number
     Ranks: TSArray<TTLPTalentRank> = []
     PrereqCount!: number
@@ -81,7 +82,13 @@ export class GetTalentTreeLayoutPayload {
                 Talent.TabPointReq = read.ReadDouble()
                 Talent.PrereqType = read.ReadDouble()
                 Talent.NodeType = read.ReadDouble()
-                Talent.Starter = read.ReadDouble()
+
+                Talent.StarterTabs = read.ReadDouble()
+                for (let j = 0; j < Talent.StarterTabs; j++) {
+                    let StarterTab = read.ReadDouble() 
+                    Talent.Starter.push(StarterTab)
+                }
+
                 Talent.NodeIndex = read.ReadDouble()
 
                 Talent.NumRanks = read.ReadDouble()
@@ -143,7 +150,10 @@ export class GetTalentTreeLayoutPayload {
                 packet.WriteDouble(Talent.TabPointReq)
                 packet.WriteDouble(Talent.PrereqType)
                 packet.WriteDouble(Talent.NodeType)
-                packet.WriteDouble(Talent.Starter)
+                packet.WriteDouble(Talent.StarterTabs)
+                Talent.Starter.forEach((Tab, i) => {
+                    packet.WriteDouble(Tab)
+                })
                 packet.WriteDouble(Talent.NodeIndex)
 
                 packet.WriteDouble(Talent.NumRanks)
