@@ -236,7 +236,7 @@ export function TalentTreeUI() {
         let ClassIconTexture = window.CreateTexture(null, 'ARTWORK')
         ClassIconTexture.SetTexture(CONSTANTS.UI.MAIN_BG)
         ClassIconTexture.SetSize(67, 67)
-        ClassIconTexture.SetDrawLayer('ARTWORK', 1)
+        ClassIconTexture.SetDrawLayer('OVERLAY', 2)
         SetPortraitToTexture(ClassIconTexture, CONSTANTS.classIcon[CONSTANTS.CLASS[1]])  
 
         let LockoutTexture = ClassSpecWindowLockout.CreateTexture(null, 'BACKGROUND') 
@@ -494,7 +494,7 @@ export function TalentTreeUI() {
                 let uClass = UnitClass('player')
 
                 let Spec = CreateFrame('Button', 'ClassSpecWindow_TabLefts_Spec'+Tree.Id, tabsLeft)
-                Spec.SetPoint('LEFT', StartX, 0)
+                Spec.SetPoint('LEFT', StartX, -1)
                 Spec.SetSize(Width, ClassSpecWindow.GetHeight())
                 Spec.SetFrameLevel(5)
 
@@ -541,20 +541,20 @@ export function TalentTreeUI() {
                 CircleTex.SetTexture(PATH + `tabBG\\SpecThumbs\\${uClass[1]}_${Tree.TabName}`)
 
                 let Title = Circle.CreateFontString()
-                Title.SetFont("Fonts\\FRIZQT__.TTF", 40, "OUTLINE")
-                Title.SetPoint('BOTTOM', 0, 0)
+                Title.SetFont("Fonts\\FRIZQT__.TTF", 32, "OUTLINE")
+                Title.SetPoint('BOTTOM', 0, 15)
                 Title.SetText(Tree.TabName)
 
                 let SamplesTitle = Spec.CreateFontString(null, 'OVERLAY', 'GameFontNormalSmall')
                 SamplesTitle.SetFont("Fonts\\FRIZQT__.TTF", 15, "OUTLINE")
-                SamplesTitle.SetPoint('BOTTOM', 0, 150)
+                SamplesTitle.SetPoint('BOTTOM', 0, Spec.GetHeight()/4)
                 SamplesTitle.SetText('Sample Abilities')
                 SamplesTitle.SetTextColor(1,1,1,1)
 
                 let RoleTex = Circle.CreateTexture('RoleTex', 'ARTWORK')
-                RoleTex.SetTexture(PATH + `tabBg\\Roles\\${Tree.Role}`)
+                RoleTex.SetTexture(PATH + `tabBg\\Roles\\${Tree.TabRole}`)
+                RoleTex.SetPoint('BOTTOM', Title, 'BOTTOM', 0, -30)
                 RoleTex.SetSize(30, 30)
-                RoleTex.SetPoint('BOTTOM', -40, -40)
                 RoleTex.SetDrawLayer('ARTWORK', 3)
 
                 let LineTex = Circle.CreateTexture('LineTex', 'ARTWORK')
@@ -564,20 +564,20 @@ export function TalentTreeUI() {
                 LineTex.SetDrawLayer('ARTWORK', 3)
                 LineTex.SetVertexColor(.5, .5, .5)
 
-                let RoleText = Circle.CreateFontString('RoleText', 'OVERLAY', 'GameFontNormalSmall')
+                let RoleText = Spec.CreateFontString('RoleText', 'OVERLAY', 'GameFontNormalSmall')
                 RoleText.SetFont("Fonts\\FRIZQT__.TTF", 15, "OUTLINE")
                 RoleText.SetText(Roles[Tree.TabRole-1])
+                RoleText.SetPoint('BOTTOM', 0, 0)
 
                 let Description = Spec.CreateFontString('Description', 'OVERLAY', 'GameFontNormalSmall')
-                Description.SetFont("Fonts\\FRIZQT__.TTF", 18, "OUTLINE")
+                Description.SetFont("Fonts\\FRIZQT__.TTF", (-6*TabCount + 36), "OUTLINE")
                 Description.SetText(Tree.TabDesc)
-                Description.SetWidth(300)
-                Description.SetPoint("CENTER", 0, -70)
+                Description.SetWidth(Spec.GetWidth()*.7)
+                Description.SetPoint("CENTER", 0, 0)
 
                 // Sample Spell Icons
                 let SpellIconIds: TSArray<string> = (<string>Tree.TabSpellString).split(', ')
                 let PosX = 0
-                let PosY = 80
                 let Direction = -1
                 let Count = 0
                 let CurrentTab
@@ -585,7 +585,6 @@ export function TalentTreeUI() {
                 SpellIconIds.forEach((SpellId) => {
                     let SpellTex = Spec.CreateTexture('SpellTex', 'BACKGROUND')
                     SpellTex.SetSize(50, 50)
-                    SpellTex.SetPoint('BOTTOM', PosX, PosY)
                     SpellTex.SetDrawLayer('BACKGROUND', -1)
 
                     let SpellCircle = Spec.CreateTexture('SpellCircle', 'ARTWORK')
@@ -621,7 +620,7 @@ export function TalentTreeUI() {
                         Direction = -Direction
                     }
 
-                    SpellTex.SetPoint('BOTTOM', PosX, PosY)
+                    SpellTex.SetPoint('BOTTOM', SamplesTitle, 'BOTTOM', PosX, -(SpellTex.GetHeight() + 20))
                     SpellButton.SetPoint('CENTER', SpellTex, 'CENTER', 0, 0)
                     Count++
                 })
@@ -639,9 +638,9 @@ export function TalentTreeUI() {
                         break
                 }
 
-                RoleText.SetPoint('RIGHT', RoleTex, 'RIGHT', OffX, 0)
+                RoleText.SetPoint('BOTTOM', RoleTex, 'BOTTOM', 0, -20)
                 let ActivateSpecBtn = CreateFrame('Button', 'ActivateSpecButton', Spec, 'UIPanelButtonTemplate')
-                ActivateSpecBtn.SetSize(130, 25)
+                ActivateSpecBtn.SetSize(130, 40)
                 ActivateSpecBtn.SetPoint("BOTTOM", 0, 30)
                 ActivateSpecBtn.SetText("Activate")
                 ActivateSpecBtn.SetFrameLevel(ClickInterceptor.GetFrameLevel() + 1)
@@ -650,7 +649,6 @@ export function TalentTreeUI() {
                     if (self.GetText() === 'Activate') {
                         CurrentTab = Tree
                         SendCallbackToServer(ClientCallbackOperations.ACTIVATE_CLASS_SPEC, Tree.TabId)
-                        ClassSpecWindowLockout.Show()
                     }
                 })
 
@@ -707,7 +705,7 @@ export function TalentTreeUI() {
         Right.SetPoint('TOP', -370, -55)
         let RightPoints = TalentFrame.CreateFontString()
         RightPoints.SetFont("Fonts\\FRIZQT__.TTF", 15, "OUTLINE")
-        RightPoints.SetPoint('TOPRIGHT', -70, -35)
+        RightPoints.SetPoint('TOP', GridTalentTalents[0][17].Frame, 0, 35)
 
         let Left = CreateFrame('Frame', 'TalentPoints', TalentFrame)
         Left.SetSize(100, 100)
@@ -715,7 +713,7 @@ export function TalentTreeUI() {
         Left.SetPoint('CENTER', -370, -55)
         let LeftPoints = TalentFrame.CreateFontString()
         LeftPoints.SetFont("Fonts\\FRIZQT__.TTF", 15, "OUTLINE")
-        LeftPoints.SetPoint('TOPLEFT', -20, -35)
+        LeftPoints.SetPoint('TOP', GridTalentTalents[0][6].Frame, 0, 35)
 
         PointsBottomLeft = LeftPoints
         PointsBottomRight = RightPoints
@@ -1676,9 +1674,14 @@ export function TalentTreeUI() {
         LoadTalentString(Loadout)
     })
     OnCustomPacket(ClientCallbackOperations.ACTIVATE_CLASS_SPEC, pkt => {
-        TalentFrame.Show()
-        ClassSpecWindowLockout.Hide()
-        ClassSpecWindow.Hide()
+        let Show = pkt.ReadString() === 'Show'
+        if (Show)
+            ClassSpecWindowLockout.Show()
+        else {
+            TalentFrame.Show()
+            ClassSpecWindowLockout.Hide()
+            ClassSpecWindow.Hide()
+        }
     })
 
     SendCallbackToServer(ClientCallbackOperations.TALENT_TREE_LAYOUT, '-1')

@@ -459,11 +459,11 @@ export class DHCache {
     }
 
     public HandleDeleteCharacter(guid: uint64) {
-        QueryCharacters(`DELETE FROM character_specs WHERE guid = ${guid}`)
-        QueryCharacters(`DELETE FROM character_points WHERE guid = ${guid} AND spec != ${ACOUNT_WIDE_KEY}`)
-        QueryCharacters(`DELETE FROM character_talents WHERE guid = ${guid} AND spec != ${ACOUNT_WIDE_KEY}`)
-        QueryCharacters(`DELETE FROM character_talents_spent WHERE guid = ${guid} AND spec != ${ACOUNT_WIDE_KEY}`)
-        QueryCharacters(`DELETE FROM character_talent_loadouts where guid = ${guid}`)
+        QueryCharactersAsync(`DELETE FROM character_specs WHERE guid = ${guid}`)
+        QueryCharactersAsync(`DELETE FROM character_points WHERE guid = ${guid} AND spec != ${ACOUNT_WIDE_KEY}`)
+        QueryCharactersAsync(`DELETE FROM character_talents WHERE guid = ${guid} AND spec != ${ACOUNT_WIDE_KEY}`)
+        QueryCharactersAsync(`DELETE FROM character_talents_spent WHERE guid = ${guid} AND spec != ${ACOUNT_WIDE_KEY}`)
+        QueryCharactersAsync(`DELETE FROM character_talent_loadouts where guid = ${guid}`)
     }
 
     public ForgetTalents(player: TSPlayer, spec: DHPlayerSpec, type: DHPointType) {

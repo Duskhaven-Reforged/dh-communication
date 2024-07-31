@@ -5,7 +5,6 @@ export function ReloadGuardDruidTree() {
     let CLASS = Class.DRUID
 
     QueryWorld(`delete from character_spec_autolearn where \`class\` = ${CLASS} and \`spec\` = ${TAB}`)
-    SetSpecAutolearn(CLASS, TAB, 10, GetID(`Spell`, 'dh-spells', ''))
 
     QueryWorld(`Delete from forge_talents where talentTabId = ${TAB}`)
     QueryWorld(`Delete from forge_talent_prereq where talentTabId = ${TAB}`)
