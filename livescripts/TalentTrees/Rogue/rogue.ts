@@ -1,4 +1,4 @@
-import { EmptyPrereqs, EmptySpellArray, SetChoiceNode, SetTalentNode } from "../TalentTreeLoader"
+import { EmptyPrereqs, EmptySpellArray, SetChoiceNode, SetTalentNode, SpecTabs } from "../TalentTreeLoader"
 
 export function ReloadRogueTree() {
     let TAB: uint32 = 54
@@ -9,11 +9,11 @@ export function ReloadRogueTree() {
     QueryWorld(`Delete from forge_talent_unlearn where talentTabId = ${TAB}`)
     
     let Talent : uint32 = GetID(`Spell`, `dh-spells`, `rog-gen-shiv`)
-    SetTalentNode(Talent, TAB, 2, 1, 0, false, 0, CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
+    SetTalentNode(Talent, TAB, 2, 1, 0, false, 1 << (SpecTabs.ASSR - 1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `rog-gen-crimsonvial`)
-    SetTalentNode(Talent, TAB, 5, 1, 0, false, 0, CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
+    SetTalentNode(Talent, TAB, 5, 1, 0, false, 1 << (SpecTabs.CORR - 1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `rog-gen-sap`)
-    SetTalentNode(Talent, TAB, 8, 1, 0, false, 0, CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
+    SetTalentNode(Talent, TAB, 8, 1, 0, false, 1 << (SpecTabs.SUBR - 1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `rog-gen-virulentpoisons`)
     SetTalentNode(Talent, TAB, 3, 2, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `rog-gen-shiv`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `rog-gen-southpawexpertise`)
