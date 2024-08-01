@@ -23,6 +23,7 @@ let TalentTree = {
     FirstTab: 900,
     Tabs: [],
 }
+
 let TreeCache = {
     Spells: [],
     PointsSpent: [],
@@ -37,13 +38,12 @@ let TreeCache = {
 }
 
 let FrameData = {
-    PlayerTalentFrameTabsLeftData: []
+    PlayerTalentFrameTabsLeftData: [],
+    LastFrame: null
 }
 
 export let loadoutString: string = ''
 
-export let PlayerTalentFrame
-export let PlayerSpecFrame
 export let GridTalentTalents = []
 export let GridTalentTalentsNodes = []
 
@@ -57,11 +57,10 @@ let FirstRankToolTip = CreateFrame("GameTooltip", "firstRankToolTip", WorldFrame
 let SecondRankToolTip = CreateFrame("GameTooltip", "secondRankToolTip", WorldFrame, "GameTooltipTemplate");
 
 export function TalentTreeUI() {
-
-    let TalentFrame = CreateFrame('Frame', 'CustomTalentFrame', UIParent);
+    let TalentFrame = CreateFrame('Frame', 'CustomTalentFrame', UIParent)
     TalentFrame.SetSize(1000, 800)
     TalentFrame.SetScale(0.9)
-    TalentFrame.SetPoint('CENTER', 0, 50)
+    TalentFrame.SetPoint('CENTER', 0, 0)
     TalentFrame.SetFrameLevel(1);
     TalentFrame.SetFrameStrata('MEDIUM')
 
@@ -93,9 +92,9 @@ export function TalentTreeUI() {
     closeButton.SetPoint('TOPRIGHT', ConfigFrame, 'TOPRIGHT', -5, -5)
     closeButton.SetScript('OnClick', function() {ConfigFrame.Hide()})
 
-    let ClassSpecWindow = CreateFrame('Frame', 'ClassSpecWindow', UIParent);
+    let ClassSpecWindow = CreateFrame('Frame', 'CustomSpecFrame', UIParent)
     ClassSpecWindow.SetSize(1000, 800)
-    ClassSpecWindow.SetPoint('CENTER', 0, 50)
+    ClassSpecWindow.SetPoint('CENTER', 0, 0)
     ClassSpecWindow.SetFrameLevel(1);
     ClassSpecWindow.SetFrameStrata('MEDIUM')
     
@@ -121,8 +120,9 @@ export function TalentTreeUI() {
         SpecTabButton.SetFrameStrata('MEDIUM')
         SpecTabButton.SetScript('OnClick', function() {
             if (TalentFrame.IsVisible()) {
-            TalentFrame.Hide()
-            ClassSpecWindow.Show()
+                TalentFrame.Hide()
+                ClassSpecWindow.Show()
+                FrameData.LastFrame = ClassSpecWindow
             }
         })
         
@@ -146,6 +146,7 @@ export function TalentTreeUI() {
             if (ClassSpecWindow.IsVisible()) {
                 ClassSpecWindow.Hide()
                 TalentFrame.Show()
+                FrameData.LastFrame = TalentFrame
             }
         })
 
@@ -213,8 +214,10 @@ export function TalentTreeUI() {
         closeButton.SetPushedTexture(CONSTANTS.UI.BTN_CLOSE_PUSH)
 
         closeButton.SetScript('OnClick', function() {
+            if (window.GetName() === 'ClassSpecWindow')
+                TalentFrame.Hide()
+
             window.Hide()
-            
         })
 
         let configButton = CreateFrame('Button', 'ConfigButtonButton' + i , closeButton)
@@ -368,6 +371,11 @@ export function TalentTreeUI() {
         UpdateScale(0.01)
     })
 
+    TalentFrame.Hide()
+    ClassSpecWindow.Hide()
+
+    FrameData.LastFrame = TalentFrame
+
     function HideAllNodes() {
         let gridRows = 11
         let totalGridCols = 23
@@ -466,9 +474,6 @@ export function TalentTreeUI() {
 
         TalentFrameGridTalent = GridTalent
     }
-
-    TalentFrame.Hide()
-    ClassSpecWindow.Hide()
 
     let Roles = ['Damage', 'Healer', 'Tank']
     function InitializeTabsLeft() {
@@ -721,8 +726,7 @@ export function TalentTreeUI() {
 
     InitializeGridForTalents()
 
-    PlayerTalentFrame = TalentFrame
-    PlayerSpecFrame = ClassSpecWindow
+    _G[`PlayerSpecFrame`] = ClassSpecWindow
 
     function GetCurRankAndNextSpell(TabId: number, Talent: TTLPTalent) {
         let NextSpell = 0
@@ -744,6 +748,7 @@ export function TalentTreeUI() {
     function IsMouseOverFrame(Frame: WoWAPI.Frame, Margin = 0) : bool {
         Margin = Math.abs(Margin)
         let [Left, Bottom, Width, Height] = Frame.GetRect()
+
         let [X, Y] = GetCursorPosition()
         let Scale = Frame.GetEffectiveScale()
 
@@ -1490,7 +1495,7 @@ export function TalentTreeUI() {
     }
 
     function LoadTalentString(Talents: string, force: bool = false) {
-        let ToggleFrame = !PlayerTalentFrame.IsVisible()
+        let ToggleFrame = !TalentFrame.IsVisible()
         if (ToggleFrame)
             TalentMicroButton.Click()
 
@@ -1761,5 +1766,13 @@ export function GetTalentTreeLayout(pkt: TSPacketRead) {
             })
             SendCallbackToServer(ClientCallbackOperations.GET_CHARACTER_SPECS, '-1')
         }
+    }
+}
+
+export function PlayerTalentFrameToggle(Show: number) {
+    if (Show > 0) {
+        FrameData.LastFrame.Show()
+    } else {
+        FrameData.LastFrame.Hide()
     }
 }

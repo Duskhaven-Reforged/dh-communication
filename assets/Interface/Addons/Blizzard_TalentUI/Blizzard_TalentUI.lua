@@ -2,27 +2,41 @@
 -- PlayerTalentFrame
 
 function PlayerTalentFrame_Toggle(pet, suggestedTalentGroup)
-    local Toggle = require('TSAddons.dh-communication.addon.dh-ui.lua-hooks')
-    Toggle.PlayerTalentFrameToggle()
-    UpdateMicroButtons();
+    local TSHook = require("TSAddons.dh-communication.addon.dh-ui.dh-talent.TalentTree")
+    if ( not PlayerTalentFrame:IsShown() ) then
+        SetButtonPulse(TalentMicroButton, 0, 1);
+        
+        PlaySound("TalentScreenOpen");
+		ShowUIPanel(PlayerTalentFrame);
+        if ( not GetCVarBool("talentFrameShown") ) then
+            SetCVar("talentFrameShown", 1);
+        end
+        UpdateMicroButtons();
+
+        TSHook.PlayerTalentFrameToggle(1)
+	else
+		HideUIPanel(PlayerTalentFrame);
+        UpdateMicroButtons();
+        TSHook.PlayerTalentFrameToggle(0)
+
+        PlaySound("TalentScreenClose");
+	end
 end
 
 function PlayerTalentFrame_OnLoad(self)
-
 end
 
 function PlayerTalentFrame_OnShow(self)
-    SetButtonPulse(TalentMicroButton, 0, 1);
-
-	PlaySound("TalentScreenOpen");
-	UpdateMicroButtons();
+    local TSHook = require("TSAddons.dh-communication.addon.dh-ui.dh-talent.TalentTree")
+    TSHook.PlayerTalentFrameToggle(1)
 end
 
 function  PlayerTalentFrame_OnHide()
-    SetButtonPulse(TalentMicroButton, 0, 1);
+    local TSHook = require("TSAddons.dh-communication.addon.dh-ui.dh-talent.TalentTree")
+    TSHook.PlayerTalentFrameToggle(0)
+end
 
-	PlaySound("TalentScreenOpen");
-	UpdateMicroButtons();
+function PlayerTalentFrame_Open(pet, talentGroup)
 end
 
 function PlayerTalentFrame_OnEvent(self, event, ...)
