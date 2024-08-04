@@ -1,4 +1,5 @@
 import { ClientCallbackOperations, SimpleMessagePayload } from "../shared/Messages";
+import { ComboPoints } from "./Combopoints/Combopoints";
 import { DHPointType } from "./classes";
 import { wDefaultLoadoutStrings, wSpecAutolearn, wTalentTrees } from "./dh-cachedata/dh-worlddata";
 import { DHCommonMessage } from "./dh-message/dh-cmsg";
@@ -9,11 +10,12 @@ export let mDHDMsg : DHCommonMessage
 export function Main(events: TSEvents) {
     mDHDMsg = new DHCommonMessage()
     RouteTopics(events)
+    ComboPoints(events)
 
     events.Player.OnLogin((player, first) => {
         let spec = mDHDMsg.cache.TryGetCharacterActiveSpec(player)
-        console.log(`Login`)
         player.SetUInt(`Spec`, spec.SpecTabId)
+
         LearnSpellsForLevel(player)
 
         //todo load actions and maybe account bonuses

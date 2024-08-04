@@ -1,0 +1,1 @@
+export const ComboFinishers : TSArray<uint32> = TAG(`dh-spells`, `combo-finisher`)

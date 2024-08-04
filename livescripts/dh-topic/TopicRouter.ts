@@ -35,4 +35,9 @@ export function RouteTopics(events: TSEvents) {
         }
         
     })
+
+    events.CustomPacket.OnReceive(ClientCallbackOperations.GET_COMBO_FINISHERS, (Opcode, Packet, Player) => {
+        let CustomPacket = new SimpleMessagePayload(Opcode, '')
+        CustomPacket.read(Packet)
+    })
 }
