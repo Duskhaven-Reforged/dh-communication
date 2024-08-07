@@ -214,7 +214,11 @@ export function TalentTreeUI() {
         closeButton.SetPushedTexture(CONSTANTS.UI.BTN_CLOSE_PUSH)
 
         closeButton.SetScript('OnClick', function() {
-            TalentMicroButton.Click()
+            if (PlayerTalentFrame && PlayerTalentFrame.IsVisible())
+                TalentMicroButton.Click()
+            else {
+                window.Hide()
+            }
         })
 
         let configButton = CreateFrame('Button', 'ConfigButtonButton' + i , closeButton)
@@ -1490,10 +1494,6 @@ export function TalentTreeUI() {
     }
 
     function LoadTalentString(Talents: string, force: bool = false) {
-        let ToggleFrame = !TalentFrame.IsVisible()
-        if (ToggleFrame)
-            TalentMicroButton.Click()
-
         let Type = Util.alpha.indexOf(Talents[0]) - 1
         let Spec = Util.alpha.indexOf(Talents[1])
         let Class = Util.alpha.indexOf(Talents[2])
@@ -1545,8 +1545,6 @@ export function TalentTreeUI() {
                 TalentTree.ActiveString = Talents
             }
         }
-        if (ToggleFrame)
-            TalentMicroButton.Click()
     }
 
     function IsStarterForTab(Talent: TTLPTalent) : bool {
