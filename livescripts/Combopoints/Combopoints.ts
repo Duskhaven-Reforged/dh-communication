@@ -71,7 +71,9 @@ export function ComboPoints(events: TSEvents) {
 }
 
 function SendComboPoints(Player: TSPlayer) {
-    let packet = CreateCustomPacket(ClientCallbackOperations.COMBOPOINTS, 0);
-    packet.WriteUInt8(Player.GetUInt(`ComboPoints`))
-    packet.SendToPlayer(Player)
+    if (Player.IsInWorld()) {
+        let packet = CreateCustomPacket(ClientCallbackOperations.COMBOPOINTS, 0);
+        packet.WriteUInt8(Player.GetUInt(`ComboPoints`))
+        packet.SendToPlayer(Player)
+    }
 }

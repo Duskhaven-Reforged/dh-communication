@@ -23,21 +23,20 @@ let AltPowers = {
 }
 
 let AltManaBarAdjusted = false
-let OriginalPlayerPortraitTexture = null
 
 export function SecondaryPowerUI() {
     let PlayerFrameAlternateManaBar = _G['PlayerFrameAlternateManaBar']
 
     let UpdateFrame = CreateFrame(`Frame`)
     UpdateFrame.SetScript(`OnUpdate`, (Frame) => {
-        let Player = 'player'
-        let Target = 'target'
-        let Focused = 'focus'
+        let Player : WoWAPI.UnitId = 'player'
+        let Target : WoWAPI.UnitId = 'target'
+        let Focused : WoWAPI.UnitId = 'focus'
 
         UpdatePowerBar(_G[`PlayerFrameAlternateManaBar`], Player, false)
         
         UpdatePlayerPortrait()
-        UpdateAltManaText()
+        UpdateAltManaText(Player)
     })
 
     function UpdatePlayerPortrait() {
@@ -61,14 +60,16 @@ export function SecondaryPowerUI() {
             return `${Value}`
     }
 
-    function UpdateAltManaText() {
-        let Value = PlayerFrameAlternateManaBar.GetValue()
-        let [PowerType, PowerToken] = UnitPowerType('player')
-        let MaxPower = UnitPowerMax(`player`, PowerType)
+    function UpdateAltManaText(Unit: WoWAPI.UnitId) {
+        let [a, Class] = UnitClass(Unit)
+        if (AltPowers[Class]) {
+            let Value = PlayerFrameAlternateManaBar.GetValue()
+            let MaxPower = UnitPowerMax(Unit, AltPowers[Class])
 
-        let Text = `${AbreviateNumber(Value)}/${AbreviateNumber(MaxPower)}`
+            let Text = `${AbreviateNumber(Value)}/${AbreviateNumber(MaxPower)}`
 
-        PlayerFrameAlternateManaBar.TextString.SetText(Text)
+            PlayerFrameAlternateManaBar.TextString.SetText(Text)
+        }
     }
 
     function UpdatePowerBar(Frame, Unit, Alt : bool) {
