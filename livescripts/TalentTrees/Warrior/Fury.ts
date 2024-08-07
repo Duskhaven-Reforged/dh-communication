@@ -15,7 +15,7 @@ export function ReloadWarriorFuryTree() {
     QueryWorld(`Delete from forge_talent_unlearn where talentTabId = ${TAB}`)
 
     let Talent : uint32 = GetID(`Spell`, `dh-spells`, `warr-fur-bloodthirst`)
-    SetTalentNode(Talent, TAB, 6, 1, 0, false, 1 << (TAB-1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
+    SetTalentNode(Talent, TAB, 6, 1, 0, false, 2**(TAB-1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `warr-fur-titans-grip`)
     SetChoiceNode(Talent, TAB, 6, 2, 0, true, CreateArray<uint32>([Talent, GetID(`Spell`, `dh-spells`, `warr-fur-smf`)]), CreateDictionary<uint32, uint8>({[GetID('Spell', 'dh-spells', 'warr-fur-bloodthirst')]: 1}), EmptySpellArray)
     Talent = GetID(`Spell`, 'dh-spells', 'warr-fur-sidearm')

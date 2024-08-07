@@ -1,7 +1,7 @@
 import { ClientCallbackOperations, SimpleMessagePayload } from "../shared/Messages";
 import { ComboPoints } from "./Combopoints/Combopoints";
 import { DHPointType } from "./classes";
-import { wDefaultLoadoutStrings, wSpecAutolearn, wTalentTrees } from "./dh-cachedata/dh-worlddata";
+import { wDefaultLoadoutStrings, wSpecAutolearn, wStartersForTabs, wTalentTrees } from "./dh-cachedata/dh-worlddata";
 import { DHCommonMessage } from "./dh-message/dh-cmsg";
 import { RouteTopics } from "./dh-topic/TopicRouter";
 
@@ -139,6 +139,10 @@ export function LearnSpellsForLevel(player: TSPlayer) {
                     })
                 }
             })
+        })
+        wStartersForTabs[Spec].forEach((Spell) => {
+            if (!player.HasSpell(Spell))
+                player.LearnSpell(Spell)
         })
     }
 }

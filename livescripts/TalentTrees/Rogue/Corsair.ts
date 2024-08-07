@@ -14,7 +14,7 @@ export function ReloadRogueCorsairTree() {
     QueryWorld(`Delete from forge_talent_unlearn where talentTabId = ${TAB}`)
 
     let Talent : uint32 = GetID(`Spell`, 'dh-spells', 'rog-cor-sinisteropportunities')
-    SetTalentNode(Talent, TAB, 5, 1, 0, true, 1 << (TAB-1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
+    SetTalentNode(Talent, TAB, 5, 1, 0, true, 2**(TAB-1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `rog-cor-neptulonslockes`)
     SetTalentNode(Talent, TAB, 3, 2, 0, false, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `rog-cor-sinisteropportunities`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `rog-cor-flourishtheblade`)

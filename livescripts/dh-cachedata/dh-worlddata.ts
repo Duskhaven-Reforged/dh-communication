@@ -47,7 +47,7 @@ export let wChoiceNodeIndexLookup: TSDictionary<uint8, uint32> = CreateDictionar
 export let wSpellToTab: TSDictionary<uint32, uint32> = CreateDictionary<uint32, uint32>({})
 export let wTabToSpell: TSDictionary<uint32, uint32> = CreateDictionary<uint32, uint32>({})
 export let wDefaultLoadoutStrings: TSDictionary<uint32, TSDictionary<uint32, string>> = CreateDictionary<uint32, TSDictionary<uint32, string>>({})
-export let wStarterTalentConditions: TSDictionary<uint8, TSDictionary<uint32, uint64>> = CreateDictionary<uint8, TSDictionary<uint32, uint64>>({})
+export let wStartersForTabs: TSDictionary<uint64, TSArray<uint32>> = CreateDictionary<uint64, TSArray<uint32>>({})
 
 export function LoadWorldData() {
     console.log(`\tLoading talent trees...\n`) 
@@ -248,8 +248,10 @@ class CustomTalents {
             let StarterTabs : TSArray<uint8> = CreateArray<uint8>([])
 
             wTalentTrees.forEach((TabId : uint8, b) => {
-                if (StarterMask & (1 << (TabId-1)))
+                if (StarterMask & (1 << (TabId-1))) {
                     StarterTabs.push(TabId)
+                    wStartersForTabs[TabId].push(SpellId)
+                }
             })
 
             let talent = new DHTalent(SpellId, TalentTabId, ColumnIndex, RowIndex, RankCost, TabPointReq, RequiredLevel, TalentType, NodeType, NodeIndex, NumberOfRanks, PreReqType, StarterTabs)

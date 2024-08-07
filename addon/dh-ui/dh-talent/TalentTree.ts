@@ -61,7 +61,7 @@ export function TalentTreeUI() {
     TalentFrame.SetSize(1000, 800)
     TalentFrame.SetScale(0.9)
     TalentFrame.SetPoint('CENTER', 0, 0)
-    TalentFrame.SetFrameLevel(1);
+    TalentFrame.SetFrameLevel(3);
     TalentFrame.SetFrameStrata('MEDIUM')
 
     let ConfigFrame = CreateFrame('Frame', 'ConfigFrame', TalentFrame)
@@ -95,7 +95,7 @@ export function TalentTreeUI() {
     let ClassSpecWindow = CreateFrame('Frame', 'CustomSpecFrame', UIParent)
     ClassSpecWindow.SetSize(1000, 800)
     ClassSpecWindow.SetPoint('CENTER', 0, 0)
-    ClassSpecWindow.SetFrameLevel(1);
+    ClassSpecWindow.SetFrameLevel(3);
     ClassSpecWindow.SetFrameStrata('MEDIUM')
     
     function CheckPlayerLevel(button: WoWAPI.Button, text: WoWAPI.FontString) {
@@ -174,11 +174,13 @@ export function TalentTreeUI() {
     let Bordertexture = TalentFrame.CreateTexture(null, 'OVERLAY')
     Bordertexture.SetTexture(CONSTANTS.UI.MAIN_BG)
     Bordertexture.SetPoint('CENTER', 0, -100)
+    Bordertexture.SetDrawLayer('OVERLAY', 1)
     Bordertexture.SetTexCoord(0, 1, 0, 0.57)
     Bordertexture.SetSize(TalentFrame.GetWidth() * 1.8, TalentFrame.GetHeight() * 1.3)
 
     let BorderSpec = ClassSpecWindow.CreateTexture(null, 'OVERLAY')
     BorderSpec.SetTexture(CONSTANTS.UI.MAIN_BG_SPEC)
+    BorderSpec.SetDrawLayer('OVERLAY', 7)
     BorderSpec.SetPoint('CENTER', 0, -100)
     BorderSpec.SetTexCoord(0, 1, 0, 0.57)
     BorderSpec.SetSize(TalentFrame.GetWidth() * 1.8, TalentFrame.GetHeight() * 1.3)
@@ -190,10 +192,9 @@ export function TalentTreeUI() {
     ClassSpecWindowLockout.SetPoint('CENTER', -25, -5)
     ClassSpecWindowLockout.Hide()
 
-    let BackgroundSpec = ClassSpecWindow.CreateTexture(null, 'BACKGROUND')
+    let BackgroundSpec = ClassSpecWindow.CreateTexture(null, 'BACKGROUND', null, -8)
     BackgroundSpec.SetTexture(CONSTANTS.UI.BG_SPEC)
     BackgroundSpec.SetPoint('CENTER', 0, -117)
-    BackgroundSpec.SetDrawLayer('BACKGROUND', -2)
     BackgroundSpec.SetTexCoord(0, 1, 0, 0.57)
     BackgroundSpec.SetSize(TalentFrame.GetWidth() * 1.8, TalentFrame.GetHeight() * 1.4)
 
@@ -204,43 +205,42 @@ export function TalentTreeUI() {
     SpecTitleText.SetText('Specializations')
 
     windows.forEach((window, i) => {
-        let closeButton = CreateFrame('Button', 'CloseTalentUI'+i, window)
-        closeButton.SetSize(30, 30) 
-        closeButton.SetFrameLevel(100)
-        closeButton.SetFrameStrata('FULLSCREEN')
+        // let closeButton = CreateFrame('Button', 'CloseTalentUI'+i, window)
+        // closeButton.SetSize(30, 30) 
+        // closeButton.SetFrameLevel(100)
+        // closeButton.SetFrameStrata('FULLSCREEN')
 
-        closeButton.SetNormalTexture(CONSTANTS.UI.BTN_CLOSE_NORM) 
-        closeButton.SetHighlightTexture(CONSTANTS.UI.BTN_CLOSE_HILI)
-        closeButton.SetPushedTexture(CONSTANTS.UI.BTN_CLOSE_PUSH)
+        // closeButton.SetNormalTexture(CONSTANTS.UI.BTN_CLOSE_NORM) 
+        // closeButton.SetHighlightTexture(CONSTANTS.UI.BTN_CLOSE_HILI)
+        // closeButton.SetPushedTexture(CONSTANTS.UI.BTN_CLOSE_PUSH)
 
-        closeButton.SetScript('OnClick', function() {
-            if (PlayerTalentFrame && PlayerTalentFrame.IsVisible())
-                TalentMicroButton.Click()
-            else {
-                window.Hide()
-            }
-        })
+        // closeButton.SetScript('OnClick', function() {
+        //     if (PlayerTalentFrame && PlayerTalentFrame.IsVisible())
+        //         TalentMicroButton.Click()
+        //     else {
+        //         window.Hide()
+        //     }
+        // })
 
-        let configButton = CreateFrame('Button', 'ConfigButtonButton' + i , closeButton)
-        configButton.SetSize(30, 30)
-        configButton.SetFrameLevel(100)
-        configButton.SetFrameStrata('FULLSCREEN')
+        // let configButton = CreateFrame('Button', 'ConfigButtonButton' + i , closeButton)
+        // configButton.SetSize(30, 30)
+        // configButton.SetFrameLevel(100)
+        // configButton.SetFrameStrata('FULLSCREEN')
 
-        configButton.SetNormalTexture(CONSTANTS.UI.BTN_CONF_NORM) 
-        configButton.SetHighlightTexture(CONSTANTS.UI.BTN_CLOSE_HILI)
-        configButton.SetPushedTexture(CONSTANTS.UI.BTN_CONF_PUSH)
+        // configButton.SetNormalTexture(CONSTANTS.UI.BTN_CONF_NORM) 
+        // configButton.SetHighlightTexture(CONSTANTS.UI.BTN_CLOSE_HILI)
+        // configButton.SetPushedTexture(CONSTANTS.UI.BTN_CONF_PUSH)
 
-        configButton.SetScript('OnClick', function() {
-            if (ConfigFrame.IsVisible())
-                ConfigFrame.Show()
-            else
-                ConfigFrame.Hide()
-        })
+        // configButton.SetScript('OnClick', function() {
+        //     if (ConfigFrame.IsVisible())
+        //         ConfigFrame.Show()
+        //     else
+        //         ConfigFrame.Hide()
+        // })
 
-        let ClassIconTexture = window.CreateTexture(null, 'ARTWORK')
+        let ClassIconTexture = window.CreateTexture(null, 'ARTWORK', null, -8)
         ClassIconTexture.SetTexture(CONSTANTS.UI.MAIN_BG)
         ClassIconTexture.SetSize(67, 67)
-        ClassIconTexture.SetDrawLayer('ARTWORK', 2)
         SetPortraitToTexture(ClassIconTexture, CONSTANTS.classIcon[CONSTANTS.CLASS[1]])  
 
         let LockoutTexture = ClassSpecWindowLockout.CreateTexture(null, 'BACKGROUND') 
@@ -251,13 +251,11 @@ export function TalentTreeUI() {
         LockoutTexture.SetDrawLayer('BACKGROUND', -1)
 
         if (window == TalentFrame) {
-            closeButton.SetPoint('TOPRIGHT', window, 'TOPRIGHT', 180, 4) 
             ClassIconTexture.SetPoint('TOPLEFT', window, 'TOPLEFT', -241, 12) 
-            configButton.SetPoint('LEFT', closeButton, 'RIGHT', -70, 0) 
+            //configButton.SetPoint('LEFT', closeButton, 'RIGHT', -70, 0) 
         } else if (window == ClassSpecWindow) {
-            closeButton.SetPoint('TOPRIGHT', window, 'TOPRIGHT', 180, 4)
             ClassIconTexture.SetPoint('TOPLEFT', window, 'TOPLEFT', -241, 12)
-            configButton.SetPoint('LEFT', closeButton, 'RIGHT', -70, 0) 
+            //configButton.SetPoint('LEFT', closeButton, 'RIGHT', -70, 0) 
         }
     })
     
@@ -516,30 +514,31 @@ export function TalentTreeUI() {
                 let Spec = CreateFrame('Button', 'ClassSpecWindow_TabLefts_Spec'+TreeId, tabsLeft)
                 Spec.SetPoint('CENTER', Point, -1)
                 Spec.SetSize(Width+Offs, ClassSpecWindow.GetHeight())
-                Spec.SetFrameLevel(5)
+                Spec.SetFrameLevel(3)
                 i++
 
-                let NormalTex = Spec.CreateTexture("$parentNormalTexture", "ARTWORK")
+                let NormalTex = Spec.CreateTexture("$parentNormalTexture", "BACKGROUND")
                 NormalTex.SetPoint('CENTER', 0, 15)
                 NormalTex.SetTexture(CONSTANTS.UI.SPECIALIZATION_BUTTON)
                 NormalTex.SetVertexColor(0.5, 0.5, 0.5, 1)
 
-                let HilightTex = Spec.CreateTexture("SetHighlightTexture", "ARTWORK")
+                let HilightTex = Spec.CreateTexture("SetHighlightTexture", "BACKGROUND")
                 HilightTex.SetPoint('CENTER', 0, 15)
                 HilightTex.SetTexture(CONSTANTS.UI.SPECIALIZATION_BUTTON_BG_HOVER_OR_PUSHED)
                 HilightTex.SetVertexColor(0.5, 0.5, 0.5, 1)
 
-                let PushedTex = Spec.CreateTexture("SetHighlightTexture", "ARTWORK")
+                let PushedTex = Spec.CreateTexture("SetHighlightTexture", "BACKGROUND")
                 PushedTex.SetTexture(CONSTANTS.UI.SPECIALIZATION_BUTTON_BG_HOVER_OR_PUSHED)
                 PushedTex.SetAlpha(.8)
 
-                let LockedTex = Spec.CreateTexture("$parentNormalTexture", "ARTWORK")
+                let LockedTex = Spec.CreateTexture("$parentNormalTexture", "BACKGROUND")
                 LockedTex.SetTexture(CONSTANTS.UI.SPECIALIZATION_BUTTON_BG_DISABLED)
                 LockedTex.SetTexCoord(0, 0.625, 0.265625, 0)
 
                 let ClickInterceptor = CreateFrame('Button', 'clickInterceptor', Spec)
                 ClickInterceptor.SetAllPoints(Spec)
                 ClickInterceptor.EnableMouse(true)
+                ClickInterceptor.SetFrameStrata('MEDIUM')
                 ClickInterceptor.SetFrameLevel(Spec.GetFrameLevel()+1)
 
                 Spec.SetNormalTexture(NormalTex)
@@ -1494,6 +1493,10 @@ export function TalentTreeUI() {
     }
 
     function LoadTalentString(Talents: string, force: bool = false) {
+        let ToggleFrame = !PlayerTalentFrame || !PlayerTalentFrame.IsVisible()
+        if (ToggleFrame)
+            TalentMicroButton.Click()
+
         let Type = Util.alpha.indexOf(Talents[0]) - 1
         let Spec = Util.alpha.indexOf(Talents[1])
         let Class = Util.alpha.indexOf(Talents[2])

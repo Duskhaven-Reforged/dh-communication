@@ -1,7 +1,7 @@
 import { EmptyPrereqs, EmptySpellArray, SetChoiceNode, SetSpecAutolearn, SetTalentNode, SpecTabs } from "../TalentTreeLoader"
 
 export function ReloadDKFrostTree() {
-    let TAB: uint32 = SpecTabs.FDK
+    let TAB: uint64 = SpecTabs.FDK
     let CLASS = Class.DEATH_KNIGHT
 
     QueryWorld(`delete from character_spec_autolearn where \`class\` = ${CLASS} and \`spec\` = ${TAB}`)
@@ -16,7 +16,7 @@ export function ReloadDKFrostTree() {
     QueryWorld(`Delete from forge_talent_unlearn where talentTabId = ${TAB}`)
 
     let Talent : uint32 = GetID(`Spell`, 'dh-spells', 'dk-fro-froststrike')
-    SetTalentNode(Talent, TAB, 5, 1, 0, false, 1 << (TAB-1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
+    SetTalentNode(Talent, TAB, 5, 1, 0, false, 2**(TAB-1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `dk-fro-obliterate`)
     SetTalentNode(Talent, TAB, 4, 2, 0, false, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `dk-fro-froststrike`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `dk-fro-icytalons`)
@@ -35,5 +35,4 @@ export function ReloadDKFrostTree() {
     SetTalentNode(Talent, TAB, 5, 4, 0, false, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `dk-fro-shatterstrikes`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `dk-fro-frigidforecast`)
     SetTalentNode(Talent, TAB, 6, 4, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `dk-fro-rime`)]: 1}), EmptySpellArray, EmptySpellArray)
-
 }

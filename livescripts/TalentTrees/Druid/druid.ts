@@ -1,7 +1,7 @@
 import { EmptyPrereqs, EmptySpellArray, SetChoiceNode, SetTalentNode, SpecTabs } from "../TalentTreeLoader"
 
 export function ReloadDruidTree() {
-    let TAB: uint32 = 61
+    let TAB: uint64 = 61
 
     QueryWorld(`Delete from forge_talents where talentTabId = ${TAB}`)
     QueryWorld(`Delete from forge_talent_prereq where talentTabId = ${TAB}`)
@@ -9,13 +9,13 @@ export function ReloadDruidTree() {
     QueryWorld(`Delete from forge_talent_unlearn where talentTabId = ${TAB}`)
 
     let Talent : uint32 = GetID(`Spell`, 'dh-spells', `dru-gen-pounce`)
-    SetTalentNode(Talent, TAB, 3, 1, 0, false, 1 << (SpecTabs.FERA-1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
+    SetTalentNode(Talent, TAB, 3, 1, 0, false, 2**(SpecTabs.FERA-1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `dru-gen-frenziedregen`)
-    SetTalentNode(Talent, TAB, 5, 1, 0, false, 1 << (SpecTabs.GUAR-1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
+    SetTalentNode(Talent, TAB, 5, 1, 0, false, 2**(SpecTabs.GUAR-1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `dru-gen-lifebloom`)
-    SetTalentNode(Talent, TAB, 7, 1, 0, false, 1 << (SpecTabs.RDRU-1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
+    SetTalentNode(Talent, TAB, 7, 1, 0, false, 2**(SpecTabs.RDRU-1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `dru-gen-typhoon`)
-    SetTalentNode(Talent, TAB, 9, 1, 0, false, 1 << (SpecTabs.BALD-1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
+    SetTalentNode(Talent, TAB, 9, 1, 0, false, 2**(SpecTabs.BALD-1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `dru-gen-effortlessinitiation`)
     SetChoiceNode(Talent, TAB, 3, 2, 0, true, CreateArray<uint32>([Talent, GetID(`Spell`, `dh-spells`, `dru-gen-visceralinitiation`)]), CreateDictionary<uint32, uint8>({[GetID('Spell', 'dh-spells', 'dru-gen-pounce')]: 1}), EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `dru-gen-goldrinnsfury`)

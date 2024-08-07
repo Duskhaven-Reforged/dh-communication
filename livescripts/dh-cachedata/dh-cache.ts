@@ -260,7 +260,7 @@ export class DHCache {
     }
 
     public IsStarter(Player: TSPlayer, Talent: DHTalent) : bool {
-        let Spec : uint32 = Player.GetUInt(`Spec`)
+        let Spec : uint64 = Player.GetUInt(`Spec`)
         return Talent.Starter.includes(Spec)
     }
 

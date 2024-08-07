@@ -1,7 +1,7 @@
 import { EmptyPrereqs, EmptySpellArray, SetChoiceNode, SetTalentNode, SpecTabs } from "../TalentTreeLoader"
 
 export function ReloadDKTree() {
-    let TAB: uint32 = 56
+    let TAB: uint64 = 56
 
     QueryWorld(`Delete from forge_talents where talentTabId = ${TAB}`)
     QueryWorld(`Delete from forge_talent_prereq where talentTabId = ${TAB}`)
@@ -9,11 +9,11 @@ export function ReloadDKTree() {
     QueryWorld(`Delete from forge_talent_unlearn where talentTabId = ${TAB}`)
 
     let Talent : uint32 = GetID(`Spell`, `dh-spells`, `dk-gen-ibf`)
-    SetTalentNode(Talent, TAB, 4, 1, 0, false, 1 << (SpecTabs.FDK - 1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
+    SetTalentNode(Talent, TAB, 4, 1, 0, false, 2**(SpecTabs.FDK - 1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `dk-gen-deathstrike`)
-    SetTalentNode(Talent, TAB, 6, 1, 0, false, 1 << (SpecTabs.BDK - 1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
+    SetTalentNode(Talent, TAB, 6, 1, 0, false, 2**(SpecTabs.BDK - 1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `dk-gen-raiseghoul`)
-    SetTalentNode(Talent, TAB, 8, 1, 0, false, 1 << (SpecTabs.UDK - 1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
+    SetTalentNode(Talent, TAB, 8, 1, 0, false, 2**(SpecTabs.UDK - 1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
     
     Talent = GetID(`Spell`, `dh-spells`, `dk-gen-strongwill`)
     SetTalentNode(Talent, TAB, 4, 2, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `dk-gen-ibf`)]: 1}), EmptySpellArray, EmptySpellArray)

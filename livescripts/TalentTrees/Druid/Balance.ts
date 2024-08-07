@@ -1,7 +1,7 @@
 import { EmptyPrereqs, EmptySpellArray, SetChoiceNode, SetSpecAutolearn, SetTalentNode, SpecTabs } from "../TalentTreeLoader"
 
 export function ReloadBalDruidTree() {
-    let TAB: uint32 = SpecTabs.BALD
+    let TAB: uint64 = SpecTabs.BALD
     let CLASS = Class.DRUID
 
     QueryWorld(`delete from character_spec_autolearn where \`class\` = ${CLASS} and \`spec\` = ${TAB}`)
@@ -18,7 +18,7 @@ export function ReloadBalDruidTree() {
     QueryWorld(`Delete from forge_talent_unlearn where talentTabId = ${TAB}`)
 
     let Talent : uint32 = GetID(`Spell`, 'dh-spells', `dru-bal-sunfire`)
-    SetTalentNode(Talent, TAB, 6, 1, 0, false, 1 << (TAB-1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
+    SetTalentNode(Talent, TAB, 6, 1, 0, false, 2**(TAB-1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `dru-bal-astralpowered`)
     SetTalentNode(Talent, TAB, 5, 2, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `dru-bal-sunfire`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `dru-bal-umbralembrace`)

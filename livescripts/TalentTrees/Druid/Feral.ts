@@ -18,7 +18,7 @@ export function ReloadFeralDruidTree() {
     QueryWorld(`Delete from forge_talent_unlearn where talentTabId = ${TAB}`)
 
     let Talent : uint32 = GetID(`Spell`, 'dh-spells', `dru-fer-rip`)
-    SetTalentNode(Talent, TAB, 6, 1, 0, false, 1 << (TAB-1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
+    SetTalentNode(Talent, TAB, 6, 1, 0, false, 2**(TAB-1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `dru-fer-ripthewound`)
     SetTalentNode(Talent, TAB, 5, 2, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `dru-fer-rip`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `dru-fer-thrillinghunt`)
@@ -38,7 +38,7 @@ export function ReloadFeralDruidTree() {
     Talent = GetID(`Spell`, `dh-spells`, `dru-fer-suddenambush`)
     SetTalentNode(Talent, TAB, 4, 4, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `dru-fer-stalkingfixation`)]: 1, [GetID(`Spell`, `dh-spells`, `dru-fer-bloodthirstybites`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `dru-fer-nurtureandnature`)
-    SetTalentNode(Talent, TAB, 6, 4, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `dru-fer-stalkingfixation`)]: 1, [GetID(`Spell`, `dh-spells`, `dru-fer-predatoryswiftness`)]: 1, [GetID(`Spell`, `dh-spells`, `dru-fer-primalwrath`)]: 1}), EmptySpellArray, EmptySpellArray)
+    SetTalentNode(Talent, TAB, 6, 4, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `dru-fer-bloodthirstybites`)]: 1, [GetID(`Spell`, `dh-spells`, `dru-fer-predatoryswiftness`)]: 1, [GetID(`Spell`, `dh-spells`, `dru-fer-primalwrath`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `dru-fer-cleavingrake`)
     SetTalentNode(Talent, TAB, 8, 4, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `dru-fer-primalwrath`)]: 1, [GetID(`Spell`, `dh-spells`, `dru-fer-openwounds`)]: 1}), EmptySpellArray, EmptySpellArray)
 }

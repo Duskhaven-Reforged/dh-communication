@@ -3,7 +3,7 @@ import { EmptyPrereqs, EmptySpellArray, SetChoiceNode, SetTalentNode, SpecTabs }
 
 export function ReloadWarriorTree() {
     let TAB = 51
-    let ALLMASK = (1 << SpecTabs.ARMS - 1) | 1 << (SpecTabs.FURY - 1) | 1 << (SpecTabs.PWAR - 1)
+    let ALLMASK = 2**(SpecTabs.ARMS - 1) + 2**(SpecTabs.FURY - 1) + 2**(SpecTabs.PWAR - 1)
 
     QueryWorld(`Delete from forge_talents where talentTabId = ${TAB}`)
     let Talent : uint32 = GetID(`Spell`, `dh-spells`, `warr-gen-victory-rush`)

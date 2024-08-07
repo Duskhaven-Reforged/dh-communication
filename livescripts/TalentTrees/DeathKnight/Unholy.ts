@@ -1,7 +1,7 @@
 import { EmptyPrereqs, EmptySpellArray, SetChoiceNode, SetSpecAutolearn, SetTalentNode, SpecTabs } from "../TalentTreeLoader"
 
 export function ReloadDKUnholyTree() {
-    let TAB: uint32 = SpecTabs.UDK
+    let TAB: uint64 = SpecTabs.UDK
     let CLASS = Class.DEATH_KNIGHT
 
     QueryWorld(`delete from character_spec_autolearn where \`class\` = ${CLASS} and \`spec\` = ${TAB}`)
@@ -14,7 +14,7 @@ export function ReloadDKUnholyTree() {
     QueryWorld(`Delete from forge_talent_unlearn where talentTabId = ${TAB}`)
 
     let Talent : uint32 = GetID(`Spell`, 'dh-spells', 'dk-unh-festeringstrikes')
-    SetTalentNode(Talent, TAB, 5, 1, 0, true, 1 << (TAB-1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
+    SetTalentNode(Talent, TAB, 5, 1, 0, true, 2**(TAB-1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `dk-unh-clawingshadows`)
     SetTalentNode(Talent, TAB, 3, 2, 0, false, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `dk-unh-festeringstrikes`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `dk-unh-outbreak`)

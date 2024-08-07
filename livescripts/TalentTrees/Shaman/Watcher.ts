@@ -1,8 +1,9 @@
 import { EmptyPrereqs, EmptySpellArray, SetChoiceNode, SetSpecAutolearn, SetTalentNode, SpecTabs } from "../TalentTreeLoader"
 
 export function ReloadShamanWatcherTree() {
-    let TAB: uint32 = SpecTabs.WARD
+    let TAB: uint64 = SpecTabs.WARD
     let CLASS = Class.SHAMAN
+    let SpecMask : uint64 = 2**(TAB-1)
 
     QueryWorld(`delete from character_spec_autolearn where \`class\` = ${CLASS} and \`spec\` = ${TAB}`)
     SetSpecAutolearn(CLASS, TAB, 10, GetID(`Spell`, `dh-spells`, `sha-wat-chosenofearth`))
@@ -16,7 +17,7 @@ export function ReloadShamanWatcherTree() {
     QueryWorld(`Delete from forge_talent_unlearn where talentTabId = ${TAB}`)
 
     let Talent : uint32 = GetID(`Spell`, 'dh-spells', `sha-wat-rockbiter`)
-    SetTalentNode(Talent, TAB, 6, 1, 0, false, 1 << (TAB-1), CreateArray<uint32>([Talent]), EmptyPrereqs, CreateArray<uint32>([GetID(`Spell`, `dh-spells`, `sha-gen-primalstrike`)]), EmptySpellArray)
+    SetTalentNode(Talent, TAB, 6, 1, 0, false, SpecMask, CreateArray<uint32>([Talent]), EmptyPrereqs, CreateArray<uint32>([GetID(`Spell`, `dh-spells`, `sha-gen-primalstrike`)]), EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `sha-wat-grit`)
     SetTalentNode(Talent, TAB, 5, 2, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `sha-wat-rockbiter`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `sha-wat-magneticgrip`)

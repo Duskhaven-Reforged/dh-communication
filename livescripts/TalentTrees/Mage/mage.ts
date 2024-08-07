@@ -2,7 +2,7 @@ import { EmptyPrereqs, EmptySpellArray, SetChoiceNode, SetTalentNode, SpecTabs }
 
 export function ReloadMageTree() {
     let TAB: uint32 = 58
-    let ALLMASK = (1 << (SpecTabs.FIRE - 1)) | (1 << (SpecTabs.ARCA - 1)) | (1 << (SpecTabs.FROS - 1))
+    let ALLMASK = (2**(SpecTabs.FIRE - 1)) + (2**(SpecTabs.ARCA - 1)) + (2**(SpecTabs.FROS - 1))
 
     QueryWorld(`Delete from forge_talents where talentTabId = ${TAB}`)
     QueryWorld(`Delete from forge_talent_prereq where talentTabId = ${TAB}`)
