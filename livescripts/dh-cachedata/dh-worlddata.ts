@@ -2,6 +2,11 @@ import { ReloadDKBloodTree } from "../TalentTrees/DeathKnight/Blood"
 import { ReloadDKFrostTree } from "../TalentTrees/DeathKnight/Frost"
 import { ReloadDKUnholyTree } from "../TalentTrees/DeathKnight/Unholy"
 import { ReloadDKTree } from "../TalentTrees/DeathKnight/deathknight"
+import { ReloadBalDruidTree } from "../TalentTrees/Druid/Balance"
+import { ReloadFeralDruidTree } from "../TalentTrees/Druid/Feral"
+import { ReloadGuardDruidTree } from "../TalentTrees/Druid/Guardian"
+import { ReloadRestoDruidTree } from "../TalentTrees/Druid/Restoration"
+import { ReloadDruidTree } from "../TalentTrees/Druid/druid"
 import { ReloadMageArcaneTree } from "../TalentTrees/Mage/Arcane"
 import { ReloadMageFireTree } from "../TalentTrees/Mage/Fire"
 import { ReloadMageFrostTree } from "../TalentTrees/Mage/Frost"
@@ -117,7 +122,13 @@ export function RefillTrees(ClassMask: uint32) {
         ReloadMageArcaneTree()
     }
     if (ClassMask & (1 << Class.WARLOCK)) {}
-    if (ClassMask & (1 << Class.DRUID)) {}
+    if (ClassMask & (1 << Class.DRUID)) {
+        ReloadDruidTree()
+        ReloadBalDruidTree()
+        ReloadFeralDruidTree()
+        ReloadGuardDruidTree()
+        ReloadRestoDruidTree()
+    }
 }
 
 class SpecAutolearn {

@@ -11,8 +11,6 @@ export function ComboPointUI() {
     PlayerComboFrame.SetSize(256, 32)
     PlayerComboFrame.SetPoint(`TOPLEFT`, PlayerFrame, `TOPLEFT`, -25, -5)
 
-    console.log(`INIT COMBOS`)
-
     for (let i = MaximumPoints; i >= 1; i--) {
         let ComboPoint = CreateFrame(`Frame`, `NewComboPoint${i}`, PlayerComboFrame)
         ComboPoint.SetSize(12, 12)
@@ -40,7 +38,8 @@ export function ComboPointUI() {
         }
         ComboFrames[i] = ComboPointFrameData
     }
-
+    PlayerComboFrame.Hide()
+    
     let ComboPoint1Highlight = _G['NewComboPoint1Highlight']
     _G['CurrentComboPoints'] = 0
 

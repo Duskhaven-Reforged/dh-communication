@@ -117,7 +117,7 @@ export function TalentTreeUI() {
     windows.forEach((window, i) => {
         let SpecTabButton = CreateFrame('Button', 'SpecButton' + i, window)
         SpecTabButton.SetSize(150, 60)
-        SpecTabButton.SetFrameStrata('MEDIUM')
+        SpecTabButton.SetFrameStrata('FULLSCREEN')
         SpecTabButton.SetScript('OnClick', function() {
             if (TalentFrame.IsVisible()) {
                 TalentFrame.Hide()
@@ -141,7 +141,7 @@ export function TalentTreeUI() {
 
         let TalentTabButton = CreateFrame('Button', 'TalentTabButton'+i, window)
         TalentTabButton.SetSize(100, 60)
-        TalentTabButton.SetFrameStrata('MEDIUM')
+        TalentTabButton.SetFrameStrata('FULLSCREEN')
         TalentTabButton.SetScript('OnClick', function() {
             if (ClassSpecWindow.IsVisible()) {
                 ClassSpecWindow.Hide()
@@ -193,7 +193,7 @@ export function TalentTreeUI() {
     let BackgroundSpec = ClassSpecWindow.CreateTexture(null, 'BACKGROUND')
     BackgroundSpec.SetTexture(CONSTANTS.UI.BG_SPEC)
     BackgroundSpec.SetPoint('CENTER', 0, -117)
-    BackgroundSpec.SetDrawLayer('BACKGROUND', -1)
+    BackgroundSpec.SetDrawLayer('BACKGROUND', -2)
     BackgroundSpec.SetTexCoord(0, 1, 0, 0.57)
     BackgroundSpec.SetSize(TalentFrame.GetWidth() * 1.8, TalentFrame.GetHeight() * 1.4)
 
@@ -214,10 +214,7 @@ export function TalentTreeUI() {
         closeButton.SetPushedTexture(CONSTANTS.UI.BTN_CLOSE_PUSH)
 
         closeButton.SetScript('OnClick', function() {
-            if (window.GetName() === 'ClassSpecWindow')
-                TalentFrame.Hide()
-
-            window.Hide()
+            TalentMicroButton.Click()
         })
 
         let configButton = CreateFrame('Button', 'ConfigButtonButton' + i , closeButton)
@@ -239,7 +236,7 @@ export function TalentTreeUI() {
         let ClassIconTexture = window.CreateTexture(null, 'ARTWORK')
         ClassIconTexture.SetTexture(CONSTANTS.UI.MAIN_BG)
         ClassIconTexture.SetSize(67, 67)
-        ClassIconTexture.SetDrawLayer('OVERLAY', 2)
+        ClassIconTexture.SetDrawLayer('ARTWORK', 2)
         SetPortraitToTexture(ClassIconTexture, CONSTANTS.classIcon[CONSTANTS.CLASS[1]])  
 
         let LockoutTexture = ClassSpecWindowLockout.CreateTexture(null, 'BACKGROUND') 
@@ -465,8 +462,6 @@ export function TalentTreeUI() {
                     TextureIconRight: TextureIconRight,
                 }
 
-                Talent.Hide()
-
                 GridTalentTalents[i][j] = FrameLinks
                 GridTalentTalentsNodes[i][j] = []
             }
@@ -486,7 +481,9 @@ export function TalentTreeUI() {
         let StartX = 0
 
         let Width = (tabsLeft.GetWidth()) / TabCount
-        let i = 0
+        let Ratio = 72/477.66666
+        let Offs = Ratio * Width 
+        let i = 1
         TalentTree.Tabs.forEach((TreeId) => {
             let Tree = TalentTree.TalentTrees[TreeId+1]
             if (Tree) {
@@ -498,10 +495,25 @@ export function TalentTreeUI() {
                 })
                 let uClass = UnitClass('player')
 
-                let Spec = CreateFrame('Button', 'ClassSpecWindow_TabLefts_Spec'+Tree.Id, tabsLeft)
-                Spec.SetPoint('LEFT', StartX, -1)
-                Spec.SetSize(Width, ClassSpecWindow.GetHeight())
+                let Point = Width*(i-2)
+                if (TabCount > 3) {
+                    Point = Width*(i-2.5)
+                } else if (TabCount < 3) {
+                    switch  (i) {
+                        case 1:
+                            Point = Width*-1
+                            break;
+                        case 2:
+                            Point = Width
+                            break;
+                    }
+                }
+
+                let Spec = CreateFrame('Button', 'ClassSpecWindow_TabLefts_Spec'+TreeId, tabsLeft)
+                Spec.SetPoint('CENTER', Point, -1)
+                Spec.SetSize(Width+Offs, ClassSpecWindow.GetHeight())
                 Spec.SetFrameLevel(5)
+                i++
 
                 let NormalTex = Spec.CreateTexture("$parentNormalTexture", "ARTWORK")
                 NormalTex.SetPoint('CENTER', 0, 15)
@@ -598,10 +610,7 @@ export function TalentTreeUI() {
                     SpellCircle.SetTexture(PATH+'SampleBorder')
                     SpellCircle.SetDrawLayer('ARTWORK', 1)
 
-                    let SpellInfo = GetSpellInfo(parseInt(SpellId))
-                    let Name = SpellInfo[0]
-                    let Rank = SpellInfo[1]
-                    let Icon = SpellInfo[2]
+                    let [Name, Rank, Icon] = GetSpellInfo(parseInt(SpellId))
 
                     SetPortraitToTexture(SpellTex, Icon)
                     let SpellButton = CreateFrame('Button', 'SpellButton', Spec)
@@ -664,20 +673,6 @@ export function TalentTreeUI() {
                     else
                         self.Enable()
                 })
-
-                let EventFrame = CreateFrame('Frame')
-                EventFrame.RegisterEvent('UNIT_SPELLCAST_SUCCEEDED')
-                EventFrame.RegisterEvent('UNIT_SPELLCAST_INTERRUPTED')
-                EventFrame.SetScript('OnEvent', function (self, event, unit, spellName) {
-                    if (unit === 'player')
-                        if (event === 'UNIT_SPELLCAST_SUCCEEDED' && spellName === 'Activate Primary Spec' && CurrentTab) {
-                            //SelectTab(CurrentTab)
-                            CurrentTab = null
-                        } else if (event === 'UNIT_SPELLCAST_INTERRUPTED' && CurrentTab) {
-                            ActivateSpecBtn.SetButtonState('NORMAL')
-                            CurrentTab = null
-                        }
-                })
                 
                 if (TabCount <= 2) {
                     NormalTex.SetSize(Spec.GetWidth(), Spec.GetHeight() + 180)
@@ -692,7 +687,7 @@ export function TalentTreeUI() {
                     HilightTex.SetSize(Spec.GetWidth(), Spec.GetHeight() + 180)
                     PushedTex.SetSize(Spec.GetWidth(), Spec.GetHeight() + 180)
                 }
-                StartX += Width
+                StartX += Width - Offs/2
 
                 FrameData.PlayerTalentFrameTabsLeftData[Tree.TabId+1] = {Frame: Spec, SpecButton: ActivateSpecBtn}
             }
@@ -709,7 +704,7 @@ export function TalentTreeUI() {
         Right.SetFrameLevel(2000)
         Right.SetPoint('TOP', -370, -55)
         let RightPoints = TalentFrame.CreateFontString()
-        RightPoints.SetFont("Fonts\\FRIZQT__.TTF", 15, "OUTLINE")
+        RightPoints.SetFont("Fonts\\FRIZQT__.TTF", 10, "OUTLINE")
         RightPoints.SetPoint('TOP', GridTalentTalents[0][17].Frame, 0, 35)
 
         let Left = CreateFrame('Frame', 'TalentPoints', TalentFrame)
@@ -717,7 +712,7 @@ export function TalentTreeUI() {
         Left.SetFrameLevel(2000)
         Left.SetPoint('CENTER', -370, -55)
         let LeftPoints = TalentFrame.CreateFontString()
-        LeftPoints.SetFont("Fonts\\FRIZQT__.TTF", 15, "OUTLINE")
+        LeftPoints.SetFont("Fonts\\FRIZQT__.TTF", 10, "OUTLINE")
         LeftPoints.SetPoint('TOP', GridTalentTalents[0][6].Frame, 0, 35)
 
         PointsBottomLeft = LeftPoints
