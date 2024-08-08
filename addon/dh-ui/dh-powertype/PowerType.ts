@@ -33,10 +33,11 @@ export function SecondaryPowerUI() {
         let Target : WoWAPI.UnitId = 'target'
         let Focused : WoWAPI.UnitId = 'focus'
 
-        UpdatePowerBar(_G[`PlayerFrameAlternateManaBar`], Player, false)
-        
-        UpdatePlayerPortrait()
-        UpdateAltManaText(Player)
+        if (_G[`PlayerFrameAlternateManaBar`].IsVisible()) {
+            UpdatePowerBar(_G[`PlayerFrameAlternateManaBar`], Player, false)
+            
+            UpdatePlayerPortrait()
+        }
     })
 
     function UpdatePlayerPortrait() {
@@ -58,18 +59,6 @@ export function SecondaryPowerUI() {
             return `${(Value/1e3)}K`
         else
             return `${Value}`
-    }
-
-    function UpdateAltManaText(Unit: WoWAPI.UnitId) {
-        let [a, Class] = UnitClass(Unit)
-        if (AltPowers[Class]) {
-            let Value = PlayerFrameAlternateManaBar.GetValue()
-            let [Min, Max] = PlayerFrameAlternateManaBar.GetMinMaxValues()
-
-            let Text = `${AbreviateNumber(Value)}/${AbreviateNumber(Max)}`
-
-            PlayerFrameAlternateManaBar.TextString.SetText(Text)
-        }
     }
 
     function UpdatePowerBar(Frame, Unit, Alt : bool) {
