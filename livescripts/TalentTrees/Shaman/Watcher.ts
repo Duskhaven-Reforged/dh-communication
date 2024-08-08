@@ -37,5 +37,5 @@ export function ReloadShamanWatcherTree() {
     Talent = GetID(`Spell`, `dh-spells`, `sha-wat-airsgrace`)
     SetChoiceNode(Talent, TAB, 6, 4, 0, true, CreateArray<uint32>([Talent, GetID(`Spell`, `dh-spells`, `sha-wat-earthsstocism`)]), CreateDictionary<uint32, uint8>({[GetID('Spell', 'dh-spells', 'sha-wat-frostbrandweapon')]: 1,  [GetID('Spell', 'dh-spells', 'sha-wat-elementalbash')]: 1, [GetID('Spell', 'dh-spells', 'sha-wat-lavapooltotem')]: 1}), EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `sha-wat-maelstromdefense`)
-    SetTalentNode(Talent, TAB, 9, 4, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `sha-wat-lavapooltotem`)]: 1, [GetID(`Spell`, `dh-spells`, `sha-wat-maelstromdefense`)]: 1}), EmptySpellArray, EmptySpellArray)
+    SetTalentNode(Talent, TAB, 9, 4, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `sha-wat-lavapooltotem`)]: 1, [GetID(`Spell`, `dh-spells`, `sha-wat-ferallunge`)]: 1}), EmptySpellArray, EmptySpellArray)
 }

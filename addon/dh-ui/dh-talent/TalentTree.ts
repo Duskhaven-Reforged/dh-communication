@@ -1548,6 +1548,9 @@ export function TalentTreeUI() {
                 TalentTree.ActiveString = Talents
             }
         }
+
+        if (ToggleFrame)
+            TalentMicroButton.Click()
     }
 
     function IsStarterForTab(Talent: TTLPTalent) : bool {
