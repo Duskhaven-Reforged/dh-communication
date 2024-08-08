@@ -64,33 +64,33 @@ export function TalentTreeUI() {
     TalentFrame.SetFrameLevel(3);
     TalentFrame.SetFrameStrata('MEDIUM')
 
-    let ConfigFrame = CreateFrame('Frame', 'ConfigFrame', TalentFrame)
-    ConfigFrame.SetSize(500, 400) // Tamanho do frame de configuração
-    ConfigFrame.SetPoint('TOP', TalentFrame, 'TOP', 0, -50) // Centraliza no TalentFrame
-    ConfigFrame.SetFrameStrata('HIGH')
-    ConfigFrame.SetBackdrop({
-        bgFile: 'Interface\\DialogFrame\\UI-DialogBox-Background', // Textura de fundo
-        edgeFile: 'Interface\\DialogFrame\\UI-DialogBox-Border', // Borda
-        tile: true,
-        tileSize: 32,
-        edgeSize: 32,
-        insets: { left: 8, right: 8, top: 8, bottom: 8 }
-    })
-    ConfigFrame.SetBackdropColor(0, 0, 0, 1) // Cor de fundo
-    ConfigFrame.Hide()
+    // let ConfigFrame = CreateFrame('Frame', 'ConfigFrame', TalentFrame)
+    // ConfigFrame.SetSize(500, 400) // Tamanho do frame de configuração
+    // ConfigFrame.SetPoint('TOP', TalentFrame, 'TOP', 0, -50) // Centraliza no TalentFrame
+    // ConfigFrame.SetFrameStrata('HIGH')
+    // ConfigFrame.SetBackdrop({
+    //     bgFile: 'Interface\\DialogFrame\\UI-DialogBox-Background', // Textura de fundo
+    //     edgeFile: 'Interface\\DialogFrame\\UI-DialogBox-Border', // Borda
+    //     tile: true,
+    //     tileSize: 32,
+    //     edgeSize: 32,
+    //     insets: { left: 8, right: 8, top: 8, bottom: 8 }
+    // })
+    // ConfigFrame.SetBackdropColor(0, 0, 0, 1) // Cor de fundo
+    // ConfigFrame.Hide()
 
-    let headerTexture = ConfigFrame.CreateTexture(null, 'ARTWORK')
-    headerTexture.SetTexture('Interface\\DialogFrame\\UI-DialogBox-Header') // caminho para a textura do cabeçalho
-    headerTexture.SetSize(256, 64) // O tamanho da textura pode variar, ajuste conforme necessário
-    headerTexture.SetPoint('TOP', ConfigFrame, 'TOP', 0, 12) // Ajuste a posição Y conforme necessário
+    // let headerTexture = ConfigFrame.CreateTexture(null, 'ARTWORK')
+    // headerTexture.SetTexture('Interface\\DialogFrame\\UI-DialogBox-Header') // caminho para a textura do cabeçalho
+    // headerTexture.SetSize(256, 64) // O tamanho da textura pode variar, ajuste conforme necessário
+    // headerTexture.SetPoint('TOP', ConfigFrame, 'TOP', 0, 12) // Ajuste a posição Y conforme necessário
 
-    let headerText = ConfigFrame.CreateFontString(null, 'OVERLAY', 'GameFontNormal')
-    headerText.SetPoint('CENTER', headerTexture, 'CENTER', 0, 12)
-    headerText.SetText('Configuration') // Defina o texto do cabeçalho conforme necessário
+    // let headerText = ConfigFrame.CreateFontString(null, 'OVERLAY', 'GameFontNormal')
+    // headerText.SetPoint('CENTER', headerTexture, 'CENTER', 0, 12)
+    // headerText.SetText('Configuration') // Defina o texto do cabeçalho conforme necessário
 
-    let closeButton = CreateFrame('Button', null, ConfigFrame, 'UIPanelCloseButton')
-    closeButton.SetPoint('TOPRIGHT', ConfigFrame, 'TOPRIGHT', -5, -5)
-    closeButton.SetScript('OnClick', function() {ConfigFrame.Hide()})
+    // let closeButton = CreateFrame('Button', null, ConfigFrame, 'UIPanelCloseButton')
+    // closeButton.SetPoint('TOPRIGHT', ConfigFrame, 'TOPRIGHT', -5, -5)
+    // closeButton.SetScript('OnClick', function() {ConfigFrame.Hide()})
 
     let ClassSpecWindow = CreateFrame('Frame', 'CustomSpecFrame', UIParent)
     ClassSpecWindow.SetSize(1000, 800)
@@ -205,22 +205,20 @@ export function TalentTreeUI() {
     SpecTitleText.SetText('Specializations')
 
     windows.forEach((window, i) => {
-        // let closeButton = CreateFrame('Button', 'CloseTalentUI'+i, window)
-        // closeButton.SetSize(30, 30) 
-        // closeButton.SetFrameLevel(100)
-        // closeButton.SetFrameStrata('FULLSCREEN')
+        let closeButton = CreateFrame('Button', 'CloseTalentUI'+i, window)
+        closeButton.SetSize(30, 30) 
+        closeButton.SetFrameLevel(100)
+        closeButton.SetFrameStrata('FULLSCREEN')
+        closeButton.Show()
 
-        // closeButton.SetNormalTexture(CONSTANTS.UI.BTN_CLOSE_NORM) 
-        // closeButton.SetHighlightTexture(CONSTANTS.UI.BTN_CLOSE_HILI)
-        // closeButton.SetPushedTexture(CONSTANTS.UI.BTN_CLOSE_PUSH)
+        closeButton.SetNormalTexture(CONSTANTS.UI.BTN_CLOSE_NORM) 
+        closeButton.SetHighlightTexture(CONSTANTS.UI.BTN_CLOSE_HILI)
+        closeButton.SetPushedTexture(CONSTANTS.UI.BTN_CLOSE_PUSH)
 
-        // closeButton.SetScript('OnClick', function() {
-        //     if (PlayerTalentFrame && PlayerTalentFrame.IsVisible())
-        //         TalentMicroButton.Click()
-        //     else {
-        //         window.Hide()
-        //     }
-        // })
+        closeButton.SetScript('OnClick', function() {
+            if (PlayerTalentFrame && PlayerTalentFrame.IsVisible())
+                TalentMicroButton.Click()
+        })
 
         // let configButton = CreateFrame('Button', 'ConfigButtonButton' + i , closeButton)
         // configButton.SetSize(30, 30)
@@ -306,50 +304,50 @@ export function TalentTreeUI() {
     })
 
     // [[Configs]]
-    let alphaSlider = CreateFrame('Slider', 'AlphaSlider', ConfigFrame, 'OptionsSliderTemplate')
-    alphaSlider.SetMinMaxValues(0, 1)
-    alphaSlider.SetValueStep(0.01)  
-    alphaSlider.SetWidth(200)  
-    alphaSlider.SetHeight(20)  
-    alphaSlider.SetPoint('TOPLEFT', ConfigFrame, 'TOPLEFT', 40, -50)
+    // let alphaSlider = CreateFrame('Slider', 'AlphaSlider', ConfigFrame, 'OptionsSliderTemplate')
+    // alphaSlider.SetMinMaxValues(0, 1)
+    // alphaSlider.SetValueStep(0.01)  
+    // alphaSlider.SetWidth(200)  
+    // alphaSlider.SetHeight(20)  
+    // alphaSlider.SetPoint('TOPLEFT', ConfigFrame, 'TOPLEFT', 40, -50)
 
-    let lowText = alphaSlider.CreateFontString(null, 'ARTWORK', 'GameFontNormalSmall')
-    lowText.SetPoint('TOPLEFT', alphaSlider, 'BOTTOMLEFT', 2, 3)
+    // let lowText = alphaSlider.CreateFontString(null, 'ARTWORK', 'GameFontNormalSmall')
+    // lowText.SetPoint('TOPLEFT', alphaSlider, 'BOTTOMLEFT', 2, 3)
 
-    let highText = alphaSlider.CreateFontString(null, 'ARTWORK', 'GameFontNormalSmall')
-    highText.SetPoint('TOPRIGHT', alphaSlider, 'BOTTOMRIGHT', -2, 3)
+    // let highText = alphaSlider.CreateFontString(null, 'ARTWORK', 'GameFontNormalSmall')
+    // highText.SetPoint('TOPRIGHT', alphaSlider, 'BOTTOMRIGHT', -2, 3)
 
-    let titleText = alphaSlider.CreateFontString(null, 'ARTWORK', 'GameFontNormalSmall')
-    titleText.SetPoint('TOP', alphaSlider, 'TOP', 0, 10)
-    titleText.SetText('Background Transparence')
+    // let titleText = alphaSlider.CreateFontString(null, 'ARTWORK', 'GameFontNormalSmall')
+    // titleText.SetPoint('TOP', alphaSlider, 'TOP', 0, 10)
+    // titleText.SetText('Background Transparence')
 
-    alphaSlider.SetScript('OnValueChanged', function(self, value) {
-        TalentFrameContainerBackground.SetAlpha(value)
-    })
+    // alphaSlider.SetScript('OnValueChanged', function(self, value) {
+    //     TalentFrameContainerBackground.SetAlpha(value)
+    // })
 
-    alphaSlider.SetValue(1)
+    // alphaSlider.SetValue(1)
 
-    let scaleSlider = CreateFrame('Slider', 'ScaleSlider', ConfigFrame, 'OptionsSliderTemplate')
-    scaleSlider.SetMinMaxValues(0.5, 2) // Define os valores mínimos e máximos. Por exemplo, de 0.5 (50%) a 2 (200%)
-    scaleSlider.SetValueStep(0.01)
-    scaleSlider.SetWidth(200)
-    scaleSlider.SetHeight(20)
-    scaleSlider.SetPoint('BOTTOM', alphaSlider, 'BOTTOM', 0, -50)
-    scaleSlider.EnableMouse(false)
+    // let scaleSlider = CreateFrame('Slider', 'ScaleSlider', ConfigFrame, 'OptionsSliderTemplate')
+    // scaleSlider.SetMinMaxValues(0.5, 2) // Define os valores mínimos e máximos. Por exemplo, de 0.5 (50%) a 2 (200%)
+    // scaleSlider.SetValueStep(0.01)
+    // scaleSlider.SetWidth(200)
+    // scaleSlider.SetHeight(20)
+    // scaleSlider.SetPoint('BOTTOM', alphaSlider, 'BOTTOM', 0, -50)
+    // scaleSlider.EnableMouse(false)
 
-    let scaleTitleText = scaleSlider.CreateFontString(null, 'ARTWORK', 'GameFontNormalSmall')
-    scaleTitleText.SetPoint('TOP', scaleSlider, 'TOP', 0, 10)
-    scaleTitleText.SetText('Scale Adjustment')
+    // let scaleTitleText = scaleSlider.CreateFontString(null, 'ARTWORK', 'GameFontNormalSmall')
+    // scaleTitleText.SetPoint('TOP', scaleSlider, 'TOP', 0, 10)
+    // scaleTitleText.SetText('Scale Adjustment')
 
-    let decreaseButton = CreateFrame('Button', 'DecreaseButton', ConfigFrame, 'UIPanelButtonTemplate')
-    decreaseButton.SetSize(20, 20)
-    decreaseButton.SetPoint('RIGHT', scaleSlider, 'LEFT', -5, 0)
-    decreaseButton.SetText('-')
+    // let decreaseButton = CreateFrame('Button', 'DecreaseButton', ConfigFrame, 'UIPanelButtonTemplate')
+    // decreaseButton.SetSize(20, 20)
+    // decreaseButton.SetPoint('RIGHT', scaleSlider, 'LEFT', -5, 0)
+    // decreaseButton.SetText('-')
 
-    let increaseButton = CreateFrame('Button', 'IncreaseButton', ConfigFrame, 'UIPanelButtonTemplate')
-    increaseButton.SetSize(20, 20)
-    increaseButton.SetPoint('LEFT', scaleSlider, 'RIGHT', 5, 0)
-    increaseButton.SetText('+')
+    // let increaseButton = CreateFrame('Button', 'IncreaseButton', ConfigFrame, 'UIPanelButtonTemplate')
+    // increaseButton.SetSize(20, 20)
+    // increaseButton.SetPoint('LEFT', scaleSlider, 'RIGHT', 5, 0)
+    // increaseButton.SetText('+')
 
     function UpdateScale(value) {
         let currentScale = TalentFrame.GetScale()
@@ -358,17 +356,17 @@ export function TalentTreeUI() {
             newScale = Math.max(0.5, Math.min(newScale, 2))
             TalentFrame.SetScale(newScale)
             ClassSpecWindow.SetScale(newScale)
-            scaleSlider.SetValue(newScale)
+            // scaleSlider.SetValue(newScale)
         }
     }
 
-    decreaseButton.SetScript('OnClick', function() {
-        UpdateScale(-0.01)
-    })
+    // decreaseButton.SetScript('OnClick', function() {
+    //     UpdateScale(-0.01)
+    // })
 
-    increaseButton.SetScript('OnClick', function() {
-        UpdateScale(0.01)
-    })
+    // increaseButton.SetScript('OnClick', function() {
+    //     UpdateScale(0.01)
+    // })
 
     TalentFrame.Hide()
     ClassSpecWindow.Hide()
@@ -603,9 +601,8 @@ export function TalentTreeUI() {
                 let CurrentTab
 
                 SpellIconIds.forEach((SpellId) => {
-                    let SpellTex = Spec.CreateTexture('SpellTex', 'BACKGROUND')
+                    let SpellTex = Spec.CreateTexture('SpellTex', 'ARTWORK', null, -1)
                     SpellTex.SetSize(50, 50)
-                    SpellTex.SetDrawLayer('BACKGROUND', -1)
 
                     let SpellCircle = Spec.CreateTexture('SpellCircle', 'ARTWORK')
                     SpellCircle.SetPoint('CENTER', SpellTex, 'CENTER', 0, 0)
@@ -1497,6 +1494,8 @@ export function TalentTreeUI() {
         if (ToggleFrame)
             TalentMicroButton.Click()
 
+        _G['TalentTabButton0'].Click()
+
         let Type = Util.alpha.indexOf(Talents[0]) - 1
         let Spec = Util.alpha.indexOf(Talents[1])
         let Class = Util.alpha.indexOf(Talents[2])
@@ -1683,9 +1682,7 @@ export function TalentTreeUI() {
         if (Show)
             ClassSpecWindowLockout.Show()
         else {
-            TalentFrame.Show()
             ClassSpecWindowLockout.Hide()
-            ClassSpecWindow.Hide()
         }
     })
 
