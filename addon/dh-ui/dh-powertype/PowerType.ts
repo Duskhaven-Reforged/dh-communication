@@ -64,9 +64,9 @@ export function SecondaryPowerUI() {
         let [a, Class] = UnitClass(Unit)
         if (AltPowers[Class]) {
             let Value = PlayerFrameAlternateManaBar.GetValue()
-            let MaxPower = UnitPowerMax(Unit, AltPowers[Class])
+            let [Min, Max] = PlayerFrameAlternateManaBar.GetMinMaxValues()
 
-            let Text = `${AbreviateNumber(Value)}/${AbreviateNumber(MaxPower)}`
+            let Text = `${AbreviateNumber(Value)}/${AbreviateNumber(Max)}`
 
             PlayerFrameAlternateManaBar.TextString.SetText(Text)
         }
@@ -78,7 +78,6 @@ export function SecondaryPowerUI() {
         if (AltPowers[Class]) {
             let ColorData = PowerTypes[AltPowers[Class]]
             if (ColorData) {
-                //Frame.SetStatusBarTexture(`${PATH}PowerType\\amber_horizontal_fill`, 'OVERLAY')
                 Frame.SetStatusBarColor(ColorData.R/255, ColorData.G/255, ColorData.B/255)
             }
 
