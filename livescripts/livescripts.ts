@@ -76,7 +76,7 @@ export function Main(events: TSEvents) {
         }
     }) 
 
-    events.Spell.OnCastCancelled(63645, (who, spell) => {
+    events.Spell.OnCastCancelled(63645, (who, tar) => {
         if (who.IsPlayer()) {
             who.SetUInt(`SpecActivation`, 0)
             let ClientCallback = new SimpleMessagePayload(ClientCallbackOperations.ACTIVATE_CLASS_SPEC, 'Cancelled Setting Spec')
