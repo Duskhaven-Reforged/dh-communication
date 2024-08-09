@@ -7,7 +7,7 @@ export function ReloadWarriorArmsTree() {
     QueryWorld(`delete from character_spec_autolearn where \`class\` = ${CLASS} and \`spec\` = ${TAB}`)
     SetSpecAutolearn(CLASS, TAB, 16, GetID(`Spell`, 'dh-spells', 'warr-gen-traumatize'))
     SetSpecAutolearn(CLASS, TAB, 10, GetID(`Spell`, 'dh-spells', 'warr-arm-sudden-death'))
-    SetSpecAutolearn(CLASS, TAB, 20, GetID(`Spell`, 'dh-spells', 'warr-arm-battle-stance'))
+    SetSpecAutolearn(CLASS, TAB, 20, GetID(`Spell`, 'dh-spells', 'warr-arm-battlestance'))
 
     QueryWorld(`Delete from forge_talents where talentTabId = ${TAB}`)
     QueryWorld(`Delete from forge_talent_prereq where talentTabId = ${TAB}`)
