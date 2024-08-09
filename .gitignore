@@ -2,3 +2,4 @@
 build/
 global.d.ts
 tsconfig.json
+livescripts/Guild/Guild.ts
