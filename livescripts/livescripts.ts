@@ -1,5 +1,6 @@
 import { ClientCallbackOperations, SimpleMessagePayload } from "../shared/Messages";
 import { ComboPoints } from "./Combopoints/Combopoints";
+import { StarterGuild } from "./Guild/Guild";
 import { DHPointType } from "./classes";
 import { wDefaultLoadoutStrings, wSpecAutolearn, wStartersForTabs, wTalentTrees } from "./dh-cachedata/dh-worlddata";
 import { DHCommonMessage } from "./dh-message/dh-cmsg";
@@ -11,13 +12,13 @@ export function Main(events: TSEvents) {
     mDHDMsg = new DHCommonMessage()
     RouteTopics(events)
     ComboPoints(events)
+    StarterGuild(events)
 
     events.Player.OnLogin((player, first) => {
         let spec = mDHDMsg.cache.TryGetCharacterActiveSpec(player)
         player.SetUInt(`Spec`, spec.SpecTabId)
 
         LearnSpellsForLevel(player)
-
         //todo load actions and maybe account bonuses
         // maybe unlearn flagged too
     })
@@ -75,8 +76,8 @@ export function Main(events: TSEvents) {
         }
     }) 
 
-    events.Unit.OnCastCancelled((who, spell) => {
-        if (who.IsPlayer() && spell.GetEntry() === 63645) {
+    events.Spell.OnCastCancelled(63645, (who, spell) => {
+        if (who.IsPlayer()) {
             who.SetUInt(`SpecActivation`, 0)
             let ClientCallback = new SimpleMessagePayload(ClientCallbackOperations.ACTIVATE_CLASS_SPEC, 'Cancelled Setting Spec')
             ClientCallback.write().SendToPlayer(who.ToPlayer())
