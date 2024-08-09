@@ -1,7 +1,7 @@
 import { ClientCallbackOperations, SimpleMessagePayload } from '../../shared/Messages';
 import { ACOUNT_WIDE_KEY, DHCharacterPoint, DHCharacterTalent, DHNodeType, DHPlayerLoadout, DHPlayerSpec, DHPointType, DHTalent, DHTalentTab, DHTreeMetaData, TALENT_POINT_TYPES, base64_char } from '../classes';
 import { LoadCharacterData, cActiveLoadouts, cCharPoints, cLoadouts, cSpecs } from './dh-chardata';
-import { LoadWorldData, wClassNodeToSpell, wRaceClassTabMap, wPointTypeToTabs, wSpecNodeToSpell, wSpellToTab, wTabToSpell, wTalentTrees, wChoiceNodesRev, wTreeMetaData, wClassNodeToClassTree, wChoiceNodes, wDefaultLoadoutStrings, wStarterTalentConditions } from './dh-worlddata';
+import { LoadWorldData, wClassNodeToSpell, wRaceClassTabMap, wPointTypeToTabs, wSpecNodeToSpell, wSpellToTab, wTabToSpell, wTalentTrees, wChoiceNodesRev, wTreeMetaData, wClassNodeToClassTree, wChoiceNodes, wDefaultLoadoutStrings } from './dh-worlddata';
 
 export class DHCache {
     
