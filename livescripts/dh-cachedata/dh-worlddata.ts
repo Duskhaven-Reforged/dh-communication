@@ -324,6 +324,7 @@ class DefaultTalentStrings {
                     })
 
                     wDefaultLoadoutStrings[ClassId][SpecId] = Default
+                    count++
                 })
             }
         })
@@ -424,8 +425,8 @@ class CustomTalentUnlearns {
 
         const res = QueryWorld('SELECT * FROM `forge_talent_unlearn`')
         while (res.GetRow()) {
-            let SpellId = res.GetUInt32(0)
-            let TalentTabId = res.GetUInt32(1)
+            let TalentTabId = res.GetUInt32(0)
+            let SpellId = res.GetUInt32(1)
             let UnlearnedSpellId = res.GetUInt32(2)
 
             if (wTalentTrees.contains(TalentTabId)) {
