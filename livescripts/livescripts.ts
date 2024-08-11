@@ -152,7 +152,6 @@ export function LearnSpellsForLevel(player: TSPlayer) {
 
 function LearnSpecSpecificSkills(Player: TSPlayer, SpecId: number) {
     let DualWieldSpecs = [2, 20, 16, 17, 18]
-    console.log(`DW SPEC? ${SpecId}\n`)
     if (SpecId != 6) {
         if (DualWieldSpecs.includes(SpecId))
             Player.SetSkill(118, 1, 1, 1)

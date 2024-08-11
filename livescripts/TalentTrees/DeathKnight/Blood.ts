@@ -23,7 +23,7 @@ export function ReloadDKBloodTree() {
     Talent = GetID(`Spell`, `dh-spells`, `dk-blo-goliathstrike`)
     SetTalentNode(Talent, TAB, 5, 3, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({55233: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `dk-blo-crimsonscourge`)
-    SetTalentNode(Talent, TAB, 6, 3, 0, false, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({55233: 1}), CreateArray<uint32>([43265]), EmptySpellArray)
+    SetTalentNode(Talent, TAB, 6, 3, 0, false, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({55233: 1}), CreateArray<uint32>([GetID(`Spell`, `dh-spells`, `dk-gen-deathanddecay`)]), EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `dk-blo-runetap`)
     SetTalentNode(Talent, TAB, 3, 4, 0, false, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `dk-blo-tombstone`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `dk-blo-undyingresolve`)
