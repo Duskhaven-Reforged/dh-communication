@@ -142,17 +142,21 @@ export function LearnSpellsForLevel(player: TSPlayer) {
                 }
             })
         })
-        wStartersForTabs[Spec].forEach((Spell) => {
-            if (!player.HasSpell(Spell))
-                player.LearnSpell(Spell)
-        })
+        if (player.GetLevel() > 9) {
+            wStartersForTabs[Spec].forEach((Spell) => {
+                !player.HasSpell(Spell)  ? player.LearnSpell(Spell) : player.RemoveSpell(Spell, false, false)
+            })
+        }
     }
 }
 
 function LearnSpecSpecificSkills(Player: TSPlayer, SpecId: number) {
     let DualWieldSpecs = [2, 20, 16, 17, 18]
-    if (DualWieldSpecs.includes(SpecId))
-        Player.SetSkill(118, 1, 1, 1)
-    else
-        Player.SetSkill(118, 0, 0, 0)
+    console.log(`DW SPEC? ${SpecId}\n`)
+    if (SpecId != 6) {
+        if (DualWieldSpecs.includes(SpecId))
+            Player.SetSkill(118, 1, 1, 1)
+        else
+            Player.SetSkill(118, 0, 0, 0)
+    }
 }
