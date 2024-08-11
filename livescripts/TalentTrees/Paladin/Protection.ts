@@ -38,6 +38,6 @@ export function ReloadPalProtTree() {
     SetTalentNode(Talent, TAB, 5, 4, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `pal-prot-grandcrusader`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `pal-prot-reckoning`)
     SetTalentNode(Talent, TAB, 6, 4, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `pal-prot-grandcrusader`)]: 1}), EmptySpellArray, EmptySpellArray)
-    Talent = GetID(`Spell`, `dh-spells`, `pal-prot-alessioninjustice`)
+    Talent = GetID(`Spell`, `dh-spells`, `pal-prot-alessoninjustice`)
     SetTalentNode(Talent, TAB, 7, 4, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `pal-prot-divinegavels`)]: 1}), EmptySpellArray, EmptySpellArray)
 }

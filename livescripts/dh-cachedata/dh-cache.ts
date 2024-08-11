@@ -155,6 +155,7 @@ export class DHCache {
                                     Points.Sum -= Talent.CurrentRank * TTab.Talents[Talent.SpellId].RankCost
                                 }
                                 TTab.Talents[Talent.SpellId].UnlearnSpells.forEach((UnlearnSpellId) => {
+                                    console.log(UnlearnSpellId, '\n')
                                     Player.RemoveSpell(UnlearnSpellId, false, false)
                                 })
 

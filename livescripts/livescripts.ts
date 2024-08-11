@@ -96,7 +96,7 @@ export function Main(events: TSEvents) {
                 if (!Tab.IsNull() && !Spec.IsNull() && Tree.TalentType === DHPointType.TALENT) {
                     Spec.SpecTabId = SpecToActivate
                     Player.SetUInt(`Spec`, Spec.SpecTabId)
-                    
+
                     mDHDMsg.cache.ForgetTalents(Player, Spec, DHPointType.CLASS)
                     mDHDMsg.cache.ForgetTalents(Player, Spec, DHPointType.TALENT)
 
