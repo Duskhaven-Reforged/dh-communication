@@ -38,7 +38,6 @@ export function ComboPoints(events: TSEvents) {
         if (Spell.GetCaster().IsPlayer()) {
             let Player = Spell.GetCaster().ToPlayer()
             let Spent = Player.GetUInt(`ComboPoints`)
-            console.log(Spent)
             if (Player.GetClass() == Class.DRUID) {
                 if (Player.HasAura(GoldrinnsFury) && Player.HasAura(UnendingOnslaught)) {
                     let Onslaught = Player.GetAura(UnendingOnslaught)

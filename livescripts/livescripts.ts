@@ -146,6 +146,9 @@ export function LearnSpellsForLevel(player: TSPlayer) {
             wStartersForTabs[Spec].forEach((Spell) => {
                 !player.HasSpell(Spell)  ? player.LearnSpell(Spell) : player.RemoveSpell(Spell, false, false)
             })
+
+            if (player.GetClass() == Class.DEATH_KNIGHT)
+                player.CastSpell(player, 53431, true)
         }
     }
 }

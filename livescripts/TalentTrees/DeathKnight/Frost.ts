@@ -22,7 +22,7 @@ export function ReloadDKFrostTree() {
     Talent = GetID(`Spell`, `dh-spells`, `dk-fro-icytalons`)
     SetTalentNode(Talent, TAB, 5, 2, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `dk-fro-froststrike`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `dk-fro-howlingblast`)
-    SetTalentNode(Talent, TAB, 6, 2, 0, false, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `dk-fro-froststrike`)]: 1}), EmptySpellArray, EmptySpellArray)
+    SetTalentNode(Talent, TAB, 6, 2, 0, false, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `dk-fro-froststrike`)]: 1}), EmptySpellArray, CreateArray<uint32>([GetID(`Spell`, `dh-spells`, `dk-fro-howlingblastfrostfever`)]))
     Talent = GetID(`Spell`, `dh-spells`, `dk-fro-killingmachine`)
     SetTalentNode(Talent, TAB, 3, 3, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `dk-fro-obliterate`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `dk-fro-shatterstrikes`)
