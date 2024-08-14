@@ -28,6 +28,9 @@ export function ComboPoints(events: TSEvents) {
     })
 
     events.Spell.OnCheckCast(Finishers, (Spell, Result) => {
+        if (Spell.GetCaster() == null)
+            return
+        
         if (Spell.GetCaster().IsPlayer()) {
             let Player = Spell.GetCaster().ToPlayer()
             Result.set(Player.GetUInt(`ComboPoints`, 0) > 0 ? 255 : 78)

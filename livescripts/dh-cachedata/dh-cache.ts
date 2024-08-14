@@ -91,7 +91,6 @@ export class DHCache {
                 if (Player.GetClass() === PlayerClass && PlayerSpec === Spec.SpecTabId) {
                     let Tab = this.TryGetTalentTab(Player, PlayerSpec)
                     if (!Tab.IsNull()) {
-                        console.log(`${wDefaultLoadoutStrings[PlayerClass][PlayerSpec]} === ${LoadoutString}`)
                         let Ranks = LoadoutString.substring(3)
                         let ClassMap = wClassNodeToSpell[Player.GetClassMask()]
                         let SpecMap = wSpecNodeToSpell[PlayerSpec]
@@ -498,9 +497,12 @@ export class DHCache {
                         })
                     }
 
-                    if (spec.Talents.contains(tab.Id))
-                        if (spec.Talents[tab.Id].contains(spellId))
-                            spec.Talents[tab.Id][spellId].CurrentRank = 0
+                    if (spec.Talents.contains(tab.Id)) {
+                        if (spec.Talents[tab.Id].contains(spellId)) {
+                            if (spec.Talents[tab.Id][spellId] == null)
+                                spec.Talents[tab.Id][spellId].CurrentRank = 0
+                        }
+                    }
                 }
             })
         })
