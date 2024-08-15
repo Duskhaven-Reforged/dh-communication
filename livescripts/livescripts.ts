@@ -2,6 +2,7 @@ import { ClientCallbackOperations, SimpleMessagePayload } from "../shared/Messag
 import { ComboPoints } from "./Combopoints/Combopoints";
 import { StarterGuild } from "./Guild/Guild";
 import { DHPointType } from "./classes";
+import { LearnWithExtraSteps } from "./dh-cachedata/dh-cache";
 import { wDefaultLoadoutStrings, wSpecAutolearn, wStartersForTabs, wTalentTrees } from "./dh-cachedata/dh-worlddata";
 import { DHCommonMessage } from "./dh-message/dh-cmsg";
 import { RouteTopics } from "./dh-topic/TopicRouter";
@@ -19,6 +20,7 @@ export function Main(events: TSEvents) {
         player.SetUInt(`Spec`, spec.SpecTabId)
 
         LearnSpellsForLevel(player)
+        // EnsurePlayerHasAllSpells(player)
         //todo load actions and maybe account bonuses
         // maybe unlearn flagged too
     })
@@ -132,7 +134,7 @@ export function LearnSpellsForLevel(player: TSPlayer) {
                     if (player.GetLevel() >= Level) {
                         Spells.forEach((Spell) => {
                             if (!player.HasSpell(Spell))
-                                player.LearnSpell(Spell)
+                                LearnWithExtraSteps(player, Spell)
                         })
                     }
                 } else {
@@ -142,9 +144,11 @@ export function LearnSpellsForLevel(player: TSPlayer) {
                 }
             })
         })
+
         if (player.GetLevel() > 9) {
             wStartersForTabs[Spec].forEach((Spell) => {
-                !player.HasSpell(Spell)  ? player.LearnSpell(Spell) : player.RemoveSpell(Spell, false, false)
+                if (!player.HasSpell(Spell))
+                    LearnWithExtraSteps(player, Spell)
             })
 
             if (player.GetClass() == Class.DEATH_KNIGHT)

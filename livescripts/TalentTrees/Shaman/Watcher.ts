@@ -7,7 +7,7 @@ export function ReloadShamanWatcherTree() {
 
     QueryWorld(`delete from character_spec_autolearn where \`class\` = ${CLASS} and \`spec\` = ${TAB}`)
     SetSpecAutolearn(CLASS, TAB, 10, GetID(`Spell`, `dh-spells`, `sha-wat-chosenofearth`))
-    SetSpecAutolearn(CLASS, TAB, 10, GetID(`Spell`, `dh-spells`, `sha-wat-wathersprovocation`))
+    SetSpecAutolearn(CLASS, TAB, 10, GetID(`Spell`, `dh-spells`, `sha-wat-watchersprovocation`))
     SetSpecAutolearn(CLASS, TAB, 20, GetID(`Spell`, `dh-spells`, `sha-wat-challenginggale`))
     SetSpecAutolearn(CLASS, TAB, 10, GetID(`Spell`, `dh-spells`, `sha-wat-mastery`))
 
@@ -35,7 +35,7 @@ export function ReloadShamanWatcherTree() {
     Talent = GetID(`Spell`, `dh-spells`, `sha-wat-sandstorm`)
     SetTalentNode(Talent, TAB, 3, 4, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `sha-wat-courageousstrikes`)]: 1, [GetID(`Spell`, `dh-spells`, `sha-wat-frostbrandweapon`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `sha-wat-airsgrace`)
-    SetChoiceNode(Talent, TAB, 6, 4, 0, true, CreateArray<uint32>([Talent, GetID(`Spell`, `dh-spells`, `sha-wat-earthsstocism`)]), CreateDictionary<uint32, uint8>({[GetID('Spell', 'dh-spells', 'sha-wat-frostbrandweapon')]: 1,  [GetID('Spell', 'dh-spells', 'sha-wat-elementalbash')]: 1, [GetID('Spell', 'dh-spells', 'sha-wat-lavapooltotem')]: 1}), EmptySpellArray)
+    SetChoiceNode(Talent, TAB, 6, 4, 0, true, CreateArray<uint32>([Talent, GetID(`Spell`, `dh-spells`, `sha-wat-earthsstoicism`)]), CreateDictionary<uint32, uint8>({[GetID('Spell', 'dh-spells', 'sha-wat-frostbrandweapon')]: 1,  [GetID('Spell', 'dh-spells', 'sha-wat-elementalbash')]: 1, [GetID('Spell', 'dh-spells', 'sha-wat-lavapooltotem')]: 1}), EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `sha-wat-maelstromdefense`)
     SetTalentNode(Talent, TAB, 9, 4, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `sha-wat-lavapooltotem`)]: 1, [GetID(`Spell`, `dh-spells`, `sha-wat-ferallunge`)]: 1}), EmptySpellArray, EmptySpellArray)
 }

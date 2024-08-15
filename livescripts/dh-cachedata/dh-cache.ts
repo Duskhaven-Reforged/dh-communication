@@ -1,4 +1,5 @@
 import { ClientCallbackOperations, SimpleMessagePayload } from '../../shared/Messages';
+import { SpecTabs } from '../TalentTrees/TalentTreeLoader';
 import { ACOUNT_WIDE_KEY, DHCharacterPoint, DHCharacterTalent, DHNodeType, DHPlayerLoadout, DHPlayerSpec, DHPointType, DHTalent, DHTalentTab, DHTreeMetaData, TALENT_POINT_TYPES, base64_char } from '../classes';
 import { LoadCharacterData, cActiveLoadouts, cCharPoints, cLoadouts, cSpecs } from './dh-chardata';
 import { LoadWorldData, wClassNodeToSpell, wRaceClassTabMap, wPointTypeToTabs, wSpecNodeToSpell, wSpellToTab, wTabToSpell, wTalentTrees, wChoiceNodesRev, wTreeMetaData, wClassNodeToClassTree, wChoiceNodes, wDefaultLoadoutStrings } from './dh-worlddata';
@@ -164,7 +165,7 @@ export class DHCache {
                                         Spec.ChoiceNodesChosen[Talent.SpellId] = Choice
                                     } else {
                                         let RankedSpell = TTab.Talents[Talent.SpellId].Ranks[Talent.CurrentRank]
-                                        Player.LearnSpell(RankedSpell)
+                                        LearnWithExtraSteps(Player, RankedSpell)
                                     }
 
                                     this.UpdateCharPoints(Player, Points)
@@ -535,4 +536,26 @@ function GetPointTypeName(Type: DHPointType): string {
         default:
             return ''
         }
+}
+
+let HasConditionalSpell : TSArray<uint32> = TAG(`dh-spells`, `spec-specific-effect`)
+export function LearnWithExtraSteps(Player: TSPlayer, SpellId: uint32) {
+    let ConditionalSpellMap : TSDictionary<uint32, TSDictionary<uint32, uint32>> = CreateDictionary<uint32, TSDictionary<uint32, uint32>>({
+        [GetID(`Spell`, `dh-spells`, `mag-gen-barrierarcana`)]: CreateDictionary<uint32, uint32>({
+            [SpecTabs.FIRE] : GetID(`Spell`, `dh-spells`, `mag-gen-blazingbarrier`),
+            [SpecTabs.FROS] : GetID(`Spell`, `dh-spells`, `mag-gen-frostbarrier`),
+            [SpecTabs.ARCA] : GetID(`Spell`, `dh-spells`, `mag-gen-prismaticbarrier`),
+        })
+    })
+    
+    if (HasConditionalSpell.includes(SpellId)) {
+        let cSpec = Player.GetUInt(`Spec`, 0)
+        ConditionalSpellMap[SpellId].forEach((Spec, Spell) => {
+            if (cSpec == Spec)
+                Player.LearnSpell(Spell)
+            else
+                Player.RemoveSpell(Spell, false, false)
+        })
+    } else
+        Player.LearnSpell(SpellId)
 }

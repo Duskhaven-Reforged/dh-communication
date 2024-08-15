@@ -64,34 +64,6 @@ export function TalentTreeUI() {
     TalentFrame.SetFrameLevel(3);
     TalentFrame.SetFrameStrata('MEDIUM')
 
-    // let ConfigFrame = CreateFrame('Frame', 'ConfigFrame', TalentFrame)
-    // ConfigFrame.SetSize(500, 400) // Tamanho do frame de configuração
-    // ConfigFrame.SetPoint('TOP', TalentFrame, 'TOP', 0, -50) // Centraliza no TalentFrame
-    // ConfigFrame.SetFrameStrata('HIGH')
-    // ConfigFrame.SetBackdrop({
-    //     bgFile: 'Interface\\DialogFrame\\UI-DialogBox-Background', // Textura de fundo
-    //     edgeFile: 'Interface\\DialogFrame\\UI-DialogBox-Border', // Borda
-    //     tile: true,
-    //     tileSize: 32,
-    //     edgeSize: 32,
-    //     insets: { left: 8, right: 8, top: 8, bottom: 8 }
-    // })
-    // ConfigFrame.SetBackdropColor(0, 0, 0, 1) // Cor de fundo
-    // ConfigFrame.Hide()
-
-    // let headerTexture = ConfigFrame.CreateTexture(null, 'ARTWORK')
-    // headerTexture.SetTexture('Interface\\DialogFrame\\UI-DialogBox-Header') // caminho para a textura do cabeçalho
-    // headerTexture.SetSize(256, 64) // O tamanho da textura pode variar, ajuste conforme necessário
-    // headerTexture.SetPoint('TOP', ConfigFrame, 'TOP', 0, 12) // Ajuste a posição Y conforme necessário
-
-    // let headerText = ConfigFrame.CreateFontString(null, 'OVERLAY', 'GameFontNormal')
-    // headerText.SetPoint('CENTER', headerTexture, 'CENTER', 0, 12)
-    // headerText.SetText('Configuration') // Defina o texto do cabeçalho conforme necessário
-
-    // let closeButton = CreateFrame('Button', null, ConfigFrame, 'UIPanelCloseButton')
-    // closeButton.SetPoint('TOPRIGHT', ConfigFrame, 'TOPRIGHT', -5, -5)
-    // closeButton.SetScript('OnClick', function() {ConfigFrame.Hide()})
-
     let ClassSpecWindow = CreateFrame('Frame', 'CustomSpecFrame', UIParent)
     ClassSpecWindow.SetSize(1000, 800)
     ClassSpecWindow.SetPoint('CENTER', 0, 0)
@@ -205,20 +177,20 @@ export function TalentTreeUI() {
     SpecTitleText.SetText('Specializations')
 
     windows.forEach((window, i) => {
-        let closeButton = CreateFrame('Button', 'CloseTalentUI'+i, window)
-        closeButton.SetSize(30, 30) 
-        closeButton.SetFrameLevel(100)
-        closeButton.SetFrameStrata('FULLSCREEN')
-        closeButton.Show()
+        // let closeButton = CreateFrame('Button', 'CloseTalentUI'+i, window)
+        // closeButton.SetSize(30, 30) 
+        // closeButton.SetFrameLevel(100)
+        // closeButton.SetFrameStrata('FULLSCREEN')
+        // closeButton.Show()
 
-        closeButton.SetNormalTexture(CONSTANTS.UI.BTN_CLOSE_NORM) 
-        closeButton.SetHighlightTexture(CONSTANTS.UI.BTN_CLOSE_HILI)
-        closeButton.SetPushedTexture(CONSTANTS.UI.BTN_CLOSE_PUSH)
+        // closeButton.SetNormalTexture(CONSTANTS.UI.BTN_CLOSE_NORM) 
+        // closeButton.SetHighlightTexture(CONSTANTS.UI.BTN_CLOSE_HILI)
+        // closeButton.SetPushedTexture(CONSTANTS.UI.BTN_CLOSE_PUSH)
 
-        closeButton.SetScript('OnClick', function() {
-            if (PlayerTalentFrame && PlayerTalentFrame.IsVisible())
-                TalentMicroButton.Click()
-        })
+        // closeButton.SetScript('OnClick', function() {
+        //     if (PlayerTalentFrame && PlayerTalentFrame.IsVisible())
+        //         TalentMicroButton.Click()
+        // })
 
         // let configButton = CreateFrame('Button', 'ConfigButtonButton' + i , closeButton)
         // configButton.SetSize(30, 30)
@@ -1188,6 +1160,8 @@ export function TalentTreeUI() {
                                     })
     
                                     ChoiceTalentButton.SetScript('OnLeave', function (self) {
+                                        FirstRankToolTip.Hide()
+                                        SecondRankToolTip.Hide()
                                         FrameStatus.TooltipActive = false
                                     })
                                 }
@@ -1764,8 +1738,10 @@ export function GetTalentTreeLayout(pkt: TSPacketRead) {
 
 export function PlayerTalentFrameToggle(Show: number) {
     if (Show > 0) {
+        FirstRankToolTip.Hide()
         FrameData.LastFrame.Show()
     } else {
+        FirstRankToolTip.Hide()
         FrameData.LastFrame.Hide()
     }
 }

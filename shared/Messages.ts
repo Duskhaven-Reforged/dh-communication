@@ -27,6 +27,7 @@ export enum  ClientCallbackOperations
     ACTIVATE_CLASS_SPEC_ERROR       = 24,
     GET_TOOLTIPS                    = 25,
     FORGET_TOOLTIP                  = 26,
+    ARCANE_CHARGES                  = 27,
     
     // m+
     MYTHIC_GET_WEEKLY_REWARD        = 101,
