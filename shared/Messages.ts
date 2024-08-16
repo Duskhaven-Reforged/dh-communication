@@ -28,6 +28,7 @@ export enum  ClientCallbackOperations
     GET_TOOLTIPS                    = 25,
     FORGET_TOOLTIP                  = 26,
     ARCANE_CHARGES                  = 27,
+    MAGE_CLEARCASTING               = 28,
     
     // m+
     MYTHIC_GET_WEEKLY_REWARD        = 101,

@@ -1,11 +1,12 @@
 import { ClientCallbackOperations, SimpleMessagePayload } from "../shared/Messages";
-import { ComboPoints } from "./Combopoints/Combopoints";
+import { ComboPoints } from "./SpellPoints/Combopoints";
 import { StarterGuild } from "./Guild/Guild";
 import { DHPointType } from "./classes";
 import { LearnWithExtraSteps } from "./dh-cachedata/dh-cache";
 import { wDefaultLoadoutStrings, wSpecAutolearn, wStartersForTabs, wTalentTrees } from "./dh-cachedata/dh-worlddata";
 import { DHCommonMessage } from "./dh-message/dh-cmsg";
 import { RouteTopics } from "./dh-topic/TopicRouter";
+import { ArcaneCharges } from "./SpellPoints/ArcaneCharges";
 
 export let mDHDMsg : DHCommonMessage
 
@@ -13,6 +14,7 @@ export function Main(events: TSEvents) {
     mDHDMsg = new DHCommonMessage()
     RouteTopics(events)
     ComboPoints(events)
+    ArcaneCharges(events)
     StarterGuild(events)
 
     events.Player.OnLogin((player, first) => {
@@ -158,7 +160,7 @@ export function LearnSpellsForLevel(player: TSPlayer) {
 }
 
 function LearnSpecSpecificSkills(Player: TSPlayer, SpecId: number) {
-    let DualWieldSpecs = [2, 20, 16, 17, 18]
+    let DualWieldSpecs = [2, 20, 16, 17, 18, 10, 11, 12, 7, 8, 9]
     if (SpecId != 6) {
         if (DualWieldSpecs.includes(SpecId))
             Player.SetSkill(118, 1, 1, 1)
