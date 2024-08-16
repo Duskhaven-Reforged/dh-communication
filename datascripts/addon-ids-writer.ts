@@ -9,7 +9,9 @@ interface DataEntry {
 
 const writtenTypes = new Map<string, DataEntry[]>([
     ['Spell', []],
-    ['creature_template', []]
+    ['SkillLine', []],
+    ['creature_template', []],
+    ['item_template', []]
 ]);
 const idsFilePath = './modules/default/datasets/dataset/ids.txt';
 const addonsFilePath = './modules/dh-communication/addon/internal-ids.ts';
