@@ -17,16 +17,11 @@ const idsFilePath = './modules/default/datasets/dataset/ids.txt';
 const addonsFilePath = './modules/dh-communication/addon/internal-ids.ts';
 
 async function processFileSync(filePath: string) {
-    // Create a read stream for the file
-    const fileStream = fs.createReadStream(filePath);
-
-    // Create an interface to read the file line by line
     const rl = readline.createInterface({
-        input: fileStream,
+        input: fs.createReadStream(filePath),
         crlfDelay: Infinity
     });
 
-    // Process each line
     rl.on('line', (line) => {
         const [type, name, idStart] = line.split('|');
         if (type && name && idStart) {
@@ -36,7 +31,6 @@ async function processFileSync(filePath: string) {
             }
         }
     });
-
     rl.on('close', () => {
         fs.writeFile(addonsFilePath, mapToTypeScriptString(writtenTypes), (err) => { });
     });
