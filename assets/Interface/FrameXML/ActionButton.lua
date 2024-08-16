@@ -186,6 +186,7 @@ function ActionButton_Update (self)
 			self:RegisterEvent("COMPANION_UPDATE");
 			self:RegisterEvent("UNIT_INVENTORY_CHANGED");
 			self:RegisterEvent("LEARNED_SPELL_IN_TAB");
+			self:RegisterEvent("PLAYER_AURAS_CHANGED");
 			self.eventsRegistered = true;
 		end
 
@@ -214,6 +215,7 @@ function ActionButton_Update (self)
 			self:UnregisterEvent("COMPANION_UPDATE");
 			self:UnregisterEvent("UNIT_INVENTORY_CHANGED");
 			self:UnregisterEvent("LEARNED_SPELL_IN_TAB");
+			self:UnregisterEvent("PLAYER_AURAS_CHANGED");
 			self.eventsRegistered = nil;
 		end
 
@@ -416,6 +418,8 @@ function ActionButton_OnEvent (self, event, ...)
 		if ( ActionButton_IsFlashing(self) and not IsAttackAction(self.action) ) then
 			ActionButton_StopFlash(self);
 		end
+	elseif ( event == "PLAYER_AURAS_CHANGED" ) then
+		ActionButton_UpdateUsable(self);
 	end
 end
 

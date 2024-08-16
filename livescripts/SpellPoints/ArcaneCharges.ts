@@ -1,10 +1,11 @@
 import { ClientCallbackOperations } from "../../shared/Messages"
 import { ArcaneChargeDependent } from "../../shared/Shared"
 
-let MageClearcasting = GetID(`Spell`, `dh-spells`, `mag-arc-clearcasting`)
+let MageClearcasting = GetID(`Spell`, `dh-spells`, `mag-arc-clearcastingbuff`)
 
 let ArcaneCharge = GetID(`Spell`, `dh-spells`, `mag-arc-arcanecharge`)
-
+let RuleOfThrees = GetID(`Spell`, `dh-spells`, `mag-arc-ruleofthrees`)
+let RuleOfThreesBuff = GetID(`Spell`, `dh-spells`, `mag-arc-ruleofthreesbuff`)
 
 export function ArcaneCharges(events: TSEvents) {
     events.Player.OnLogin((Player) => {
@@ -18,6 +19,15 @@ export function ArcaneCharges(events: TSEvents) {
             let Charges = App.GetAura().GetStackAmount()
             Player.SetUInt('ArcaneCharges', Charges)
             SendArcaneCharges(Player)
+
+            if (Player.HasAura(RuleOfThrees)) {
+                let Ticker = Player.GetUInt('RuleOfThrees', 0) + 1
+                if (Ticker >= 3) {
+                    Player.AddAura(RuleOfThreesBuff, Player)
+                    Ticker = 0
+                }
+                Player.SetUInt('RuleOfThrees', Ticker)
+            }
         }
     })
 
@@ -35,7 +45,7 @@ export function ArcaneCharges(events: TSEvents) {
         
         if (Spell.GetCaster().IsPlayer()) {
             let Player = Spell.GetCaster().ToPlayer()
-            Result.set(Player.GetUInt(`ArcaneCharges`, 0) > 0 ? 255 : 78)
+            Result.set(Player.GetUInt(`ArcaneCharges`, 0) > 0 ? 255 : 172)
         }    
     })
 

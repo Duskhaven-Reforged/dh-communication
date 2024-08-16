@@ -9,11 +9,9 @@ export function IsActionUsable(Usable: bool, Action: number) : bool {
         }
         
         if (ArcaneChargeDependent.includes(Action)) {
-            console.log('Action: ',Action)
-            let Check = _G['CurrentArcaneCharges'] ? _G['CurrentArcaneCharges'] > 0 : false
-            console.log('Result: ', Check)
-            Usable = Check
-        } 
+            Usable = _G['CurrentArcaneCharges'] ? _G['CurrentArcaneCharges'] > 0 : false
+        }
+        
         if (RequiresMageClearcasting.includes(Action)) {
             Usable = _G['HasClearcasting'] ? _G['HasClearcasting'] > 0 : false
         }
