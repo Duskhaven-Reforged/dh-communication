@@ -57,6 +57,7 @@ export function SpellCharges() {
                 if (Button && _G[`${prefix}${i}ChargeText`]) {
                     _G[`${prefix}${i}ChargeText`].SetText('Nil')
                     _G[`${prefix}${i}ChargeText`].Hide()
+                    _G[`${prefix}${i}ChargingCooldown`].Hide()
                 }
             }
         })
@@ -119,7 +120,6 @@ export function SpellCharges() {
                     if (Cooldown > 0) {
                         _G[`${prefix}${i}ChargingCooldown`].Start = StartTime
                         _G[`${prefix}${i}ChargingCooldown`].SetCooldown(StartTime, Cooldown/1000)
-                        console.log('Set start: ',StartTime)
                     }
 
                     SpellCooldownFrames[SpellId] = _G[`${prefix}${i}ChargingCooldown`]
@@ -139,11 +139,6 @@ export function SpellCharges() {
     UpdateFrame.RegisterEvent('LEARNED_SPELL_IN_TAB')
 
     UpdateFrame.SetScript('OnEvent', (f, EventName, a, b, c) => {
-        ClearButtons()
-        UpdateAllButtonCharges()
-    })
-
-    UpdateFrame.SetScript('OnUpdate', () => {
         UpdateAllButtonCharges()
     })
 
@@ -155,7 +150,6 @@ export function SpellCharges() {
         let Charges = Packet.ReadUInt8()
         let Max = Packet.ReadUInt8()
         let Timer = Packet.ReadUInt32()
-        console.log(Timer)
 
         SpellsWithCharges.push(SpellId)
         CharCharges[SpellId] = new ChargeData(SpellId, Charges, Max, Timer)
@@ -176,16 +170,16 @@ export function SpellCharges() {
         let Setting = Packet.ReadDouble(0) > 0 ? true : false
         let Button = Packet.ReadUInt8(1)
         let Spell : uint32 = Packet.ReadUInt32(2)
+        let ButtonString = ActionButtonMap[Button+1]
+        let ChargeCD = _G[`${ButtonString}ChargingCooldown`]
 
         if (SpellsWithCharges.includes(Spell)) {
-            let ButtonString = ActionButtonMap[Button+1]
-            let ChargeCD = _G[`${ButtonString}ChargingCooldown`]
-
             if (!Setting && ChargeCD) {
-                if (_G[`${ButtonString}ChargingCooldown`].IsVisible())
-                    _G[`${ButtonString}ChargingCooldown`].Hide()
+                if (ChargeCD.IsVisible())
+                    ChargeCD.Hide()
+                    _G[`${ButtonString}ChargeText`].SetText('Nil')
+                    _G[`${ButtonString}ChargeText`].Hide()
             } else {
-                console.log(Setting, Button, Spell)
                 let OldCooldownFrame = SpellCooldownFrames[Spell-1]
                 let Time = GetTime()
                 if (OldCooldownFrame)
@@ -194,6 +188,11 @@ export function SpellCharges() {
                 let ChargeData = CharCharges[Spell]
                 UpdateSpellCharges(Spell, ChargeData.Timer, ChargeData.Charges, ChargeData.Max, Time)
             }
+        } else if (ChargeCD) {
+            ChargeCD.Hide()
+            _G[`${ButtonString}ChargeText`].SetText('Nil')
+            _G[`${ButtonString}ChargeText`].Hide()
         }
+        UpdateAllButtonCharges()
     })
 }

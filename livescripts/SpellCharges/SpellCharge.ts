@@ -163,23 +163,19 @@ export function SpellChargeHandler(events: TSEvents) {
     })
 
     events.Player.OnActionButtonSet((Player, Button, Action, Type) => {
-        if (SpellsWithCharges.includes(Action)) {
-            let Packet = CreateCustomPacket(ClientCallbackOperations.SPELLCHARGE_MOVE, 0)
-            Packet.WriteDouble(1)
-            Packet.WriteUInt8(Button)
-            Packet.WriteUInt32(Action)
-            Packet.SendToPlayer(Player)
-        }
+        let Packet = CreateCustomPacket(ClientCallbackOperations.SPELLCHARGE_MOVE, 0)
+        Packet.WriteDouble(1)
+        Packet.WriteUInt8(Button)
+        Packet.WriteUInt32(Action)
+        Packet.SendToPlayer(Player)
     })
 
     events.Player.OnActionButtonDelete((Player, Button, Action, Type) => {
-        if (SpellsWithCharges.includes(Action)) {
-            let Packet = CreateCustomPacket(ClientCallbackOperations.SPELLCHARGE_MOVE, 0)
-            Packet.WriteDouble(0)
-            Packet.WriteUInt8(Button)
-            Packet.WriteUInt32(Action)
-            Packet.SendToPlayer(Player)
-        }
+        let Packet = CreateCustomPacket(ClientCallbackOperations.SPELLCHARGE_MOVE, 0)
+        Packet.WriteDouble(0)
+        Packet.WriteUInt8(Button)
+        Packet.WriteUInt32(Action)
+        Packet.SendToPlayer(Player)
     })
 }
 
