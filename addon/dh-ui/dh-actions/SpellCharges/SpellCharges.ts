@@ -57,7 +57,8 @@ export function SpellCharges() {
                 if (Button && _G[`${prefix}${i}ChargeText`]) {
                     _G[`${prefix}${i}ChargeText`].SetText('Nil')
                     _G[`${prefix}${i}ChargeText`].Hide()
-                    _G[`${prefix}${i}ChargingCooldown`].Hide()
+                    if (_G[`${prefix}${i}ChargingCooldown`])
+                        _G[`${prefix}${i}ChargingCooldown`].Hide()
                 }
             }
         })
@@ -153,7 +154,6 @@ export function SpellCharges() {
 
         SpellsWithCharges.push(SpellId)
         CharCharges[SpellId] = new ChargeData(SpellId, Charges, Max, Timer)
-        ClearButtons()
         let OldCooldownFrame = SpellCooldownFrames[SpellId-1]
         let Time = GetTime()
         if (OldCooldownFrame && OldCooldownFrame.Start) {

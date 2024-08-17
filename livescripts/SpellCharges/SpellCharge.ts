@@ -15,7 +15,10 @@ export class SpellChargeInfo {
 }
 
 export let wSpellCharges : TSDictionary<uint32, SpellChargeInfo> = CreateDictionary<uint32, SpellChargeInfo>({
-    [GetID(`Spell`, `dh-spells`, `mag-fir-fireblast`)]: new SpellChargeInfo(GetID(`Spell`, `dh-spells`, `mag-fir-fireblast`), 0, 2, 12000)
+    [GetID(`Spell`, `dh-spells`, `mag-fir-fireblast`)]: new SpellChargeInfo(GetID(`Spell`, `dh-spells`, `mag-fir-fireblast`), 0, 2, 12000),
+    [GetID(`Spell`, `dh-spells`, `pal-holy-holyshock`)]: new SpellChargeInfo(GetID(`Spell`, `dh-spells`, `pal-holy-holyshock`), 0, 2, 6000),
+    [GetID(`Spell`, `dh-spells`, `mag-gen-managem`)]: new SpellChargeInfo(GetID(`Spell`, `dh-spells`, `mag-gen-managem`), 0, 3, 120000),
+    [GetID(`Spell`, `dh-spells`, `mag-fir-livingbomb`)]: new SpellChargeInfo(GetID(`Spell`, `dh-spells`, `mag-fir-livingbomb`), 0, 2, 20000),
 })
 
 @CharactersTable
