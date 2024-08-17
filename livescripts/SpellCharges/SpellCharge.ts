@@ -192,9 +192,8 @@ function StartCD(Player: TSPlayer, BaseCharge: SpellChargeInfo, CharChargeInfo: 
         Player.AddTimer(Timer, 1, (Player, Ticker) => {
             FinishCD(Player.ToPlayer(), BaseCharge, CharChargeInfo)
         })
-        SendChargeData(Player, CharChargeInfo.SpellId, CharChargeInfo)
-    } else
-        SendChargeData(Player, CharChargeInfo.SpellId, CharChargeInfo)
+    }
+    SendChargeData(Player, CharChargeInfo.SpellId, CharChargeInfo)
 }
 
 function FinishCD(Player: TSPlayer, BaseCharge: SpellChargeInfo, CharChargeInfo: CharacterSpellChargeInfo) {
