@@ -67,7 +67,7 @@ function LoadCharacterSpellCharges(Player: TSPlayer) {
                 cSpellCharges[GUID] = CreateDictionary<uint32, CharacterSpellChargeInfo>({})
 
             cSpellCharges[GUID][Spell] = CharacterSpellChargeInfo.get(Player, Spell)
-            SendChargeData(Player, Spell, cSpellCharges[GUID][Spell], false)
+            SendChargeData(Player, Spell, cSpellCharges[GUID][Spell])
         }
     })
 }
@@ -96,7 +96,7 @@ function LoadCharacterChargesForSpell(Player: TSPlayer, Spell: uint32) : Charact
         if (ChargeData.Current < ChargeData.Max)
             StartCD(Player, BaseChargeData, cSpellCharges[GUID][Spell])
         else
-            SendChargeData(Player, Spell, cSpellCharges[GUID][Spell], false)
+            SendChargeData(Player, Spell, cSpellCharges[GUID][Spell])
 
         return ChargeData
     }
@@ -161,6 +161,26 @@ export function SpellChargeHandler(events: TSEvents) {
     events.CustomPacket.OnReceive(ClientCallbackOperations.SPELLCHARGE, (Op, Packet, Player) => {
         LoadCharacterSpellCharges(Player)
     })
+
+    events.Player.OnActionButtonSet((Player, Button, Action, Type) => {
+        if (SpellsWithCharges.includes(Action)) {
+            let Packet = CreateCustomPacket(ClientCallbackOperations.SPELLCHARGE_MOVE, 0)
+            Packet.WriteDouble(1)
+            Packet.WriteUInt8(Button)
+            Packet.WriteUInt32(Action)
+            Packet.SendToPlayer(Player)
+        }
+    })
+
+    events.Player.OnActionButtonDelete((Player, Button, Action, Type) => {
+        if (SpellsWithCharges.includes(Action)) {
+            let Packet = CreateCustomPacket(ClientCallbackOperations.SPELLCHARGE_MOVE, 0)
+            Packet.WriteDouble(0)
+            Packet.WriteUInt8(Button)
+            Packet.WriteUInt32(Action)
+            Packet.SendToPlayer(Player)
+        }
+    })
 }
 
 function StartCD(Player: TSPlayer, BaseCharge: SpellChargeInfo, CharChargeInfo: CharacterSpellChargeInfo) {
@@ -176,9 +196,9 @@ function StartCD(Player: TSPlayer, BaseCharge: SpellChargeInfo, CharChargeInfo: 
         Player.AddTimer(Timer, 1, (Player, Ticker) => {
             FinishCD(Player.ToPlayer(), BaseCharge, CharChargeInfo)
         })
-        SendChargeData(Player, CharChargeInfo.SpellId, CharChargeInfo, false)
+        SendChargeData(Player, CharChargeInfo.SpellId, CharChargeInfo)
     } else
-        SendChargeData(Player, CharChargeInfo.SpellId, CharChargeInfo, true)
+        SendChargeData(Player, CharChargeInfo.SpellId, CharChargeInfo)
 }
 
 function FinishCD(Player: TSPlayer, BaseCharge: SpellChargeInfo, CharChargeInfo: CharacterSpellChargeInfo) {
@@ -187,17 +207,15 @@ function FinishCD(Player: TSPlayer, BaseCharge: SpellChargeInfo, CharChargeInfo:
     if (CharChargeInfo.Current < CharChargeInfo.Max)
         CharChargeInfo.CD = BaseCharge.Cooldown
     SaveCharges(Player, CharChargeInfo)
-    SendChargeData(Player, CharChargeInfo.SpellId, CharChargeInfo, false)
     Player.SetBool(`ChargeTimer:${BaseCharge.SpellId}`, false)
-    if (CharChargeInfo.CD > 0)
-        StartCD(Player, BaseCharge, CharChargeInfo)
+    StartCD(Player, BaseCharge, CharChargeInfo)
 }
 
-function SendChargeData(Player: TSPlayer, Spell: uint32, ChargeData: CharacterSpellChargeInfo, JustCount: bool) {
+function SendChargeData(Player: TSPlayer, Spell: uint32, ChargeData: CharacterSpellChargeInfo) {
     let Payload = CreateCustomPacket(ClientCallbackOperations.SPELLCHARGE, 0)
     Payload.WriteInt32(ChargeData.SpellId)
     Payload.WriteInt8(ChargeData.Current)
     Payload.WriteInt8(ChargeData.Max)
-    Payload.WriteUInt32(JustCount ? 0 : ChargeData.CD)
+    Payload.WriteUInt32(ChargeData.CD)
     Payload.SendToPlayer(Player)
 }

@@ -30,6 +30,7 @@ export enum  ClientCallbackOperations
     ARCANE_CHARGES                  = 27,
     MAGE_CLEARCASTING               = 28,
     SPELLCHARGE                     = 29,
+    SPELLCHARGE_MOVE                = 30,
     
     // m+
     MYTHIC_GET_WEEKLY_REWARD        = 101,
