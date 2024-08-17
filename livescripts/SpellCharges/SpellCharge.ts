@@ -40,7 +40,7 @@ export class CharacterSpellChargeInfo extends DBEntry {
         this.SpellId = Spell
 
         let Base = wSpellCharges[Spell]
-        this.Current = 0
+        this.Current = Base.BaseCharges
         this.CD = Base.Cooldown
         this.Max = Base.BaseCharges
     }
