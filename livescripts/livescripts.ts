@@ -7,6 +7,7 @@ import { wDefaultLoadoutStrings, wSpecAutolearn, wStartersForTabs, wTalentTrees 
 import { DHCommonMessage } from "./dh-message/dh-cmsg";
 import { RouteTopics } from "./dh-topic/TopicRouter";
 import { ArcaneCharges } from "./SpellPoints/ArcaneCharges";
+import { SpellChargeHandler } from "./SpellCharges/SpellCharge";
 
 export let mDHDMsg : DHCommonMessage
 
@@ -16,6 +17,7 @@ export function Main(events: TSEvents) {
     ComboPoints(events)
     ArcaneCharges(events)
     StarterGuild(events)
+    SpellChargeHandler(events)
 
     events.Player.OnLogin((player, first) => {
         let spec = mDHDMsg.cache.TryGetCharacterActiveSpec(player)

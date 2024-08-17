@@ -1,5 +1,5 @@
 import { std } from "wow/wotlk";
-let RebuildWorld = true
+let RebuildWorld = false
 
 if (RebuildWorld) {
     std.SQL.Databases.world_dest.writeEarly(`
