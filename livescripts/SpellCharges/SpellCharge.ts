@@ -19,6 +19,7 @@ export let wSpellCharges : TSDictionary<uint32, SpellChargeInfo> = CreateDiction
     [GetID(`Spell`, `dh-spells`, `pal-holy-holyshock`)]: new SpellChargeInfo(GetID(`Spell`, `dh-spells`, `pal-holy-holyshock`), 0, 2, 6000),
     [GetID(`Spell`, `dh-spells`, `mag-gen-managem`)]: new SpellChargeInfo(GetID(`Spell`, `dh-spells`, `mag-gen-managem`), 0, 3, 120000),
     [GetID(`Spell`, `dh-spells`, `mag-fir-livingbomb`)]: new SpellChargeInfo(GetID(`Spell`, `dh-spells`, `mag-fir-livingbomb`), 0, 2, 20000),
+    [GetID(`Spell`, `dh-spells`, `mag-fro-flurry`)]: new SpellChargeInfo(GetID(`Spell`, `dh-spells`, `mag-fro-flurry`), 0, 2, 30000),
 })
 
 @CharactersTable
@@ -61,6 +62,7 @@ export class CharacterSpellChargeInfo extends DBEntry {
 export let cSpellCharges : TSDictionary<uint64, TSDictionary<uint32, CharacterSpellChargeInfo>>
 
 let SpellsWithCharges : TSArray<uint32> = TAG(`dh-spells`, 'has-charges')
+let AddsACharge : TSArray<uint32> = TAG(`dh-spells`, 'add-charge-on-apply')
 
 function LoadCharacterSpellCharges(Player: TSPlayer) {
     wSpellCharges.forEach((Spell) => {
@@ -122,6 +124,8 @@ function SaveCharges(Player: TSPlayer, Info: CharacterSpellChargeInfo) {
     cSpellCharges[GUID][Info.SpellId].Save()
 }
 
+let BrainFreeze = GetID(`Spell`, `dh-spells`, `mag-fro-brainfreezeamp`)
+let Flurry = GetID(`Spell`, `dh-spells`, `mag-fro-flurry`)
 export function SpellChargeHandler(events: TSEvents) {
     events.Spell.OnLearn(SpellsWithCharges, (SpellInfo, Player) => {
         LoadCharacterChargesForSpell(Player, SpellInfo.GetEntry())
@@ -157,6 +161,26 @@ export function SpellChargeHandler(events: TSEvents) {
                 SaveCharges(Player, ChargeInfo)
                 let BaseChargeData = wSpellCharges[Spell.GetEntry()]
                 StartCD(Player, BaseChargeData, ChargeInfo)
+            }
+        }
+    })
+
+    events.Spell.OnApply(AddsACharge,  (Eff, App, Mode) => {
+        if (App.GetTarget().IsPlayer()) {
+            let SpellId  = Eff.GetSpellInfo().GetEntry()
+            let ChargedSpell = 0
+            if (SpellId == BrainFreeze)
+                ChargedSpell = Flurry
+
+            if (SpellId > 0) {
+                let Caster = App.GetTarget().ToPlayer()
+                let ChargeInfo = GetCharaterChargeInfo(Caster, ChargedSpell)
+                if (ChargeInfo.Current < ChargeInfo.Max) {
+                    ChargeInfo.Current += 1
+                    SaveCharges(Caster, ChargeInfo)
+                    let BaseChargeData = wSpellCharges[ChargedSpell]
+                    StartCD(Caster, BaseChargeData, ChargeInfo)
+                }
             }
         }
     })
@@ -200,10 +224,11 @@ function StartCD(Player: TSPlayer, BaseCharge: SpellChargeInfo, CharChargeInfo: 
 }
 
 function FinishCD(Player: TSPlayer, BaseCharge: SpellChargeInfo, CharChargeInfo: CharacterSpellChargeInfo) {
-    CharChargeInfo.Current += 1
     CharChargeInfo.CD = 0
-    if (CharChargeInfo.Current < CharChargeInfo.Max)
+    if (CharChargeInfo.Current < CharChargeInfo.Max) {
+        CharChargeInfo.Current += 1
         CharChargeInfo.CD = BaseCharge.Cooldown
+    }
     SaveCharges(Player, CharChargeInfo)
     Player.SetBool(`ChargeTimer:${BaseCharge.SpellId}`, false)
     StartCD(Player, BaseCharge, CharChargeInfo)
