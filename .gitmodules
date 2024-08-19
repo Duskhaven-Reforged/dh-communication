@@ -1,0 +1,3 @@
+[submodule "dh-shared"]
+	path = dh-shared
+	url = https://github.com/Duskhaven-Reforged/dh-shared.git
