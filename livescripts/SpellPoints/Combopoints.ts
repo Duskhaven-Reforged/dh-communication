@@ -1,6 +1,10 @@
 import { ClientCallbackOperations } from "../../shared/Messages"
 
 let Finishers : TSArray<uint32> = TAG(`dh-spells`, `combo-finisher`)
+let Generators : TSArray<uint32> = TAG(`dh-spells`, `combo-generator`)
+
+// rogue
+let OneComboPoint = GetID(`Spell`, `dh-spells`, `rog-cor-freecombopoint`)
 
 // druid
 let GoldrinnsFury = GetID(`Spell`, `dh-spells`, `dru-gen-goldrinnsfury`)
@@ -35,6 +39,10 @@ export function ComboPoints(events: TSEvents) {
             let Player = Spell.GetCaster().ToPlayer()
             Result.set(Player.GetUInt(`ComboPoints`, 0) > 0 ? 255 : 78)
         }    
+    })
+
+    events.Spell.OnAfterCast(Generators, (Spell) => {
+        Spell.GetCaster().CastSpell(Spell.GetCaster(), OneComboPoint, true)
     })
 
     events.Spell.OnAfterHit(Finishers, (Spell, Cancel) => {
