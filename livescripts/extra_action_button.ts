@@ -11,6 +11,7 @@ export function ExtraActionButton(events: TSEvents) {
             player.LearnSpell(774)
             let pkt = new ExtraActionButtonUpdate()
             pkt.spellID = 774
+            pkt.flag = 1
             pkt.BuildPacket().SendToPlayer(player);
 
         } else if (command.get().startsWith('losespell')) {
