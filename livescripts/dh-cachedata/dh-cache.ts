@@ -2,7 +2,7 @@ import { ClientCallbackOperations, SimpleMessagePayload } from '../../shared/Mes
 import { SpecTabs } from '../TalentTrees/TalentTreeLoader';
 import { ACOUNT_WIDE_KEY, DHCharacterPoint, DHCharacterTalent, DHNodeType, DHPlayerLoadout, DHPlayerSpec, DHPointType, DHTalent, DHTalentTab, DHTreeMetaData, TALENT_POINT_TYPES, base64_char } from '../classes';
 import { LoadCharacterData, cActiveLoadouts, cCharPoints, cLoadouts, cSpecs } from './dh-chardata';
-import { LoadWorldData, wClassNodeToSpell, wRaceClassTabMap, wPointTypeToTabs, wSpecNodeToSpell, wSpellToTab, wTabToSpell, wTalentTrees, wChoiceNodesRev, wTreeMetaData, wClassNodeToClassTree, wChoiceNodes, wDefaultLoadoutStrings } from './dh-worlddata';
+import { LoadWorldData, wClassNodeToSpell, wRaceClassTabMap, wPointTypeToTabs, wSpecNodeToSpell, wSpellToTab, wTabToSpell, wTalentTrees, wChoiceNodesRev, wTreeMetaData, wClassNodeToClassTree, wChoiceNodes, wDefaultLoadoutStrings, wChoiceNodeIndexLookup } from './dh-worlddata';
 
 export class DHCache {
     
@@ -197,7 +197,6 @@ export class DHCache {
 
     private VerifyFlatTable(Player: TSPlayer, SpecTab: DHTalentTab) : bool {
         this.ToLearn = CreateArray<DHCharacterTalent>([])
-        this.Unlocks = CreateArray<uint32>([])
         if (SpecTab.Classmask == Player.GetClassMask()) {
             let Spend = CreateDictionary<uint32, uint8>({})
             this.SimplifiedTreeMap.forEach((TabId, Rows) => {
@@ -225,7 +224,17 @@ export class DHCache {
                                                     return false
                                                 }
                                                 if (Talent.Prereqs.length) {
-                                                    if (!this.Unlocks.includes(Node.SpellId))
+                                                    let Satisfied = false
+                                                    Talent.Prereqs.forEach((Prereq) => {
+                                                        let ReqSpell = Prereq.Talent
+                                                        let Location = Meta.NodeLocation[ReqSpell]
+                                                        let PrereqRank = this.SimplifiedTreeMap[Prereq.TabId][Location.Row][Location.Col]
+                                                        if (PrereqRank < Prereq.ReqRank) {
+                                                            Satisfied = true
+                                                            return
+                                                        }
+                                                    })
+                                                    if (!Satisfied)
                                                         return false
                                                 }
 
@@ -237,10 +246,6 @@ export class DHCache {
                                                     if (Spend[Tab.Id] > Points.Max)
                                                         return false;
                                                 }
-
-                                                Node.Unlocks.forEach((Unlock) => {
-                                                    this.Unlocks.push(Unlock.SpellId)
-                                                })
                                             }
                                             let CharacterTalent =  new DHCharacterTalent(Talent.SpellId, TabId, Rank, Starter)
                                             CharacterTalent.Type = Talent.NodeType
@@ -547,7 +552,7 @@ export function LearnWithExtraSteps(Player: TSPlayer, SpellId: uint32) {
             [SpecTabs.ARCA] : GetID(`Spell`, `dh-spells`, `mag-gen-prismaticbarrier`),
         })
     })
-    
+
     if (HasConditionalSpell.includes(SpellId)) {
         let cSpec = Player.GetUInt(`Spec`, 0)
         ConditionalSpellMap[SpellId].forEach((Spec, Spell) => {
