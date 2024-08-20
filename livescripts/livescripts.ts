@@ -8,6 +8,7 @@ import { DHCommonMessage } from "./dh-message/dh-cmsg";
 import { RouteTopics } from "./dh-topic/TopicRouter";
 import { ArcaneCharges } from "./SpellPoints/ArcaneCharges";
 import { SpellChargeHandler } from "./SpellCharges/SpellCharge";
+import { ExtraActionButton } from "./extra_action_button";
 
 export let mDHDMsg : DHCommonMessage
 
@@ -18,7 +19,8 @@ export function Main(events: TSEvents) {
     ArcaneCharges(events)
     StarterGuild(events)
     SpellChargeHandler(events)
-
+    ExtraActionButton(events)
+    
     events.Player.OnLogin((player, first) => {
         let spec = mDHDMsg.cache.TryGetCharacterActiveSpec(player)
         player.SetUInt(`Spec`, spec.SpecTabId)

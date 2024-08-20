@@ -43,6 +43,9 @@ export enum  ClientCallbackOperations
     MYTHIC_UPDATE_DEATHS            = 108,
     MYTHIC_UPDATE_CRITERIA          = 109,
 
+    //Extra Action Button
+    EXTRA_ACTION_BUTTON_UPDATE      = 115,
+
     // loadouts
     LOADOUT_ERROR                   = 120,
     GET_LOADOUTS                    = 121,
