@@ -3,6 +3,10 @@ import { ClientCallbackOperations } from "../Messages"
 export class ExtraActionButtonUpdate {
     spellID: number = 123
     flag: number = 1
+    constructor(spellID: number, flag: number) {
+        this.spellID = spellID
+        this.flag = flag
+    }
 
     read(read: TSPacketRead): ExtraActionButtonUpdate {
         this.spellID = read.ReadUInt32();

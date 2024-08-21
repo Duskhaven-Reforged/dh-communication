@@ -61,36 +61,30 @@ let bgs = ["default.blp",
     "zoneabilitiesshadowlands.blp"]
 
 export function eab() {
-    let btn = CreateFrame("Button", "myButton", UIParent, "SecureActionButtonTemplate")
-    btn.SetSize(50,50)
+    let btn = CreateFrame("Button", "myButton", UIParent)
+    btn.SetSize(50, 50)
     btn.SetPoint("CENTER", 0, -200)
-    btn.SetAttribute("type", "spell")
-    btn.SetAttribute("spell", "Fireball")
+    btn.RegisterForClicks("LeftButtonDown")
+    btn.SetScript("OnClick", (frame, button, down) => new ExtraActionButtonUpdate(1, 1).BuildPacket().Send())
+
     let TextureFlag = btn.CreateTexture(`EABTextureFlag`, "BACKGROUND")
     TextureFlag.SetTexture(`Interface\\ComboFrame\\ComboPoint`)
-    TextureFlag.SetPoint("CENTER",0,0)
-    TextureFlag.SetSize(250,120)
+    TextureFlag.SetPoint("CENTER", 0, 0)
+    TextureFlag.SetSize(250, 120)
     let Texture = btn.CreateTexture(`EABTexture`, "ARTWORK")
     Texture.SetTexture(`Interface\\ComboFrame\\ComboPoint`)
     Texture.SetAllPoints()
     btn.Hide()
 
     OnCustomPacket(ClientCallbackOperations.EXTRA_ACTION_BUTTON_UPDATE, (pkt) => {
-        let payload = new ExtraActionButtonUpdate().read(pkt)
+        let payload = new ExtraActionButtonUpdate(1, 1).read(pkt)
         if (payload.spellID == 1) {
             btn.Hide()
             return;
         }
-        let [name, _, icon] = GetSpellInfo(payload.spellID)
-        btn.SetAttribute("spell", name)
+        let [a, b, icon] = GetSpellInfo(payload.spellID)
         Texture.SetTexture(icon)
-        payload.flag = payload.flag
-        let bg = bgs[payload.flag]
-        if (bgs == null) {
-            bg = bgs[0]
-        }
-        TextureFlag.SetTexture('Interface\\eab\\'+bg)
-
+        TextureFlag.SetTexture('Interface\\eab\\' + bgs[payload.flag])
         btn.Show()
     })
 }
