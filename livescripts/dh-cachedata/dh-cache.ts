@@ -229,9 +229,8 @@ export class DHCache {
                                                         let ReqSpell = Prereq.Talent
                                                         let Location = Meta.NodeLocation[ReqSpell]
                                                         let PrereqRank = this.SimplifiedTreeMap[Prereq.TabId][Location.Row][Location.Col]
-                                                        if (PrereqRank < Prereq.ReqRank) {
+                                                        if (PrereqRank >= Prereq.ReqRank) {
                                                             Satisfied = true
-                                                            return
                                                         }
                                                     })
                                                     if (!Satisfied)
