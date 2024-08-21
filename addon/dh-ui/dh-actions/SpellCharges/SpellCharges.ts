@@ -50,20 +50,6 @@ export function SpellCharges() {
         }
     }
 
-    function ClearButtons() {
-        ActionButtons.forEach((prefix) => {
-            for (let i = 1; i < 12; i++) {
-                let Button = _G[`${prefix}${i}`]
-                if (Button && _G[`${prefix}${i}ChargeText`]) {
-                    _G[`${prefix}${i}ChargeText`].SetText('Nil')
-                    _G[`${prefix}${i}ChargeText`].Hide()
-                    if (_G[`${prefix}${i}ChargingCooldown`])
-                        _G[`${prefix}${i}ChargingCooldown`].Hide()
-                }
-            }
-        })
-    }
-
     function GetSpellTex(SpellId) {
         const [a, b, Icon] = GetSpellInfo(SpellId)
         return Icon
