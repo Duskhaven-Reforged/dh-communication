@@ -86,5 +86,14 @@ export function eab() {
         Texture.SetTexture(icon)
         TextureFlag.SetTexture('Interface\\eab\\' + bgs[payload.flag])
         btn.Show()
+
+        btn.SetScript("OnEnter", function (self, button, down) {
+            GameTooltip.SetOwner(self, "ANCHOR_CURSOR")
+            GameTooltip.SetHyperlink("spell:" + payload.spellID)
+            GameTooltip.Show()
+        })
+        btn.SetScript("OnEnter", function (self, button, down) {
+            GameTooltip.Hide()
+        })
     })
 }
