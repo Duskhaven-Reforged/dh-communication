@@ -25,13 +25,13 @@ export function ExtraActionButton(events: TSEvents) {
 }
 
 export function setupEAB(player: TSPlayer, spellID: number, flagID: number) {
-    let pkt = new ExtraActionButtonUpdate(spellID, flagID)
     playerToSpellID[player.GetGUIDLow()] = spellID
+    let pkt = new ExtraActionButtonUpdate(spellID, flagID)
     pkt.BuildPacket().SendToPlayer(player);
 }
 
 export function clearEAB(player: TSPlayer) {
-    let pkt = new ExtraActionButtonUpdate(1, 1)
     playerToSpellID.erase(player.GetGUIDLow())
+    let pkt = new ExtraActionButtonUpdate(1, 1)
     pkt.BuildPacket().SendToPlayer(player);
 }
