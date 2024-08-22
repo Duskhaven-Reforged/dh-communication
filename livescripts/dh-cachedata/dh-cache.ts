@@ -138,7 +138,6 @@ export class DHCache {
 
                     let Verified = this.VerifyFlatTable(Player, Tab)
                     if (Verified) {
-                        this.ForgetTalents(Player, Spec, 0)
                         let Tabs = CreateArray<uint32>([])
                         this.ToLearn.forEach((Talent) => {
                             if (!Tabs.includes(Talent.TabId)) {
@@ -164,12 +163,18 @@ export class DHCache {
                                         Player.LearnSpell(Choice)
                                         Spec.ChoiceNodesChosen[Talent.SpellId] = Choice
                                     } else {
-                                        let RankedSpell = TTab.Talents[Talent.SpellId].Ranks[Talent.CurrentRank]
-                                        LearnWithExtraSteps(Player, RankedSpell)
+                                        TTab.Talents[Talent.SpellId].Ranks.forEach((Rank, RankedSpell) => {
+                                            if (Talent.CurrentRank == Rank)
+                                                LearnWithExtraSteps(Player, RankedSpell)
+                                            else
+                                                Player.RemoveSpell(RankedSpell, false, false)
+                                        })
                                     }
 
                                     this.UpdateCharPoints(Player, Points)
                                 }
+                            } else {
+                                Player.RemoveSpell(Talent.SpellId, false, false)
                             }
                         })
                         this.UpdateCharSpec(Player, Spec)
