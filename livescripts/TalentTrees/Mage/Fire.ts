@@ -24,7 +24,7 @@ export function ReloadMageFireTree() {
     Talent = GetID(`Spell`, `dh-spells`, `mag-fir-livingbomb`)
     SetTalentNode(Talent, TAB, 7, 2, 0, false, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `mag-fir-pyroblast`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `mag-fir-fuelthefire`)
-    SetTalentNode(Talent, TAB, 4, 3, 0, false, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `mag-fir-fireblast`)]: 1}), EmptySpellArray, EmptySpellArray)
+    SetTalentNode(Talent, TAB, 4, 3, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `mag-fir-fireblast`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `mag-fir-dragonheart`)
     SetTalentNode(Talent, TAB, 6, 3, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `mag-fir-fireblast`)]: 1, [GetID(`Spell`, `dh-spells`, `mag-fir-instantblaze`)]: 1, [GetID(`Spell`, `dh-spells`, `mag-fir-livingbomb`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `mag-fir-livingbombardment`)
