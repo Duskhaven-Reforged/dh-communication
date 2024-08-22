@@ -138,7 +138,9 @@ export function SpellCharges() {
         let Max = Packet.ReadUInt8()
         let Timer = Packet.ReadUInt32()
 
-        SpellsWithCharges.push(SpellId)
+        if (!SpellsWithCharges.includes(SpellId))
+            SpellsWithCharges.push(SpellId)
+
         CharCharges[SpellId] = new ChargeData(SpellId, Charges, Max, Timer)
         let OldCooldownFrame = SpellCooldownFrames[SpellId-1]
         let Time = GetTime()

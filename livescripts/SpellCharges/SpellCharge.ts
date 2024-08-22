@@ -166,11 +166,11 @@ export function SpellChargeHandler(events: TSEvents) {
             let TimerName = `ChargeTimer:${ChargeSpell}`
             let Mod : int32 = Effect.GetBasePoints()
             if (Player.GetBool(TimerName, false)) {
-                let Rem : int64 = Player.ModNamedTimer(TimerName, Mod)
+                let Rem : int64 = Math.max(0, Player.ModNamedTimer(TimerName, Mod))
                 let ChargeInfo = CharacterSpellChargeInfo.get(Player, ChargeSpell)
-                ChargeInfo.CD -= Rem
+                ChargeInfo.CD = Rem
                 ChargeInfo.Save()
-                SendChargeData(Player, ChargeSpell, ChargeInfo)
+                StartCD(Player, wSpellCharges[ChargeSpell], ChargeInfo)
             }
         }
     })
@@ -188,10 +188,10 @@ function StartCD(Player: TSPlayer, BaseCharge: SpellChargeInfo, CharChargeInfo: 
         Player.AddNamedTimer(TimerName, Timer, (Player, TSTimer) => {
             FinishCD(Player.ToPlayer(), BaseCharge, CharChargeInfo)
         })
-    } else if (Current == CharChargeInfo.Max &&  HasTimer) {
+    } else if (Current == CharChargeInfo.Max && HasTimer) {
         Player.StopNamedTimer(TimerName)
         CharChargeInfo.CD = 0
-        Player.SetBool(`ChargeTimer:${BaseCharge.SpellId}`, false)
+        Player.SetBool(TimerName, false)
     }
     CharChargeInfo.Save()
     SendChargeData(Player, CharChargeInfo.SpellId, CharChargeInfo)
@@ -199,10 +199,7 @@ function StartCD(Player: TSPlayer, BaseCharge: SpellChargeInfo, CharChargeInfo: 
 
 function FinishCD(Player: TSPlayer, BaseCharge: SpellChargeInfo, CharChargeInfo: CharacterSpellChargeInfo) {
     CharChargeInfo.CD = 0
-    if (CharChargeInfo.Current < CharChargeInfo.Max) {
-        CharChargeInfo.Current += 1
-        CharChargeInfo.CD = BaseCharge.Cooldown
-    }
+    CharChargeInfo.Current += 1
     CharChargeInfo.Save()
     Player.SetBool(`ChargeTimer:${BaseCharge.SpellId}`, false)
     StartCD(Player, BaseCharge, CharChargeInfo)
