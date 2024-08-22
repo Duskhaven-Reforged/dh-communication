@@ -55,14 +55,16 @@ export function SpellCharges() {
         return Icon
     }
 
-    function UpdateButtonCharges(Button, SpellId, Charges) {
+    function UpdateButtonCharges(Button, SpellId, Charges, Max) {
         let SpellTexture = GetSpellTex(SpellId)
         const [ActionType, Id] = GetActionInfo(Button.action)
         let ButtonTexture = GetActionTexture(Button.action)
         if (ActionType == 'spell' && ButtonTexture == SpellTexture) {
             CreateChargeText(Button)
-            _G[Button.GetName()+'ChargeText'].SetText(Charges)
-            _G[Button.GetName()+'ChargeText'].Show()
+            if (Max > 1) {
+                _G[Button.GetName()+'ChargeText'].SetText(Charges)
+                _G[Button.GetName()+'ChargeText'].Show()
+            }
         }
     }
 
@@ -79,7 +81,7 @@ export function SpellCharges() {
                             let Texture = GetSpellTex(ChargeData.SpellId)
                             let ButtonTexture = GetActionTexture(Button.action)
                             if (ButtonTexture == Texture)
-                                UpdateButtonCharges(Button, ChargeData.SpellId, Charges)
+                                UpdateButtonCharges(Button, ChargeData.SpellId, Charges, ChargeData.Max)
                         })
                     }
                 }
@@ -104,10 +106,8 @@ export function SpellCharges() {
                         _G[`${prefix}${i}ChargingCooldown`].SetAllPoints(Button)
                     }
                     
-                    if (Cooldown > 0) {
-                        _G[`${prefix}${i}ChargingCooldown`].Start = StartTime
-                        _G[`${prefix}${i}ChargingCooldown`].SetCooldown(StartTime, Cooldown/1000)
-                    }
+                    _G[`${prefix}${i}ChargingCooldown`].Start = Current == Max ? 0 : StartTime
+                    _G[`${prefix}${i}ChargingCooldown`].SetCooldown(StartTime, Cooldown/1000)
 
                     SpellCooldownFrames[SpellId] = _G[`${prefix}${i}ChargingCooldown`]
                     _G[`${prefix}${i}ChargingCooldown`].Show()
