@@ -61,7 +61,7 @@ let AddsACharge : TSArray<uint32> = TAG(`dh-spells`, 'add-charge-on-apply')
 function LoadCharacterSpellCharges(Player: TSPlayer) {
     wSpellCharges.forEach((Spell) => {
         if (Player.HasSpell(Spell)) {
-            SendChargeData(Player, Spell, CharacterSpellChargeInfo.get(Player, Spell))
+            LoadCharacterChargesForSpell(Player, Spell)
         }
     })
 }
@@ -88,7 +88,7 @@ export function SpellChargeHandler(events: TSEvents) {
     events.Spell.OnLearn(SpellsWithCharges, (SpellInfo, Player) => {
         LoadCharacterChargesForSpell(Player, SpellInfo.GetEntry())
     })
-
+    
     events.Spell.OnUnlearn(SpellsWithCharges, (SpellInfo, Player) => {
         CharacterSpellChargeInfo.get(Player, SpellInfo.GetEntry()).Delete()
     })
@@ -158,25 +158,19 @@ export function SpellChargeHandler(events: TSEvents) {
         Packet.SendToPlayer(Player)
     })
 
-    events.Spell.OnAfterCast(SpellChargeDurationRefunds, (Spell) => {
+    events.Spell.OnCast(SpellChargeDurationRefunds, (Spell) => {
         if (Spell.GetCaster().IsPlayer()) {
             let Player = Spell.GetCaster().ToPlayer()
-            let Info = Spell.GetSpellInfo()
-            for (let i = 0; i < 3; i++) {
-                let Effect = Info.GetEffect(i)
-                if (Effect.GetType() == SpellEffects.MODIFY_CURRENT_SPELL_COOLDOWN) {
-                    let ChargeSpell = Effect.GetTriggerSpell()
-                    let TimerName = `ChargeTimer:${ChargeSpell}`
-                    let Mod = Effect.CalcValue(Player)
-                    if (Player.GetBool(TimerName, false)) {
-                        let Rem = Player.ModNamedTimer(TimerName, Mod)
-                        let ChargeInfo = CharacterSpellChargeInfo.get(Player, ChargeSpell)
-                        ChargeInfo.CD = Rem
-                        ChargeInfo.Save()
-                        console.log(Rem, '\n')
-                        SendChargeData(Player, ChargeSpell, ChargeInfo)
-                    }
-                }
+            let Effect = Spell.GetSpellInfo().GetEffect(0)
+            let ChargeSpell : uint32 = Effect.GetTriggerSpell()
+            let TimerName = `ChargeTimer:${ChargeSpell}`
+            let Mod : int32 = Effect.GetBasePoints()
+            if (Player.GetBool(TimerName, false)) {
+                let Rem : int64 = Player.ModNamedTimer(TimerName, Mod)
+                let ChargeInfo = CharacterSpellChargeInfo.get(Player, ChargeSpell)
+                ChargeInfo.CD -= Rem
+                ChargeInfo.Save()
+                SendChargeData(Player, ChargeSpell, ChargeInfo)
             }
         }
     })
