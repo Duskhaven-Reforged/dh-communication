@@ -1,9 +1,9 @@
 import { ClientCallbackOperations, SimpleMessagePayload } from "../shared/Messages";
 import { ComboPoints } from "./SpellPoints/Combopoints";
 import { StarterGuild } from "./Guild/Guild";
-import { DHPointType, TALENT_POINT_TYPES } from "./classes";
+import { DHPlayerSpec, DHPointType, TALENT_POINT_TYPES } from "./classes";
 import { CharacterPoints, LearnWithExtraSteps, PointsMgr } from "./dh-cachedata/dh-cache";
-import { wDefaultLoadoutStrings, wSpecAutolearn, wStartersForTabs, wTalentTrees } from "./dh-cachedata/dh-worlddata";
+import { wChoiceNodes, wDefaultLoadoutStrings, wSpecAutolearn, wStartersForTabs, wTalentTrees } from "./dh-cachedata/dh-worlddata";
 import { DHCommonMessage } from "./dh-message/dh-cmsg";
 import { RouteTopics } from "./dh-topic/TopicRouter";
 import { ArcaneCharges } from "./SpellPoints/ArcaneCharges";
@@ -38,7 +38,7 @@ export function Main(events: TSEvents) {
         }
 
         LearnSpellsForLevel(Player)
-        // EnsurePlayerHasAllSpells(player)
+        EnsurePlayerHasTalents(Player, spec)
         //todo load actions and maybe account bonuses
         // maybe unlearn flagged too
     })
@@ -182,4 +182,39 @@ function LearnSpecSpecificSkills(Player: TSPlayer, SpecId: number) {
         else
             Player.SetSkill(118, 0, 0, 0)
     }
+}
+
+function EnsurePlayerHasTalents(Player: TSPlayer, Spec: DHPlayerSpec) {
+    Spec.Talents.forEach((TabId, Spells) => {
+        let Tab = mDHDMsg.cache.TryGetTalentTab(Player, TabId)
+        Spells.forEach((SpellId, Talent) => {
+            if (TabId == Spec.SpecTabId || Tab.TalentType == DHPointType.CLASS) {
+                let ChoiceNode = Talent.Type === CustomNodeType.CHOICE
+                if (Talent.CurrentRank > 0) {
+                    Tab.Talents[Talent.SpellId].UnlearnSpells.forEach((UnlearnSpellId) => {
+                        Player.RemoveSpell(UnlearnSpellId, false, false)
+                    })
+
+                    if (!Player.HasSpell(Talent.SpellId)) {
+                        if (ChoiceNode) {
+                            let Choice = wChoiceNodes[Talent.SpellId][Talent.CurrentRank-1]
+                            Player.LearnSpell(Choice)
+                            Spec.ChoiceNodesChosen[Talent.SpellId] = Choice
+                        } else {
+                            Tab.Talents[Talent.SpellId].Ranks.forEach((Rank, RankedSpell) => {
+                                if (Talent.CurrentRank == Rank)
+                                    LearnWithExtraSteps(Player, RankedSpell)
+                                else
+                                    Player.RemoveSpell(RankedSpell, false, false)
+                            })
+                        }
+                    }
+                } else {
+                    Player.RemoveSpell(Talent.SpellId, false, false)
+                }
+            } else {
+                Player.RemoveSpell(SpellId, false, false)
+            }
+        })
+    })
 }
