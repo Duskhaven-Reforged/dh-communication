@@ -1,20 +1,20 @@
 import { PATH } from "../dh-talent/Constants"
 
-let Focus = {R : 255, G : 128, B : 64}
-let runicPower = {R : 0, G : 209, B : 255}
-let soulShards = {R : 128, G : 82, B : 105}
-let lunarPower = {R : 77, G : 133, B : 230}
-let insanity = {R : 102, G : 0, B : 204}
-let arcaneCharges = {R : 26, G : 26, B : 250}
-let fury = {R : 201, G : 66, B : 253}
-let pain = {R : 255, G : 156, B : 0}
-let ammoSlot = {R : 204, G : 153, B : 0}
-let fuel = {R : 0, G : 140, B : 128}
-
 let PowerTypes = {
     ["ENERGY"]: {R : 255, G : 255, B : 0},
     ["RAGE"]: {R : 255, G : 0, B : 0},
-    ["MANA"]: {R : 0, G : 0, B : 255}
+    ["MANA"]: {R : 0, G : 0, B : 255},
+    ["FOCUS"]: {R : 255, G : 128, B : 64},
+    ["RUNIC_POWER"]: {R : 0, G : 209, B : 255},
+    ["SOUL_SHARDS"]: {R : 128, G : 82, B : 105},
+    ["LUNAR_POWER"]: {R : 77, G : 133, B : 230},
+    ["INSANITY"]: {R : 102, G : 0, B : 204},
+    ["ARCANE_CHARGES"]: {R : 26, G : 26, B : 250},
+    ["FURY"]: {R : 201, G : 66, B : 253},
+    ["PAIN"]: {R : 255, G : 156, B : 0},
+    ["AMMOSLOT"]: {R : 204, G : 153, B : 0},
+    ["FUEL"]: {R : 0, G : 140, B : 128},
+
 }
 
 let AltPowers = {
