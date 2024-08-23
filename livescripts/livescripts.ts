@@ -1,8 +1,8 @@
 import { ClientCallbackOperations, SimpleMessagePayload } from "../shared/Messages";
 import { ComboPoints } from "./SpellPoints/Combopoints";
 import { StarterGuild } from "./Guild/Guild";
-import { DHPointType } from "./classes";
-import { LearnWithExtraSteps, PointsMgr } from "./dh-cachedata/dh-cache";
+import { DHPointType, TALENT_POINT_TYPES } from "./classes";
+import { CharacterPoints, LearnWithExtraSteps, PointsMgr } from "./dh-cachedata/dh-cache";
 import { wDefaultLoadoutStrings, wSpecAutolearn, wStartersForTabs, wTalentTrees } from "./dh-cachedata/dh-worlddata";
 import { DHCommonMessage } from "./dh-message/dh-cmsg";
 import { RouteTopics } from "./dh-topic/TopicRouter";
@@ -22,10 +22,18 @@ export function Main(events: TSEvents) {
     ExtraActionButton(events)
     
     events.Player.OnLogin((Player, first) => {
-        PointsMgr.Load(Player)
-
         let spec = mDHDMsg.cache.TryGetCharacterActiveSpec(Player)
         Player.SetUInt(`Spec`, spec.SpecTabId)
+
+        PointsMgr.Load(Player)
+        if (!Player.HasObject(`CharacterPoints:${DHPointType.CLASS}`)) {
+            TALENT_POINT_TYPES.forEach((Type) => {
+                let Point = new CharacterPoints(Type, 0, 0, 25)
+                PointsMgr.Init(Player, Point)
+                Player.SetObject(`CharacterPoints:${Type}`, Point)
+            })
+            mDHDMsg.cache.TrySaveNewLoadout(Player, wDefaultLoadoutStrings[Player.GetClass()][spec.SpecTabId])
+        }
 
         LearnSpellsForLevel(Player)
         // EnsurePlayerHasAllSpells(player)

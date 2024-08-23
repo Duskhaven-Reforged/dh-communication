@@ -1,10 +1,8 @@
 import { ClientCallbackOperations, SimpleMessagePayload } from '../../shared/Messages';
 import { SpecTabs } from '../TalentTrees/TalentTreeLoader';
 import { ACOUNT_WIDE_KEY, DHCharacterPoint, DHCharacterTalent, DHNodeType, DHPlayerLoadout, DHPlayerSpec, DHPointType, DHTalent, DHTalentPrereq, DHTalentTab, DHTreeMetaData, TALENT_POINT_TYPES, base64_char } from '../classes';
-import { CharacterPoints, CharacterPointsLoader, LoadCharacterData, cActiveLoadouts, cCharPoints, cLoadouts, cSpecs } from './dh-chardata';
+import { LoadCharacterData, cActiveLoadouts, cCharPoints, cLoadouts, cSpecs } from './dh-chardata';
 import { LoadWorldData, wClassNodeToSpell, wRaceClassTabMap, wPointTypeToTabs, wSpecNodeToSpell, wSpellToTab, wTabToSpell, wTalentTrees, wChoiceNodesRev, wTreeMetaData, wClassNodeToClassTree, wChoiceNodes, wDefaultLoadoutStrings, wChoiceNodeIndexLookup } from './dh-worlddata';
-
-export const PointsMgr = new CharacterPointsLoader()
 
 export class DHCache {
     constructor() {
@@ -553,3 +551,97 @@ export function LearnWithExtraSteps(Player: TSPlayer, SpellId: uint32) {
     } else
         Player.LearnSpell(SpellId)
 }
+
+export class CharacterPoints extends TSClass {
+    Type: uint8 = 0
+    Sum: uint8 = 0
+    Unlocked: uint8 = 0
+    Max: uint8 = 25
+
+    constructor(Type: uint8, Sum: uint8, Unlocked: uint8, Max: uint8) {
+        super()
+        this.Type = Type
+        this.Sum = Sum
+        this.Unlocked = Unlocked
+        this.Max = Max
+    }
+}
+
+export class CharacterPointsLoader {
+    public Load(Player: TSPlayer) {
+        let GUID : uint64 = Player.GetGUID().GetCounter()
+        const res = QueryCharacters(`select * from \`characterpoints\` where guid = ${GUID}`)
+        while (res.GetRow()) {  
+            let type = res.GetUInt16(1)
+            let sum = res.GetUInt32(2)
+            let Unlocked = res.GetUInt32(3)
+            let max = res.GetUInt32(4)
+
+            let Point = new CharacterPoints(type, sum, Unlocked, max)
+            Player.SetObject(`CharacterPoints:${type}`, Point)
+        }
+    }
+
+    public LoadByType(Player: TSPlayer, Type: uint8) {
+        let GUID : uint64 = Player.GetGUID().GetCounter()
+        const res = QueryCharacters(`select * from \`characterpoints\` where guid = ${GUID} and \`type\` = ${Type}`)
+        let type = res.GetUInt16(1)
+        let sum = res.GetUInt32(2)
+        let Unlocked = res.GetUInt32(3)
+        let max = res.GetUInt32(4)
+
+        let Point = new CharacterPoints(type, sum, Unlocked, max)
+        return Player.GetObject(`CharacterPoints:${type}`, Point)
+    }
+
+    public Save(Player: TSPlayer, Points: CharacterPoints) {
+        let GUID : uint64 = Player.GetGUID().GetCounter()
+        QueryCharactersAsync(`REPLACE INTO \`characterpoints\` (\`guid\`, \`type\`, \`sum\`, \`unlocked\`, \`max\`) VALUES (${GUID}, ${Points.Type}, ${Points.Sum}, ${Points.Unlocked}, ${Points.Max});`)
+    }
+
+    public Delete(GUID : uint64) {
+        QueryCharactersAsync(`DELETE FROM \`characterpoints\` where guid = ${GUID}`)
+    }
+
+    public Init(Player: TSPlayer, Points: CharacterPoints) {
+        let Level = Player.GetLevel()
+        if (Level > 10) {
+            let ValidLevels = Level - 10
+            if (ValidLevels > 1) {
+                let div = Math.floor(ValidLevels / 2)
+                let rem = ValidLevels % 2
+                if (Points.Type == DHPointType.CLASS)
+                    this.AddPoints(Player, Points, div)
+                else
+                    this.AddPoints(Player, Points,div + (rem ? 1 : 0))
+            } else  {
+                if (Level % 2 && Points.Type == DHPointType.TALENT)
+                    this.AddPoints(Player, Points, 1)
+                else if (Points.Type == DHPointType.CLASS)
+                    this.AddPoints(Player, Points, 1)
+            }
+        } else {
+            this.Save(Player, Points)
+        }
+    }
+
+    public AddPoints(Player: TSPlayer, Points: CharacterPoints, Amount: uint8) {
+        if (Amount > 0) {
+            if (Points.Unlocked < Points.Max) {
+                let NewAmount = Points.Unlocked + Amount
+                if (NewAmount > Points.Max)
+                    Amount = Points.Max - Points.Unlocked
+
+                Points.Unlocked = Amount
+                Points.Sum = Amount
+
+                let pkt = new SimpleMessagePayload(ClientCallbackOperations.LEVELUP, `|cff8FCE00You have been awarded ${Amount} point${Amount > 1 ? 's' : ''}.`);
+                pkt.write().SendToPlayer(Player)
+            }
+        }
+
+        this.Save(Player, Points)
+    }
+}
+
+export const PointsMgr = new CharacterPointsLoader()

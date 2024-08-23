@@ -1,7 +1,7 @@
 import { ClientCallbackOperations, SimpleMessagePayload } from '../../shared/Messages';
 import { DHPointType, DHTalentTab, TALENT_POINT_TYPES } from '../classes';
 import { DHCache, PointsMgr } from '../dh-cachedata/dh-cache';
-import { CharacterPoints, cActiveLoadouts, cLoadouts } from '../dh-cachedata/dh-chardata';
+import { cActiveLoadouts } from '../dh-cachedata/dh-chardata';
 import { GetTalentTreeLayoutPayload, TTLPTalent, TTLPTalentPrereq, TTLPTalentRank, TalentTreeLayout, TalentTreeLayoutPayload } from '../../shared/Payloads/TalentTreeLayoutPayload';
 import { wDefaultLoadoutStrings } from '../dh-cachedata/dh-worlddata';
 
