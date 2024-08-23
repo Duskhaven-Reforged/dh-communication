@@ -25,11 +25,11 @@ export function Main(events: TSEvents) {
         let spec = mDHDMsg.cache.TryGetCharacterActiveSpec(Player)
         Player.SetUInt(`Spec`, spec.SpecTabId)
 
-        PointsMgr.Load(Player)
-        if (!Player.HasObject(`CharacterPoints:${DHPointType.CLASS}`)) {
+        if (!PointsMgr.Load(Player)) {
             TALENT_POINT_TYPES.forEach((Type) => {
                 let Point = new CharacterPoints(Type, 0, 0, 25)
                 PointsMgr.Init(Player, Point)
+                console.log(`init ${Type}`)
                 Player.SetObject(`CharacterPoints:${Type}`, Point)
             })
             if (Player.GetLevel() > 10) {

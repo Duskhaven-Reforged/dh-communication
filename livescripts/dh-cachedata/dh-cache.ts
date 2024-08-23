@@ -568,7 +568,8 @@ export class CharacterPoints extends TSClass {
 }
 
 export class CharacterPointsLoader {
-    public Load(Player: TSPlayer) {
+    public Load(Player: TSPlayer) : bool {
+        let Found = false
         let GUID : uint64 = Player.GetGUID().GetCounter()
         const res = QueryCharacters(`select * from \`characterpoints\` where guid = ${GUID}`)
         while (res.GetRow()) {  
@@ -579,19 +580,22 @@ export class CharacterPointsLoader {
 
             let Point = new CharacterPoints(type, sum, Unlocked, max)
             Player.SetObject(`CharacterPoints:${type}`, Point)
+            Found = true
         }
+        return Found
     }
 
-    public LoadByType(Player: TSPlayer, Type: uint8) {
+    public LoadByType(Player: TSPlayer, Type: uint8) : CharacterPoints {
         let GUID : uint64 = Player.GetGUID().GetCounter()
         const res = QueryCharacters(`select * from \`characterpoints\` where guid = ${GUID} and \`type\` = ${Type}`)
-        let type = res.GetUInt16(1)
-        let sum = res.GetUInt32(2)
-        let Unlocked = res.GetUInt32(3)
-        let max = res.GetUInt32(4)
-
-        let Point = new CharacterPoints(type, sum, Unlocked, max)
-        return Player.GetObject(`CharacterPoints:${type}`, Point)
+        while (res.GetRow()) {
+            let type = res.GetUInt16(1)
+            let sum = res.GetUInt32(2)
+            let Unlocked = res.GetUInt32(3)
+            let max = res.GetUInt32(4)
+            let Point = new CharacterPoints(type, sum, Unlocked, max)
+            return Player.GetObject(`CharacterPoints:${type}`, Point)
+        }
     }
 
     public Save(Player: TSPlayer, Points: CharacterPoints) {
