@@ -958,11 +958,6 @@ export function TalentTreeUI() {
                     GridChoiceTalents[Row][Col].Hide()
                 })
 
-                if (Talent.NodeType !== 2 && Talent.NumRanks > 1)
-                    FrameData.RankText.SetText(CurrentRank === -1 ? 0 : CurrentRank)
-                else
-                    FrameData.RankText.Hide()
-
                 Frame.SetScript('OnMouseDown', function(self, input) {
                     if (!IsStarter) {
                         let SpellRank = TreeCache.Spells[Tab.TabId][Talent.NodeIndex]
@@ -1003,9 +998,12 @@ export function TalentTreeUI() {
                 Frame.SetScript('OnUpdate', function() {
                     ShowTalentPointType(Tab.TabType, Tab.TabId)
 
-                    if (Talent.NodeType < 2)
+                    if (Talent.NodeType < 2 && Talent.NumRanks > 1) {
+                        console.log(Talent.SpellId, Talent.NumRanks, TreeCache.Spells[Tab.TabId][Talent.NodeIndex])
                         FrameData.RankText.SetText(TreeCache.Spells[Tab.TabId][Talent.NodeIndex])
-
+                    } else {
+                        FrameData.RankText.SetText('')
+                    }
                     let PreventDerank = false
                     if (TreeCache.Unlocks[Talent.SpellId]) {
                         let RequiredBy : TSArray<number> = TreeCache.Unlocks[Talent.SpellId]
@@ -1193,7 +1191,7 @@ export function TalentTreeUI() {
                         }
                     }
 
-                    if (TreeCache.Spells[Tab.TabId][Talent.NodeIndex] <= 0) {
+                    if (TreeCache.Spells[Tab.TabId][Talent.NodeIndex] <= 0 || Talent.NumRanks > TreeCache.Spells[Tab.TabId][Talent.NodeIndex]) {
                         FrameData.BorderTexture.SetVertexColor(0, 1, 0, 1)
                         if (Talent.NodeType === 2) {
                             FrameData.BorderTexture.SetTexCoord(0, 0.125, 0.625, 0.75)
@@ -1202,7 +1200,7 @@ export function TalentTreeUI() {
                     } else if (TreeCache.Spells[Tab.TabId][Talent.NodeIndex] > 0 && Talent.NodeType == 2) {
                         FrameData.BorderTexture.SetTexCoord(0, 0.125, 0.25, 0.375)
                         FrameData.BorderTexture.SetVertexColor(1, 1, 0, 1)
-                    } else if (Talent.NumRanks = TreeCache.Spells[Tab.TabId][Talent.NodeIndex]) {
+                    } else if (Talent.NumRanks == TreeCache.Spells[Tab.TabId][Talent.NodeIndex]) {
                         FrameData.BorderTexture.SetVertexColor(1, 1, 0, 1)
                     }
 
