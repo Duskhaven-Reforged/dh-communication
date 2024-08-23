@@ -32,7 +32,9 @@ export function Main(events: TSEvents) {
                 PointsMgr.Init(Player, Point)
                 Player.SetObject(`CharacterPoints:${Type}`, Point)
             })
-            mDHDMsg.cache.TrySaveNewLoadout(Player, wDefaultLoadoutStrings[Player.GetClass()][spec.SpecTabId])
+            if (Player.GetLevel() > 10) {
+                mDHDMsg.cache.TrySaveNewLoadout(Player, wDefaultLoadoutStrings[Player.GetClass()][spec.SpecTabId])
+            }
         }
 
         LearnSpellsForLevel(Player)
