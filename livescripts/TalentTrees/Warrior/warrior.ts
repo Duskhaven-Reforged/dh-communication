@@ -59,9 +59,9 @@ export function ReloadWarriorTree() {
     SetTalentNode(Talent, TAB, 8, 5, 8, true, 0, CreateArray<uint32>([Talent, GetID(`Spell`, 'dh-spells', 'warr-gen-endurancetraining2')]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `warr-gen-thewall`)]: 1}), EmptySpellArray, EmptySpellArray)
     
     Talent = GetID(`Spell`, 'dh-spells', 'warr-gen-fielddressing')
-    SetTalentNode(Talent, TAB, 3, 6, 8, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `warr-gen-angermanagement`)]: 1, [GetID(`Spell`, `dh-spells`, `warr-gen-puncture1`)]: 1}), EmptySpellArray, EmptySpellArray)
+    SetTalentNode(Talent, TAB, 3, 6, 8, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `warr-gen-angermanagement`)]: 1, [GetID(`Spell`, `dh-spells`, `warr-gen-puncture1`)]: 2}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, 'dh-spells', 'warr-gen-massacre')
-    SetTalentNode(Talent, TAB, 4, 6, 8, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `warr-gen-puncture1`)]: 1, [GetID(`Spell`, `dh-spells`, `warr-gen-throwweapon`)]: 1}), EmptySpellArray, EmptySpellArray)
+    SetTalentNode(Talent, TAB, 4, 6, 8, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `warr-gen-puncture1`)]: 2, [GetID(`Spell`, `dh-spells`, `warr-gen-throwweapon`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, 'dh-spells', 'warr-gen-throwingspec')
     SetTalentNode(Talent, TAB, 5, 6, 8, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `warr-gen-throwweapon`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, 'dh-spells', 'warr-gen-ragingmomentum')
@@ -69,9 +69,9 @@ export function ReloadWarriorTree() {
     Talent = GetID(`Spell`, 'dh-spells', 'warr-gen-polishedmirror')
     SetChoiceNode(Talent, TAB, 7, 6, 8, true, CreateArray<uint32>([Talent, GetID(`Spell`, 'dh-spells', 'warr-gen-foolproofplan')]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, 'dh-spells', 'warr-gen-spellreflection')]: 1}), EmptySpellArray)
     Talent = GetID(`Spell`, 'dh-spells', 'warr-gen-armoredtotheteeth')
-    SetTalentNode(Talent, TAB, 8, 6, 8, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `warr-gen-spellreflection`)]: 1, [GetID(`Spell`, `dh-spells`, `warr-gen-endurancetraining1`)]: 1}), EmptySpellArray, EmptySpellArray)
+    SetTalentNode(Talent, TAB, 8, 6, 8, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `warr-gen-spellreflection`)]: 1, [GetID(`Spell`, `dh-spells`, `warr-gen-endurancetraining1`)]: 2}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, 'dh-spells', 'warr-gen-frustration')
-    SetTalentNode(Talent, TAB, 9, 6, 8, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `warr-gen-chargepositive`)]: 1, [GetID(`Spell`, `dh-spells`, `warr-gen-endurancetraining1`)]: 1}), EmptySpellArray, EmptySpellArray)
+    SetTalentNode(Talent, TAB, 9, 6, 8, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `warr-gen-chargepositive`)]: 1, [GetID(`Spell`, `dh-spells`, `warr-gen-endurancetraining1`)]: 2}), EmptySpellArray, EmptySpellArray)
     
     Talent = GetID(`Spell`, 'dh-spells', 'warr-gen-proficient')
     SetTalentNode(Talent, TAB, 4, 7, 8, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `warr-gen-massacre`)]: 1, [GetID(`Spell`, `dh-spells`, `warr-gen-fielddressing`)]: 1}), EmptySpellArray, EmptySpellArray)

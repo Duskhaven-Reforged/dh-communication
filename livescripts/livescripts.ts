@@ -2,7 +2,7 @@ import { ClientCallbackOperations, SimpleMessagePayload } from "../shared/Messag
 import { ComboPoints } from "./SpellPoints/Combopoints";
 import { StarterGuild } from "./Guild/Guild";
 import { DHPointType } from "./classes";
-import { LearnWithExtraSteps } from "./dh-cachedata/dh-cache";
+import { LearnWithExtraSteps, PointsMgr } from "./dh-cachedata/dh-cache";
 import { wDefaultLoadoutStrings, wSpecAutolearn, wStartersForTabs, wTalentTrees } from "./dh-cachedata/dh-worlddata";
 import { DHCommonMessage } from "./dh-message/dh-cmsg";
 import { RouteTopics } from "./dh-topic/TopicRouter";
@@ -21,11 +21,13 @@ export function Main(events: TSEvents) {
     SpellChargeHandler(events)
     ExtraActionButton(events)
     
-    events.Player.OnLogin((player, first) => {
-        let spec = mDHDMsg.cache.TryGetCharacterActiveSpec(player)
-        player.SetUInt(`Spec`, spec.SpecTabId)
+    events.Player.OnLogin((Player, first) => {
+        PointsMgr.Load(Player)
 
-        LearnSpellsForLevel(player)
+        let spec = mDHDMsg.cache.TryGetCharacterActiveSpec(Player)
+        Player.SetUInt(`Spec`, spec.SpecTabId)
+
+        LearnSpellsForLevel(Player)
         // EnsurePlayerHasAllSpells(player)
         //todo load actions and maybe account bonuses
         // maybe unlearn flagged too
@@ -47,15 +49,18 @@ export function Main(events: TSEvents) {
         }
     })
 
-    events.Player.OnLevelChanged((player, oldLevel) => {
-        let spec = mDHDMsg.cache.TryGetCharacterActiveSpec(player)
+    events.Player.OnLevelChanged((Player, oldLevel) => {
+        let spec = mDHDMsg.cache.TryGetCharacterActiveSpec(Player)
         if (!spec.IsNull()) {
-            let curLevel = player.GetLevel()
+            let curLevel = Player.GetLevel()
             if (oldLevel < 10 && curLevel > 9)
-                mDHDMsg.cache.TrySaveNewLoadout(player, wDefaultLoadoutStrings[player.GetClass()][player.GetUInt(`Spec`)])
+                mDHDMsg.cache.TrySaveNewLoadout(Player, wDefaultLoadoutStrings[Player.GetClass()][Player.GetUInt(`Spec`)])
             
             if (curLevel > 10) {
                 if (oldLevel < curLevel) {
+                    let Classpoints = Player.GetObject(`CharacterPoints:${DHPointType.CLASS}`, PointsMgr.LoadByType(Player, DHPointType.CLASS))
+                    let TalentPoints = Player.GetObject(`CharacterPoints:${DHPointType.TALENT}`, PointsMgr.LoadByType(Player, DHPointType.TALENT))
+
                     let levelDiff = curLevel - oldLevel
                     if (oldLevel < 11 && levelDiff > 1)
                         levelDiff -= 10 - oldLevel
@@ -63,24 +68,20 @@ export function Main(events: TSEvents) {
                     if (levelDiff > 1) {
                         let div = Math.floor(levelDiff / 2)
                         let rem = levelDiff % 2
-
-                        mDHDMsg.cache.AddCharacterPointsToAllSpecs(player, DHPointType.CLASS, div)
-                        if (rem)
-                            div += 1
-
-                        mDHDMsg.cache.AddCharacterPointsToAllSpecs(player, DHPointType.TALENT, div)
+                        PointsMgr.AddPoints(Player, Classpoints, div)
+                        PointsMgr.AddPoints(Player, TalentPoints, div + (rem ? 1 : 0))
                     } else {
                         if (curLevel % 2)
-                            mDHDMsg.cache.AddCharacterPointsToAllSpecs(player, DHPointType.TALENT, 1)
+                            PointsMgr.AddPoints(Player, TalentPoints, 1)
                         else
-                            mDHDMsg.cache.AddCharacterPointsToAllSpecs(player, DHPointType.CLASS, 1)
+                            PointsMgr.AddPoints(Player, Classpoints, 1)
                     }
                 }
             }
-            mDHDMsg.cache.UpdateCharSpec(player, spec)
-            mDHDMsg.SendSpecInfo(player)
-            LearnSpellsForLevel(player)
-            SetAllSkillsToLevel(player)
+            mDHDMsg.cache.UpdateCharSpec(Player, spec)
+            mDHDMsg.SendSpecInfo(Player)
+            LearnSpellsForLevel(Player)
+            SetAllSkillsToLevel(Player)
         }
     }) 
 

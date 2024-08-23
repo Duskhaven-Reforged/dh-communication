@@ -1,27 +1,27 @@
 import { ClientCallbackOperations } from "../Messages"
 
 export class CSPPoints {
-    Type: number
-    SpecPointSum: number
-    SpecPointMax: number
-    CommonPointSum: number
-    AbsoluteMax: number
+    Type!: number
+    SpecPointSum!: number
+    SpecPointMax!: number
+    CommonPointSum!: number
+    AbsoluteMax!: number
 }
 export class CSPPointSpend {
-    TabId: number
-    Amount: number
+    TabId!: number
+    Amount!: number
 }
 export class CPSSpec {
     Id: number
-    Name: string
-    Description: string
-    Active: number
-    SpellIcon: number
-    SpecTabId: number
+    Name!: string
+    Description!: string
+    Active!: number
+    SpellIcon!: number
+    SpecTabId!: number
 
-    PointsSpentCount: number
+    PointsSpentCount!: number
     PointsSpent: TSArray<CSPPointSpend> = []
-    PointsCount: number
+    PointsCount!: number
     Points: TSArray<CSPPoints> = []
 
     constructor(){
@@ -29,7 +29,7 @@ export class CPSSpec {
     }
 }
 export class CharacterSpecsPayload {
-    SpecCounts: number
+    SpecCounts!: number
     Specs: TSArray<CPSSpec> = []
 }
 
@@ -70,34 +70,4 @@ export class GetCharacterSpecsPayload {
         }
         return output
     }
-
-    BuildPacket(Payload: CharacterSpecsPayload): TSPacketWrite {
-        let packet = CreateCustomPacket(ClientCallbackOperations.GET_CHARACTER_SPECS, 0);
-        packet.WriteDouble(Payload.SpecCounts)
-        Payload.Specs.forEach((Spec) => {
-            packet.WriteDouble(Spec.Id)
-            packet.WriteString(Spec.Name)
-            packet.WriteString(Spec.Description)
-            packet.WriteDouble(Spec.Active)
-            packet.WriteDouble(Spec.SpellIcon)
-            packet.WriteDouble(Spec.SpecTabId)
-
-            packet.WriteDouble(Spec.PointsSpentCount)
-            Spec.PointsSpent.forEach((PointSpend, i) => {
-                packet.WriteDouble(PointSpend.TabId)
-                packet.WriteDouble(PointSpend.Amount)
-            })
-
-            packet.WriteDouble(Spec.PointsCount)
-            Spec.Points.forEach((Point, i) => {
-                packet.WriteDouble(Point.Type)
-                packet.WriteDouble(Point.SpecPointSum)
-                packet.WriteDouble(Point.SpecPointMax)
-                packet.WriteDouble(Point.CommonPointSum)
-                packet.WriteDouble(Point.AbsoluteMax)
-            })
-        })
-
-        return packet;
-    } 
 }

@@ -1,7 +1,7 @@
 import { Backdrop, CONSTANTS, GetClassId, PATH, Util } from './Constants';
 import { ClientCallbackOperations, SimpleMessagePayload } from '../../../shared/Messages';
 import { GetTalentTreeLayoutPayload, TTLPTalent, TTLPTalentPrereq, TalentTreeLayout } from '../../../shared/Payloads/TalentTreeLayoutPayload';
-import { CPSSpec, CharacterSpecsPayload, GetCharacterSpecsPayload } from '../../../shared/Payloads/GetCharacterSpecsPayload';
+import { CPSSpec, GetCharacterSpecsPayload } from '../../../shared/Payloads/GetCharacterSpecsPayload';
 
 // caches for intraaddon info sharing
 let TalentTree = {
@@ -1616,7 +1616,7 @@ export function TalentTreeUI() {
                 
                 spec.Points.forEach((Point) => {
                     TreeCache.Points[Point.Type] = Point.SpecPointSum
-                    TalentTree.MaxPoints[Point.Type] = Point.AbsoluteMax
+                    TalentTree.MaxPoints[Point.Type] = Point.CommonPointSum
                 })
             })
 

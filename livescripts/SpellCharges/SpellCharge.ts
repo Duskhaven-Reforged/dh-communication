@@ -34,6 +34,8 @@ export class CharacterSpellChargeInfo extends DBEntry {
     Max: uint8 = 0
     @DBField
     CD: uint32 = 0
+    @DBField
+    BaseCD: uint32 = 0
 
     constructor(Player: TSPlayer, Spell: uint32) {
         super()
@@ -48,6 +50,8 @@ export class CharacterSpellChargeInfo extends DBEntry {
     public Calc() : CharacterSpellChargeInfo {
         let Base = wSpellCharges[this.SpellId]
         this.Max = Base.BaseCharges
+        this.CD = 0
+        this.BaseCD = Base.Cooldown
         this.Save()
         return this
     }
