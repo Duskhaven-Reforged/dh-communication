@@ -25,7 +25,7 @@ export function ReloadWarriorProtTree() {
     SetTalentNode(Talent, TAB, 6, 2, 0, false, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `warr-pro-shieldslam`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, 'dh-spells', 'warr-pro-devastate')
     SetTalentNode(Talent, TAB, 5, 2, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `warr-pro-revenge`)]: 1}), EmptySpellArray, EmptySpellArray)
-    Talent = GetID(`Spell`, 'dh-spells', 'warr-pro-shieldbash')
+    Talent = GetID(`Spell`, 'dh-spells', 'warr-pro-skirmishersstamina')
     SetTalentNode(Talent, TAB, 7, 2, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `warr-pro-revenge`)]: 1}), EmptySpellArray, EmptySpellArray)
     
     Talent = GetID(`Spell`, 'dh-spells', 'warr-pro-loudmanagement')
@@ -35,9 +35,9 @@ export function ReloadWarriorProtTree() {
     Talent = GetID(`Spell`, 'dh-spells', 'warr-pro-revengeance')
     SetTalentNode(Talent, TAB, 6, 3, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `warr-pro-revenge`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, 'dh-spells', 'warr-pro-fewstoodagainstmany')
-    SetTalentNode(Talent, TAB, 7, 3, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `warr-pro-shieldbash`)]: 1}), EmptySpellArray, EmptySpellArray)
+    SetTalentNode(Talent, TAB, 7, 3, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `warr-pro-skirmishersstamina`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, 'dh-spells', 'warr-pro-shieldmastery')
-    SetTalentNode(Talent, TAB, 9, 3, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `warr-pro-shieldbash`)]: 1}), EmptySpellArray, EmptySpellArray)
+    SetTalentNode(Talent, TAB, 9, 3, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `warr-pro-skirmishersstamina`)]: 1}), EmptySpellArray, EmptySpellArray)
     
     Talent = GetID(`Spell`, 'dh-spells', 'warr-pro-swordandboard')
     SetTalentNode(Talent, TAB, 6, 4, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `warr-pro-galvanized`)]: 1, [GetID(`Spell`, `dh-spells`, `warr-pro-revengeance`)]: 1, [GetID(`Spell`, `dh-spells`, `warr-pro-fewstoodagainstmany`)]: 1}), EmptySpellArray, EmptySpellArray)

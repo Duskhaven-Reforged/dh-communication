@@ -358,28 +358,6 @@ export class DHCache {
         return DHCharacterTalent.Empty()
     }
 
-    public GetSpecPoints(player: TSPlayer, pointType: DHPointType, spec: uint8 = 1) : DHCharacterPoint {
-        let guid = player.GetGUID().GetCounter()
-        if (cCharPoints.contains(guid)) {
-            if (cCharPoints[guid].contains(pointType)) {
-                if (cCharPoints[guid][pointType].contains(spec))
-                    return cCharPoints[guid][pointType][spec]
-            }
-        }
-
-        let fcp = new DHCharacterPoint(pointType, spec, 0, 25)
-        return this.UpdateCharPoints(player, fcp)
-    }
-
-    public UpdateCharPoints(player: TSPlayer, point: DHCharacterPoint) {
-        let guid = player.GetGUID().GetCounter()
-
-        cCharPoints[guid][point.Type][point.SpecId] = point
-
-        const res = QueryCharacters('REPLACE INTO `character_points` (`guid`,`type`,`spec`,`sum`,`max`) VALUES ('+guid+','+point.Type+','+point.SpecId+','+point.Sum+','+point.Max+')')
-        return point
-    }
-
     public UpdateCharSpec(player: TSPlayer, spec: DHPlayerSpec) {
         let owner = player.GetGUID().GetCounter()
         
@@ -510,8 +488,7 @@ export class DHCache {
             })
         })
         this.UpdateCharSpec(player, spec)
-
-        let fcp = this.GetSpecPoints(player, type, spec.Id)
+        let TalentPoints = player.GetObject(`CharacterPoints:${type}`, PointsMgr.LoadByType(player, type))
         let amount = 0
         let level = player.GetLevel()
         if (level > 9)
@@ -522,9 +499,9 @@ export class DHCache {
         if (IsTalentPoint)
             amount += 1;
 
-        fcp.Max = amount
-        fcp.Sum = amount
-        this.UpdateCharPoints(player, fcp)
+        TalentPoints.Max = amount
+        TalentPoints.Sum = amount
+        PointsMgr.Save(player, TalentPoints)
         if (type === DHPointType.TALENT)
             this.ForgetTalents(player, spec, DHPointType.CLASS)
     }

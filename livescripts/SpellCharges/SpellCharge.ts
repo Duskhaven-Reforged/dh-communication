@@ -99,6 +99,7 @@ export let cSpellCharges : TSDictionary<uint64, TSDictionary<uint32, CharacterSp
 export let SpellsWithCharges : TSArray<uint32> = TAG(`dh-spells`, 'has-charges')
 let AddsACharge : TSArray<uint32> = TAG(`dh-spells`, 'add-charge-on-apply')
 export let ModChargeCD : TSArray<uint32> = TAG(`dh-spells`, 'modify-base-charge-cd')
+export let ModChargeMax : TSArray<uint32> = TAG(`dh-spells`, 'modify-base-charge-max')
 
 let BrainFreeze = GetID(`Spell`, `dh-spells`, `mag-fro-brainfreezeamp`)
 let Flurry = GetID(`Spell`, `dh-spells`, `mag-fro-flurry`)
@@ -186,6 +187,22 @@ export function HandleSpellCharge(events: TSEvents) {
     })
 
     events.Spell.OnRemove(ModChargeCD, (E, App) => {
+        let Player = App.GetTarget().ToPlayer()
+        if (Player.IsInWorld()) {
+            let ChargeSpell : uint32 = E.GetSpellInfo().GetEffect(0).GetTriggerSpell()
+            ChargeMgr.Calc(Player, Player.GetObject(`SpellCharge:${ChargeSpell}`, ChargeMgr.NewCharge(Player, ChargeSpell)))
+        }
+    })
+
+    events.Spell.OnApply(ModChargeMax, (E, App) => {
+        let Player = App.GetTarget().ToPlayer()
+        if (Player.IsInWorld()) {
+            let ChargeSpell : uint32 = E.GetSpellInfo().GetEffect(0).GetTriggerSpell()
+            ChargeMgr.Calc(Player, Player.GetObject(`SpellCharge:${ChargeSpell}`, ChargeMgr.NewCharge(Player, ChargeSpell)))
+        }
+    })
+
+    events.Spell.OnRemove(ModChargeMax, (E, App) => {
         let Player = App.GetTarget().ToPlayer()
         if (Player.IsInWorld()) {
             let ChargeSpell : uint32 = E.GetSpellInfo().GetEffect(0).GetTriggerSpell()
