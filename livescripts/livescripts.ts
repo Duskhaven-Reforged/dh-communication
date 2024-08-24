@@ -7,7 +7,7 @@ import { wChoiceNodes, wDefaultLoadoutStrings, wSpecAutolearn, wStartersForTabs,
 import { DHCommonMessage } from "./dh-message/dh-cmsg";
 import { RouteTopics } from "./dh-topic/TopicRouter";
 import { ArcaneCharges } from "./SpellPoints/ArcaneCharges";
-import { SpellChargeHandler } from "./SpellCharges/SpellCharge";
+import { HandleSpellCharge } from "./SpellCharges/SpellCharge";
 import { ExtraActionButton } from "./extra_action_button";
 
 export let mDHDMsg : DHCommonMessage
@@ -18,7 +18,7 @@ export function Main(events: TSEvents) {
     ComboPoints(events)
     ArcaneCharges(events)
     StarterGuild(events)
-    SpellChargeHandler(events)
+    HandleSpellCharge(events)
     ExtraActionButton(events)
     
     events.Player.OnLogin((Player, first) => {
@@ -29,7 +29,6 @@ export function Main(events: TSEvents) {
             TALENT_POINT_TYPES.forEach((Type) => {
                 let Point = new CharacterPoints(Type, 0, 0, 25)
                 PointsMgr.Init(Player, Point)
-                console.log(`init ${Type}`)
                 Player.SetObject(`CharacterPoints:${Type}`, Point)
             })
             if (Player.GetLevel() > 10) {
@@ -209,7 +208,7 @@ function EnsurePlayerHasTalents(Player: TSPlayer, Spec: DHPlayerSpec) {
                             })
                         }
                     }
-                } else {
+                } else if (Player.HasSpell(SpellId) && !mDHDMsg.cache.IsStarter(Player, Tab.Talents[SpellId])) {
                     Player.RemoveSpell(Talent.SpellId, false, false)
                 }
             } else {

@@ -20,81 +20,108 @@ export let wSpellCharges : TSDictionary<uint32, SpellChargeInfo> = CreateDiction
     [GetID(`Spell`, `dh-spells`, `mag-gen-managem`)]: new SpellChargeInfo(GetID(`Spell`, `dh-spells`, `mag-gen-managem`), 0, 3, 120000),
     [GetID(`Spell`, `dh-spells`, `mag-fir-livingbomb`)]: new SpellChargeInfo(GetID(`Spell`, `dh-spells`, `mag-fir-livingbomb`), 0, 2, 20000),
     [GetID(`Spell`, `dh-spells`, `mag-fro-flurry`)]: new SpellChargeInfo(GetID(`Spell`, `dh-spells`, `mag-fro-flurry`), 0, 2, 30000),
+    [GetID(`Spell`, `dh-spells`, `warr-gen-shieldblock`)]: new SpellChargeInfo(GetID(`Spell`, `dh-spells`, `warr-gen-shieldblock`), 0, 1, 40000),
 })
 
-@CharactersTable
-export class CharacterSpellChargeInfo extends DBEntry {
-    @DBPrimaryKey
+export class CharacterSpellChargeInfo extends TSClass {
     guid: uint64 = 0
-    @DBPrimaryKey
     SpellId: uint32 = 0
-    @DBField
     Current: uint8 = 0
-    @DBField
     Max: uint8 = 0
-    @DBField
     CD: uint32 = 0
-    @DBField
-    BaseCD: uint32 = 0
+    EffectiveCD: int32 = 0
 
-    constructor(Player: TSPlayer, Spell: uint32) {
+    constructor(Player: TSPlayer, Spell: uint32, Current: uint8, Max: uint8, CD: uint32 ) {
         super()
         this.guid = Player.GetGUID().GetCounter()
         this.SpellId = Spell
-    }
-
-    static get(Player: TSPlayer, Spell: uint32) : CharacterSpellChargeInfo {
-        return Player.GetObject(`SpellCharges:${Spell}`, LoadDBEntry(new CharacterSpellChargeInfo(Player, Spell).Calc()))
-    }
-
-    public Calc() : CharacterSpellChargeInfo {
-        let Base = wSpellCharges[this.SpellId]
-        this.Max = Base.BaseCharges
-        this.CD = 0
-        this.BaseCD = Base.Cooldown
-        this.Save()
-        return this
+        this.Current = Current
+        this.Max = Max
+        this.EffectiveCD = CD
     }
 }
 
-export let cSpellCharges : TSDictionary<uint64, TSDictionary<uint32, CharacterSpellChargeInfo>>
+export class SpellChargeHandler {
+    public Load(Player: TSPlayer) : bool {
+        let Found = false
+        let GUID : uint64 = Player.GetGUID().GetCounter()
+        const res = QueryCharacters(`select * from \`characterspellcharges\` where guid = ${GUID}`)
+        while (res.GetRow()) {  
+            let Spell = res.GetUInt32(1)
+            let Current = res.GetUInt8(2)
+            let Max = res.GetUInt8(3)
+            let CD = res.GetUInt32(4)
 
-let SpellsWithCharges : TSArray<uint32> = TAG(`dh-spells`, 'has-charges')
-let AddsACharge : TSArray<uint32> = TAG(`dh-spells`, 'add-charge-on-apply')
-
-function LoadCharacterSpellCharges(Player: TSPlayer) {
-    wSpellCharges.forEach((Spell) => {
-        if (Player.HasSpell(Spell)) {
-            LoadCharacterChargesForSpell(Player, Spell)
+            let Info = new CharacterSpellChargeInfo(Player, Spell, Current, Max, CD)
+            Player.SetObject(`SpellCharge:${Spell}`, Info)
+            Found = true
         }
-    })
-}
-
-function LoadCharacterChargesForSpell(Player: TSPlayer, Spell: uint32) : CharacterSpellChargeInfo {
-    if (wSpellCharges.contains(Spell)) {
-        let BaseChargeData = wSpellCharges[Spell]
-        let ChargeData = CharacterSpellChargeInfo.get(Player, Spell)
-
-        if (ChargeData.Current < ChargeData.Max)
-            StartCD(Player, BaseChargeData, ChargeData)
-        else
-            SendChargeData(Player, Spell, ChargeData)
-
-        return ChargeData
+        return Found
     }
-    return new CharacterSpellChargeInfo(Player, 0)
+
+    public NewCharge(Player: TSPlayer, Spell: uint32) : CharacterSpellChargeInfo {
+        let Base = wSpellCharges[Spell]
+        let Info = new CharacterSpellChargeInfo(Player, Spell, 0, Base.BaseCharges, Base.Cooldown)
+        this.Calc(Player, Info)
+        return Player.GetObject(`SpellCharge:${Spell}`, Info)
+    }
+
+    public Save(Player: TSPlayer, Charges: CharacterSpellChargeInfo) {
+        let GUID : uint64 = Player.GetGUID().GetCounter()
+        Player.SetObject(`SpellCharge:${Charges.SpellId}`, Charges)
+        QueryCharacters(`REPLACE INTO \`characterspellcharges\` (\`guid\`, \`spell\`, \`current\`, \`max\`, \`cd\`) VALUES (${GUID}, ${Charges.SpellId}, ${Charges.Current}, ${Charges.Max}, ${Charges.EffectiveCD});`)
+    }
+
+    public Delete(Player: TSPlayer, Spell: uint32) {
+        let GUID : uint64 = Player.GetGUID().GetCounter()
+        QueryCharactersAsync(`DELETE FROM \`characterspellcharges\` where guid = ${GUID} and spell = ${Spell}`)
+    }
+
+    public Calc(Player: TSPlayer, Charge: CharacterSpellChargeInfo) {
+        ModChargeCD.forEach((Spell) => {
+            if (Player.HasAura(Spell)) {
+                let Info = GetSpellInfo(Spell).GetEffect(0).GetTriggerSpell()
+                if (Charge.SpellId == Info) {
+                    let CDR : int32 = Player.GetAura(Spell).GetEffect(0).GetAmount()
+                    Charge.EffectiveCD += CDR
+                }
+            }
+        })
+
+        this.Save(Player, Charge)
+    }
 }
+
+export const ChargeMgr = new SpellChargeHandler()
+
+export let cSpellCharges : TSDictionary<uint64, TSDictionary<uint32, CharacterSpellChargeInfo>> = CreateDictionary<uint64, TSDictionary<uint32, CharacterSpellChargeInfo>>({})
+
+export let SpellsWithCharges : TSArray<uint32> = TAG(`dh-spells`, 'has-charges')
+let AddsACharge : TSArray<uint32> = TAG(`dh-spells`, 'add-charge-on-apply')
+export let ModChargeCD : TSArray<uint32> = TAG(`dh-spells`, 'modify-base-charge-cd')
 
 let BrainFreeze = GetID(`Spell`, `dh-spells`, `mag-fro-brainfreezeamp`)
 let Flurry = GetID(`Spell`, `dh-spells`, `mag-fro-flurry`)
 let SpellChargeDurationRefunds : TSArray<uint32> = TAG(`dh-spells`, `charge-duration-refund`)
-export function SpellChargeHandler(events: TSEvents) {
-    events.Spell.OnLearn(SpellsWithCharges, (SpellInfo, Player) => {
-        LoadCharacterChargesForSpell(Player, SpellInfo.GetEntry())
+export function HandleSpellCharge(events: TSEvents) {
+    events.Player.OnLogin((Player) => {
+        if (!ChargeMgr.Load(Player)) {
+            SpellsWithCharges.forEach((Spell) => {
+                let Base = wSpellCharges[Spell]
+                let Charge = new CharacterSpellChargeInfo(Player, Spell, 0, Base.BaseCharges, Base.Cooldown)
+                Player.SetObject(`SpellCharge:${Spell}`, Charge)
+            })
+        }
+        SpellsWithCharges.forEach((Spell) => {
+            if (Player.HasSpell(Spell)) {
+                StartCD(Player, wSpellCharges[Spell])
+            }
+        })
     })
-    
-    events.Spell.OnUnlearn(SpellsWithCharges, (SpellInfo, Player) => {
-        CharacterSpellChargeInfo.get(Player, SpellInfo.GetEntry()).Delete()
+
+    events.Spell.OnLearn(SpellsWithCharges, (SpellInfo, Player) => {
+        let Spell = SpellInfo.GetEntry()
+        ChargeMgr.Calc(Player, Player.GetObject(`SpellCharge:${Spell}`, ChargeMgr.NewCharge(Player, Spell)))
     })
 
     events.Spell.OnCheckCast(SpellsWithCharges, (Spell, Result) => {
@@ -102,7 +129,8 @@ export function SpellChargeHandler(events: TSEvents) {
             Result.set(67)
         else if (Spell.GetCaster().IsPlayer()) {
             let Player = Spell.GetCaster().ToPlayer()
-            let ChargeInfo = CharacterSpellChargeInfo.get(Player, Spell.GetEntry())
+            let ChargeInfo = Player.GetObject(`SpellCharge:${Spell.GetEntry()}`, ChargeMgr.NewCharge(Player, Spell.GetEntry()))
+            console.log(ChargeInfo.Current, '\n')
             Result.set(ChargeInfo.Current > 0 ? 255 : 67)
             return
         }
@@ -115,10 +143,10 @@ export function SpellChargeHandler(events: TSEvents) {
 
         if (Spell.GetCaster().IsPlayer()) {
             let Player = Spell.GetCaster().ToPlayer()
-            let ChargeInfo = CharacterSpellChargeInfo.get(Player, Spell.GetEntry())
+            let ChargeInfo = Player.GetObject(`SpellCharge:${Spell.GetEntry()}`, ChargeMgr.NewCharge(Player, Spell.GetEntry()))
             ChargeInfo.Current -= 1
-            ChargeInfo.Save()
-            StartCD(Player, wSpellCharges[Spell.GetEntry()], ChargeInfo)
+            ChargeMgr.Save(Player, ChargeInfo)
+            StartCD(Player, wSpellCharges[Spell.GetEntry()])
         }
     })
 
@@ -131,19 +159,27 @@ export function SpellChargeHandler(events: TSEvents) {
 
             if (SpellId > 0) {
                 let Caster = App.GetTarget().ToPlayer()
-                let ChargeInfo = CharacterSpellChargeInfo.get(Caster, ChargedSpell)
+                let ChargeInfo = Caster.GetObject(`SpellCharge:${SpellId}`, ChargeMgr.NewCharge(Caster, SpellId))
                 if (ChargeInfo.Current < ChargeInfo.Max) {
                     ChargeInfo.Current += 1
-                    ChargeInfo.Save()
+                    ChargeMgr.Save(Caster, ChargeInfo)
                     let BaseChargeData = wSpellCharges[ChargedSpell]
-                    StartCD(Caster, BaseChargeData, ChargeInfo)
+                    StartCD(Caster, BaseChargeData)
                 }
             }
         }
     })
 
-    events.CustomPacket.OnReceive(ClientCallbackOperations.SPELLCHARGE, (Op, Packet, Player) => {
-        LoadCharacterSpellCharges(Player)
+    events.Spell.OnApply(ModChargeCD, (E, App) => {
+        let Player = App.GetTarget().ToPlayer()
+        let ChargeSpell = E.GetSpellInfo().GetEffect(0).GetTriggerSpell()
+        ChargeMgr.Calc(Player, Player.GetObject(`SpellCharge:${ChargeSpell}`, ChargeMgr.NewCharge(Player, ChargeSpell)))
+    })
+
+    events.Spell.OnRemove(ModChargeCD, (E, App) => {
+        let Player = App.GetTarget().ToPlayer()
+        let ChargeSpell = E.GetSpellInfo().GetEffect(0).GetTriggerSpell()
+        ChargeMgr.Calc(Player, Player.GetObject(`SpellCharge:${ChargeSpell}`, ChargeMgr.NewCharge(Player, ChargeSpell)))
     })
 
     events.Player.OnActionButtonSet((Player, Button, Action, Type) => {
@@ -171,17 +207,18 @@ export function SpellChargeHandler(events: TSEvents) {
             let Mod : int32 = Effect.GetBasePoints()
             if (Player.GetBool(TimerName, false)) {
                 let Rem : int64 = Math.max(0, Player.ModNamedTimer(TimerName, Mod))
-                let ChargeInfo = CharacterSpellChargeInfo.get(Player, ChargeSpell)
+                let ChargeInfo = Player.GetObject(`SpellCharge:${ChargeSpell}`, ChargeMgr.NewCharge(Player, ChargeSpell))
                 ChargeInfo.CD = Rem
-                ChargeInfo.Save()
-                StartCD(Player, wSpellCharges[ChargeSpell], ChargeInfo)
+                ChargeMgr.Save(Player, ChargeInfo)
+                StartCD(Player, wSpellCharges[ChargeSpell])
             }
         }
     })
 }
 
-function StartCD(Player: TSPlayer, BaseCharge: SpellChargeInfo, CharChargeInfo: CharacterSpellChargeInfo) {
-    let Timer = BaseCharge.Cooldown
+function StartCD(Player: TSPlayer, BaseCharge: SpellChargeInfo) {
+    let CharChargeInfo = Player.GetObject(`SpellCharge:${BaseCharge.SpellId}`, ChargeMgr.NewCharge(Player, BaseCharge.SpellId))
+    let Timer = CharChargeInfo.EffectiveCD
     let Current = CharChargeInfo.Current
 
     let TimerName = `ChargeTimer:${BaseCharge.SpellId}`
@@ -190,26 +227,29 @@ function StartCD(Player: TSPlayer, BaseCharge: SpellChargeInfo, CharChargeInfo: 
         CharChargeInfo.CD = Timer
         Player.SetBool(TimerName, true)
         Player.AddNamedTimer(TimerName, Timer, (Player, TSTimer) => {
-            FinishCD(Player.ToPlayer(), BaseCharge, CharChargeInfo)
+            FinishCD(Player.ToPlayer(), BaseCharge)
         })
     } else if (Current == CharChargeInfo.Max && HasTimer) {
         Player.StopNamedTimer(TimerName)
         CharChargeInfo.CD = 0
         Player.SetBool(TimerName, false)
     }
-    CharChargeInfo.Save()
-    SendChargeData(Player, CharChargeInfo.SpellId, CharChargeInfo)
+    ChargeMgr.Save(Player, CharChargeInfo)
+    SendChargeData(Player, CharChargeInfo.SpellId)
 }
 
-function FinishCD(Player: TSPlayer, BaseCharge: SpellChargeInfo, CharChargeInfo: CharacterSpellChargeInfo) {
+function FinishCD(Player: TSPlayer, BaseCharge: SpellChargeInfo) {
+    let CharChargeInfo = Player.GetObject(`SpellCharge:${BaseCharge.SpellId}`, ChargeMgr.NewCharge(Player, BaseCharge.SpellId))
     CharChargeInfo.CD = 0
     CharChargeInfo.Current += 1
-    CharChargeInfo.Save()
+    
+    ChargeMgr.Save(Player, CharChargeInfo)
     Player.SetBool(`ChargeTimer:${BaseCharge.SpellId}`, false)
-    StartCD(Player, BaseCharge, CharChargeInfo)
+    StartCD(Player, BaseCharge)
 }
 
-function SendChargeData(Player: TSPlayer, Spell: uint32, ChargeData: CharacterSpellChargeInfo) {
+function SendChargeData(Player: TSPlayer, Spell: uint32) {
+    let ChargeData = Player.GetObject(`SpellCharge:${Spell}`, ChargeMgr.NewCharge(Player, Spell))
     let Payload = CreateCustomPacket(ClientCallbackOperations.SPELLCHARGE, 0)
     Payload.WriteInt32(ChargeData.SpellId)
     Payload.WriteInt8(ChargeData.Current)

@@ -999,7 +999,6 @@ export function TalentTreeUI() {
                     ShowTalentPointType(Tab.TabType, Tab.TabId)
 
                     if (Talent.NodeType < 2 && Talent.NumRanks > 1) {
-                        console.log(Talent.SpellId, Talent.NumRanks, TreeCache.Spells[Tab.TabId][Talent.NodeIndex])
                         FrameData.RankText.SetText(TreeCache.Spells[Tab.TabId][Talent.NodeIndex])
                     } else {
                         FrameData.RankText.SetText('')
