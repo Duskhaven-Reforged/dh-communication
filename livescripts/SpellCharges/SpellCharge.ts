@@ -47,10 +47,10 @@ export class SpellChargeHandler {
         let GUID : uint64 = Player.GetGUID().GetCounter()
         const res = QueryCharacters(`select * from \`characterspellcharges\` where guid = ${GUID}`)
         while (res.GetRow()) {  
-            let Spell = res.GetUInt32(1)
-            let Current = res.GetUInt8(2)
-            let Max = res.GetUInt8(3)
-            let CD = res.GetUInt32(4)
+            let Spell: uint32 = res.GetUInt32(1)
+            let Current: uint8 = res.GetUInt8(2)
+            let Max: uint8 = res.GetUInt8(3)
+            let CD: uint32 = res.GetUInt32(4)
 
             let Info = new CharacterSpellChargeInfo(Player, Spell, Current, Max, CD)
             Player.SetObject(`SpellCharge:${Spell}`, Info)
@@ -121,16 +121,22 @@ export function HandleSpellCharge(events: TSEvents) {
 
     events.Spell.OnLearn(SpellsWithCharges, (SpellInfo, Player) => {
         let Spell = SpellInfo.GetEntry()
-        ChargeMgr.Calc(Player, Player.GetObject(`SpellCharge:${Spell}`, ChargeMgr.NewCharge(Player, Spell)))
+        if (Player.IsInWorld())
+            ChargeMgr.Calc(Player, Player.GetObject(`SpellCharge:${Spell}`, ChargeMgr.NewCharge(Player, Spell)))
+    })
+
+    events.Spell.OnUnlearn(SpellsWithCharges, (SpellInfo, Player) => {
+        let Spell = SpellInfo.GetEntry()
+        ChargeMgr.Delete(Player, Spell)
     })
 
     events.Spell.OnCheckCast(SpellsWithCharges, (Spell, Result) => {
         if (Spell.GetCaster() == null)
             Result.set(67)
         else if (Spell.GetCaster().IsPlayer()) {
+            let SpellId: uint32 = Spell.GetEntry()
             let Player = Spell.GetCaster().ToPlayer()
-            let ChargeInfo = Player.GetObject(`SpellCharge:${Spell.GetEntry()}`, ChargeMgr.NewCharge(Player, Spell.GetEntry()))
-            console.log(ChargeInfo.Current, '\n')
+            let ChargeInfo = Player.GetObject(`SpellCharge:${SpellId}`, ChargeMgr.NewCharge(Player, SpellId))
             Result.set(ChargeInfo.Current > 0 ? 255 : 67)
             return
         }
@@ -142,8 +148,9 @@ export function HandleSpellCharge(events: TSEvents) {
             return
 
         if (Spell.GetCaster().IsPlayer()) {
+            let SpellId: uint32 = Spell.GetEntry()
             let Player = Spell.GetCaster().ToPlayer()
-            let ChargeInfo = Player.GetObject(`SpellCharge:${Spell.GetEntry()}`, ChargeMgr.NewCharge(Player, Spell.GetEntry()))
+            let ChargeInfo = Player.GetObject(`SpellCharge:${SpellId}`, ChargeMgr.NewCharge(Player, SpellId))
             ChargeInfo.Current -= 1
             ChargeMgr.Save(Player, ChargeInfo)
             StartCD(Player, wSpellCharges[Spell.GetEntry()])
@@ -152,7 +159,7 @@ export function HandleSpellCharge(events: TSEvents) {
 
     events.Spell.OnApply(AddsACharge,  (Eff, App, Mode) => {
         if (App.GetTarget().IsPlayer()) {
-            let SpellId  = Eff.GetSpellInfo().GetEntry()
+            let SpellId: uint32  = Eff.GetSpellInfo().GetEntry()
             let ChargedSpell = 0
             if (SpellId == BrainFreeze)
                 ChargedSpell = Flurry
@@ -172,14 +179,18 @@ export function HandleSpellCharge(events: TSEvents) {
 
     events.Spell.OnApply(ModChargeCD, (E, App) => {
         let Player = App.GetTarget().ToPlayer()
-        let ChargeSpell = E.GetSpellInfo().GetEffect(0).GetTriggerSpell()
-        ChargeMgr.Calc(Player, Player.GetObject(`SpellCharge:${ChargeSpell}`, ChargeMgr.NewCharge(Player, ChargeSpell)))
+        if (Player.IsInWorld()) {
+            let ChargeSpell : uint32 = E.GetSpellInfo().GetEffect(0).GetTriggerSpell()
+            ChargeMgr.Calc(Player, Player.GetObject(`SpellCharge:${ChargeSpell}`, ChargeMgr.NewCharge(Player, ChargeSpell)))
+        }
     })
 
     events.Spell.OnRemove(ModChargeCD, (E, App) => {
         let Player = App.GetTarget().ToPlayer()
-        let ChargeSpell = E.GetSpellInfo().GetEffect(0).GetTriggerSpell()
-        ChargeMgr.Calc(Player, Player.GetObject(`SpellCharge:${ChargeSpell}`, ChargeMgr.NewCharge(Player, ChargeSpell)))
+        if (Player.IsInWorld()) {
+            let ChargeSpell : uint32 = E.GetSpellInfo().GetEffect(0).GetTriggerSpell()
+            ChargeMgr.Calc(Player, Player.GetObject(`SpellCharge:${ChargeSpell}`, ChargeMgr.NewCharge(Player, ChargeSpell)))
+        }
     })
 
     events.Player.OnActionButtonSet((Player, Button, Action, Type) => {
