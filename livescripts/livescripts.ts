@@ -27,7 +27,7 @@ export function Main(events: TSEvents) {
 
         if (!PointsMgr.Load(Player)) {
             TALENT_POINT_TYPES.forEach((Type) => {
-                let Point = new CharacterPoints(Type, 0, 0, 25)
+                let Point = new CharacterPoints(Type, 0, 0)
                 PointsMgr.Init(Player, Point)
                 Player.SetObject(`CharacterPoints:${Type}`, Point)
             })

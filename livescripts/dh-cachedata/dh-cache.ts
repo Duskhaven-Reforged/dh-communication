@@ -235,23 +235,28 @@ export class DHCache {
                                             if (ChoiceNode) {
                                                 if (!wChoiceNodes.contains(Node.SpellId)) {
                                                     Valid = false
+                                                    console.log(`choice error\n`)
                                                 }
                                             } else if (Talent.NumberOfRanks < Rank) {
                                                 Valid = false
+                                                console.log(`rank error\n`)
                                             }
 
                                             let Satisfied = this.CheckPrereqs(Talent.Prereqs, Meta)
                                             if (!Satisfied) {
                                                 Valid = false
+                                                console.log(`prereq error\n`)
                                             }
 
                                             if (Talent.RequiredLevel > Player.GetLevel() || Node.PointReq > Spend) {
                                                 Valid = false
+                                                console.log(`spend error\n`)
                                             }
 
                                             if (!Starter) {
                                                 Spend += ChoiceNode ? Talent.RankCost : Talent.RankCost * Rank
                                                 if (Spend > Points.Unlocked) {
+                                                    console.log(`spend too high error\n`)
                                                     Valid = false
                                                 }
                                             }
@@ -438,7 +443,7 @@ export class DHCache {
         }
 
         TALENT_POINT_TYPES.forEach((type) => {
-            let Points = new CharacterPoints(type, 0, 0, 25)
+            let Points = new CharacterPoints(type, 0, 0)
             PointsMgr.Save(player, Points)
         })
 
@@ -499,7 +504,7 @@ export class DHCache {
         if (IsTalentPoint)
             amount += 1;
 
-        TalentPoints.Max = amount
+        TalentPoints.Unlocked = amount
         TalentPoints.Sum = amount
         PointsMgr.Save(player, TalentPoints)
         if (type === DHPointType.TALENT)
@@ -535,12 +540,11 @@ export class CharacterPoints extends TSClass {
     Unlocked: uint8 = 0
     Max: uint8 = 25
 
-    constructor(Type: uint8, Sum: uint8, Unlocked: uint8, Max: uint8) {
+    constructor(Type: uint8, Sum: uint8, Unlocked: uint8) {
         super()
         this.Type = Type
         this.Sum = Sum
         this.Unlocked = Unlocked
-        this.Max = Max
     }
 }
 
@@ -555,7 +559,7 @@ export class CharacterPointsLoader {
             let Unlocked = res.GetUInt32(3)
             let max = res.GetUInt32(4)
 
-            let Point = new CharacterPoints(type, sum, Unlocked, max)
+            let Point = new CharacterPoints(type, sum, Unlocked)
             Player.SetObject(`CharacterPoints:${type}`, Point)
             Found = true
         }
@@ -570,7 +574,7 @@ export class CharacterPointsLoader {
             let sum = res.GetUInt32(2)
             let Unlocked = res.GetUInt32(3)
             let max = res.GetUInt32(4)
-            let Point = new CharacterPoints(type, sum, Unlocked, max)
+            let Point = new CharacterPoints(type, sum, Unlocked)
             return Player.GetObject(`CharacterPoints:${type}`, Point)
         }
     }

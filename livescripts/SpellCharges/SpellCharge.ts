@@ -78,12 +78,23 @@ export class SpellChargeHandler {
     }
 
     public Calc(Player: TSPlayer, Charge: CharacterSpellChargeInfo) {
+        Charge.EffectiveCD = wSpellCharges[Charge.SpellId].Cooldown
+        Charge.Max = wSpellCharges[Charge.SpellId].BaseCharges
         ModChargeCD.forEach((Spell) => {
             if (Player.HasAura(Spell)) {
                 let Info = GetSpellInfo(Spell).GetEffect(0).GetTriggerSpell()
                 if (Charge.SpellId == Info) {
                     let CDR : int32 = Player.GetAura(Spell).GetEffect(0).GetAmount()
                     Charge.EffectiveCD += CDR
+                }
+            }
+        })
+        ModChargeMax.forEach((Spell) => {
+            if (Player.HasAura(Spell)) {
+                let Info = GetSpellInfo(Spell).GetEffect(0).GetTriggerSpell()
+                if (Charge.SpellId == Info) {
+                    let Max : int32 = Player.GetAura(Spell).GetEffect(0).GetAmount()
+                    Charge.Max += Max
                 }
             }
         })

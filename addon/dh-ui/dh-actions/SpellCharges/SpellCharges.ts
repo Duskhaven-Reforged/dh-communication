@@ -138,6 +138,8 @@ export function SpellCharges() {
         let Max = Packet.ReadUInt8()
         let Timer = Packet.ReadUInt32()
 
+        console.log(SpellId, Charges, Max, Timer)
+
         if (!SpellsWithCharges.includes(SpellId))
             SpellsWithCharges.push(SpellId)
 
