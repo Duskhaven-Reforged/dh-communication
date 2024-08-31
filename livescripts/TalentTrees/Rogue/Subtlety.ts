@@ -30,7 +30,7 @@ export function ReloadRogueSubTree() {
     SetTalentNode(Talent, TAB, 6, 3, 0, false, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `rog-sub-masterofdeception`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `rog-sub-wellaimedblades`)
     SetTalentNode(Talent, TAB, 4, 4, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `rog-sub-shurikenstorm`)]: 1, [GetID(`Spell`, `dh-spells`, `rog-sub-shadowtechnique`)]: 1}), EmptySpellArray, EmptySpellArray)
-    Talent = GetID(`Spell`, `dh-spells`, `rog-sub-unrelentingstrikes`)
+    Talent = GetID(`Spell`, `dh-spells`, `rog-sub-relentlessstrikes`)
     SetTalentNode(Talent, TAB, 5, 4, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `rog-sub-shadowtechnique`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, `dh-spells`, `rog-sub-improvedgloomblade`)
     SetTalentNode(Talent, TAB, 6, 4, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `rog-sub-shadowtechnique`)]: 1, [GetID(`Spell`, `dh-spells`, `rog-sub-shadowblades`)]: 1}), EmptySpellArray, EmptySpellArray)
