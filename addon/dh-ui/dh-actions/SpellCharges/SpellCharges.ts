@@ -43,8 +43,8 @@ export function SpellCharges() {
         
         if (!ChargeText) {
             ChargeText = button.CreateFontString(null, 'OVERLAY')
-            ChargeText.SetFont("Fonts\\FRIZQT__.TTF", 14, "OUTLINE")
-            ChargeText.SetPoint("TOPLEFT", button, "TOPLEFT", 2, -3)
+            ChargeText.SetFont("Fonts\\ARIALN.TTF", 14, "OUTLINE")
+            ChargeText.SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", -2, 2)
             ChargeText.SetTextColor(1, 1, 1, 1)
             _G[button.GetName()+'ChargeText'] = ChargeText
         }
