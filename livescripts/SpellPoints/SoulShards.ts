@@ -39,7 +39,17 @@ export function SoulShards(events: TSEvents) {
 
         if (Spell.GetCaster().ToUnit().HasAura(SoulShard)) {
             let Aura = Spell.GetCaster().ToUnit().GetAura(SoulShard)
-            Aura.SetStackAmount(Aura.GetStackAmount() - 1)
+            let StackAmount = Aura.GetStackAmount()
+            let Player = Spell.GetCaster().ToPlayer()
+            if (StackAmount > 1) {
+                Aura.SetStackAmount(StackAmount - 1)
+                Player.SetUInt('SoulShards', StackAmount - 1)
+            } else if (StackAmount === 1) {
+                Spell.GetCaster().ToUnit().RemoveAura(SoulShard)
+                Player.SetUInt('SoulShards', 0)
+            }
+
+            SendSoulShards(Player)
         }
     })
 }
