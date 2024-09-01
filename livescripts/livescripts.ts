@@ -7,6 +7,7 @@ import { wChoiceNodes, wDefaultLoadoutStrings, wSpecAutolearn, wStartersForTabs,
 import { DHCommonMessage } from "./dh-message/dh-cmsg";
 import { RouteTopics } from "./dh-topic/TopicRouter";
 import { ArcaneCharges } from "./SpellPoints/ArcaneCharges";
+import { SoulShards } from "./SpellPoints/SoulShards";
 import { HandleSpellCharge } from "./SpellCharges/SpellCharge";
 import { ExtraActionButton } from "./extra_action_button";
 
@@ -17,6 +18,7 @@ export function Main(events: TSEvents) {
     RouteTopics(events)
     ComboPoints(events)
     ArcaneCharges(events)
+    SoulShards(events)
     StarterGuild(events)
     HandleSpellCharge(events)
     ExtraActionButton(events)

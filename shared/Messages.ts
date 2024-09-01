@@ -31,6 +31,7 @@ export enum  ClientCallbackOperations
     MAGE_CLEARCASTING               = 28,
     SPELLCHARGE                     = 29,
     SPELLCHARGE_MOVE                = 30,
+    SOUL_SHARDS                     = 31,
     
     // m+
     MYTHIC_GET_WEEKLY_REWARD        = 101,

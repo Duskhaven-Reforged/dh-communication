@@ -1,4 +1,4 @@
-import { ArcaneChargeDependent, ComboFinishers, RequiresMageClearcasting } from "../../../shared/Shared"
+import { ArcaneChargeDependent, ComboFinishers, RequiresMageClearcasting, RequiresSoulShards } from "../../../shared/Shared"
 
 export let SpellCharges = []
 
@@ -14,6 +14,10 @@ export function IsActionUsable(Usable: bool, Action: number) : bool {
         
         if (RequiresMageClearcasting.includes(Action)) {
             Usable = _G['HasClearcasting'] ? _G['HasClearcasting'] > 0 : false
+        }
+
+        if (RequiresSoulShards.includes(Action)) {
+            Usable = _G[`CurrentSoulShards`] ? _G[`CurrentSoulShards`] > 0 : false
         }
     }
     return Usable
