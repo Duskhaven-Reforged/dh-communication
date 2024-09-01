@@ -24,6 +24,10 @@ import { ReloadShamanEnhTree } from "../TalentTrees/Shaman/Enhancement"
 import { ReloadShamanRestoTree } from "../TalentTrees/Shaman/Restoration"
 import { ReloadShamanWatcherTree } from "../TalentTrees/Shaman/Watcher"
 import { ReloadShamanTree } from "../TalentTrees/Shaman/shaman"
+import { ReloadAffLockTree } from "../TalentTrees/Warlock/Affliction"
+import { ReloadDemoLockTree } from "../TalentTrees/Warlock/Demonology"
+import { ReloadDestLockTree } from "../TalentTrees/Warlock/Destruction"
+import { ReloadWarlockTree } from "../TalentTrees/Warlock/warlock" 
 import { ReloadWarriorArmsTree } from "../TalentTrees/Warrior/Arms"
 import { ReloadWarriorFuryTree } from "../TalentTrees/Warrior/Fury"
 import { ReloadWarriorProtTree } from "../TalentTrees/Warrior/Protection"
@@ -121,7 +125,12 @@ export function RefillTrees(ClassMask: uint32) {
         ReloadMageFireTree()
         ReloadMageArcaneTree()
     }
-    if (ClassMask & (1 << Class.WARLOCK)) {}
+    if (ClassMask & (1 << Class.WARLOCK)) {
+        ReloadWarlockTree()
+        ReloadAffLockTree()
+        ReloadDemoLockTree()
+        ReloadDestLockTree()
+    }
     if (ClassMask & (1 << Class.DRUID)) {
         ReloadDruidTree()
         ReloadBalDruidTree()
