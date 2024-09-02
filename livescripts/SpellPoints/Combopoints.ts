@@ -7,6 +7,7 @@ let Generators : TSArray<uint32> = TAG(`dh-spells`, `combo-generator`)
 let OneComboPoint = GetID(`Spell`, `dh-spells`, `rog-cor-freecombopoint`)
 
 // druid
+let CatForm = GetID(`Spell`, `dh-spells`, `dru-gen-catform`)
 let GoldrinnsFury = GetID(`Spell`, `dh-spells`, `dru-gen-goldrinnsfury`)
 let UnendingOnslaught = GetID(`Spell`, `dh-spells`, `dru-fer-unendingonslaught`)
 let PredatorySwiftness = GetID(`Spell`, `dh-spells`, `dru-fer-predatoryswiftness`)
@@ -16,6 +17,16 @@ let SuddenAmbushBonus = GetID(`Spell`, `dh-spells`, `dru-fer-suddenambushbonus`)
 export function ComboPoints(events: TSEvents) {
     events.Player.OnLogin((Player) => {
         Player.SetUInt(`ComboPoints`, 0)
+
+        if (Player.GetClass() === Class.DRUID) {
+            Player.SetUInt(`ShapeshiftForm`, 0)
+
+            if (Player.HasAura(CatForm))
+                Player.SetUInt(`ShapeshiftForm`, 1)
+
+            SendShapeshiftForm(Player)
+        }
+
         SendComboPoints(Player)
     })
 
@@ -78,12 +89,40 @@ export function ComboPoints(events: TSEvents) {
             SendComboPoints(Player)
         }    
     })
+
+    events.Spell.OnApply(CatForm, (Eff, App, Mode) => {
+        if (Eff.GetCaster().IsPlayer()) {
+            if (Eff.GetEffectIndex() === 0) {
+                let Player = Eff.GetCaster().ToPlayer()
+                Player.SetUInt(`ShapeshiftForm`, 1)
+                SendShapeshiftForm(Player)
+            }
+        }
+    })
+
+    events.Spell.OnRemove(CatForm, (Eff, App, Mode) => {
+        if (Eff.GetCaster().IsPlayer()) {
+            if (Eff.GetEffectIndex() === 0) {
+                let Player = Eff.GetCaster().ToPlayer()
+                Player.SetUInt(`ShapeshiftForm`, 0)
+                SendShapeshiftForm(Player)
+            }
+        }
+    })
 }
 
 function SendComboPoints(Player: TSPlayer) {
     if (Player.IsInWorld()) {
         let packet = CreateCustomPacket(ClientCallbackOperations.COMBOPOINTS, 0);
         packet.WriteUInt8(Player.GetUInt(`ComboPoints`))
+        packet.SendToPlayer(Player)
+    }
+}
+
+function SendShapeshiftForm(Player: TSPlayer) {
+    if (Player.IsInWorld()) {
+        let packet = CreateCustomPacket(ClientCallbackOperations.SHAPESHIFT_FORM, 0);
+        packet.WriteUInt8(Player.GetUInt(`ShapeshiftForm`))
         packet.SendToPlayer(Player)
     }
 }

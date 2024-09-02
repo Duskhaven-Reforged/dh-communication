@@ -32,6 +32,7 @@ export enum  ClientCallbackOperations
     SPELLCHARGE                     = 29,
     SPELLCHARGE_MOVE                = 30,
     SOUL_SHARDS                     = 31,
+    SHAPESHIFT_FORM                 = 32,
     
     // m+
     MYTHIC_GET_WEEKLY_REWARD        = 101,
