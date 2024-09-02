@@ -42,6 +42,8 @@ export function SoulShards() {
 
     if (classFilename !== "WARLOCK")
         PlayerSoulShardFrame.Hide()
+    else
+        _G[`PetFrame`].SetPoint(`TOPLEFT`,_G[`PlayerFrame`], `TOPLEFT`, 60, -73)
 
     _G['CurrentSoulShards'] = 0
 
