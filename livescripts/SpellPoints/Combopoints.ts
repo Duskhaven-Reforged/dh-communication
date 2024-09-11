@@ -9,10 +9,13 @@ let SliceAndDice = GetID(`Spell`, `dh-spells`, `rog-gen-sliceanddice`)
 let CutToTheChase = GetID(`Spell`, `dh-spells`, `rog-ass-cuttothechase`)
 let FastHands = GetID(`Spell`, `dh-spells`, `rog-ass-fasthands`)
 let Shiv = GetID(`Spell`, `dh-spells`, `rog-gen-shiv`)
-let Swashbuckling = GetID(`Spell`, `dh-spells`, `rog-gen-swashbuckling`)
-let SwashCDR = GetID(`Spell`, `dh-spells`, `rog-gen-swashcdr`)
+let Swashbuckling = GetID(`Spell`, `dh-spells`, `rog-cor-swashbuckling`)
+let SwashCDR = GetID(`Spell`, `dh-spells`, `rog-cor-swashcdr`)
 let ShadowDance = GetID(`Spell`, `dh-spells`, `rog-sub-shadowdance`)
 let DeepeningShadows = GetID(`Spell`, `dh-spells`, `rog-sub-deepeningshadows`)
+let Eviscerate = GetID(`Spell`, `dh-spells`, `rog-gen-eviscerate`)
+let Garrote = GetID(`Spell`, `dh-spells`, `rog-gen-garrote`)
+let SaltTheWound = GetID(`Spell`, `dh-spells`, `rog-sub-saltthewound`)
 // druid
 let CatForm = GetID(`Spell`, `dh-spells`, `dru-gen-catform`)
 let GoldrinnsFury = GetID(`Spell`, `dh-spells`, `dru-gen-goldrinnsfury`)
@@ -67,6 +70,9 @@ export function ComboPoints(events: TSEvents) {
         if (Spell.GetCaster().IsPlayer()) {
             let Player = Spell.GetCaster().ToPlayer()
             let Spent = Player.GetUInt(`ComboPoints`)
+
+            let SpellId = Spell.GetEntry()
+
             if (Player.GetClass() == Class.DRUID) {
                 if (Player.HasAura(GoldrinnsFury) && Player.HasAura(UnendingOnslaught)) {
                     let Onslaught = Player.GetAura(UnendingOnslaught)
@@ -114,6 +120,15 @@ export function ComboPoints(events: TSEvents) {
                 if (Player.HasAura(DeepeningShadows)) {
                     let Amount = Spent * -1000
                     Player.ModifyCooldown(ShadowDance, Amount)
+                }
+
+                if (SpellId == Eviscerate) {
+                    let Target = Spell.GetTarget().ToUnit()
+                    if (Target.HasAura(Garrote, Spell.GetCaster().GetGUID())) {
+                        let Aura = Target.GetAura(Garrote, Spell.GetCaster().GetGUID())
+                        let Amount = Spent * 1000
+                        Aura.ModifyDuration(Amount)
+                    }
                 }
             }
 
