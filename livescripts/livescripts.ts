@@ -11,6 +11,7 @@ import { SoulShards } from "./SpellPoints/SoulShards";
 import { HandleSpellCharge } from "./SpellCharges/SpellCharge";
 import { ExtraActionButton } from "./extra_action_button";
 import { UpdateSQLTables } from "./sql-updates";
+import { SquareRootScaling } from "./SquareRootScaling/SquareRootScaling";
 
 export let mDHDMsg : DHCommonMessage
 
@@ -23,6 +24,7 @@ export function Main(events: TSEvents) {
     StarterGuild(events)
     HandleSpellCharge(events)
     ExtraActionButton(events)
+    SquareRootScaling(events)
     UpdateSQLTables()
     
     events.Player.OnLogin((Player, first) => {

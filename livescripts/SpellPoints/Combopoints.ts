@@ -11,6 +11,8 @@ let FastHands = GetID(`Spell`, `dh-spells`, `rog-ass-fasthands`)
 let Shiv = GetID(`Spell`, `dh-spells`, `rog-gen-shiv`)
 let Swashbuckling = GetID(`Spell`, `dh-spells`, `rog-gen-swashbuckling`)
 let SwashCDR = GetID(`Spell`, `dh-spells`, `rog-gen-swashcdr`)
+let ShadowDance = GetID(`Spell`, `dh-spells`, `rog-sub-shadowdance`)
+let DeepeningShadows = GetID(`Spell`, `dh-spells`, `rog-sub-deepeningshadows`)
 // druid
 let CatForm = GetID(`Spell`, `dh-spells`, `dru-gen-catform`)
 let GoldrinnsFury = GetID(`Spell`, `dh-spells`, `dru-gen-goldrinnsfury`)
@@ -107,6 +109,11 @@ export function ComboPoints(events: TSEvents) {
 
                 if (Player.HasAura(Swashbuckling) && Spent >= 5) {
                     Player.CastSpell(Player, SwashCDR, true)
+                }
+
+                if (Player.HasAura(DeepeningShadows)) {
+                    let Amount = Spent * -1000
+                    Player.ModifyCooldown(ShadowDance, Amount)
                 }
             }
 
