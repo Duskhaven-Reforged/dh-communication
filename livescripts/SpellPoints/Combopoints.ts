@@ -5,7 +5,12 @@ let Generators : TSArray<uint32> = TAG(`dh-spells`, `combo-generator`)
 
 // rogue
 let OneComboPoint = GetID(`Spell`, `dh-spells`, `rog-cor-freecombopoint`)
-
+let SliceAndDice = GetID(`Spell`, `dh-spells`, `rog-gen-sliceanddice`)
+let CutToTheChase = GetID(`Spell`, `dh-spells`, `rog-ass-cuttothechase`)
+let FastHands = GetID(`Spell`, `dh-spells`, `rog-ass-fasthands`)
+let Shiv = GetID(`Spell`, `dh-spells`, `rog-gen-shiv`)
+let Swashbuckling = GetID(`Spell`, `dh-spells`, `rog-gen-swashbuckling`)
+let SwashCDR = GetID(`Spell`, `dh-spells`, `rog-gen-swashcdr`)
 // druid
 let GoldrinnsFury = GetID(`Spell`, `dh-spells`, `dru-gen-goldrinnsfury`)
 let UnendingOnslaught = GetID(`Spell`, `dh-spells`, `dru-fer-unendingonslaught`)
@@ -71,6 +76,26 @@ export function ComboPoints(events: TSEvents) {
                     if (Player.RollChance(Pct)) {
                         Player.CastSpell(Player, SuddenAmbushBonus, true)
                     }
+                }
+            } else if (Player.GetClass() == Class.ROGUE) {
+                if (Player.HasAura(SliceAndDice) && Player.HasAura(CutToTheChase)) {
+                    let CTTC = Player.GetAura(CutToTheChase)
+                    let SND = Player.GetAura(SliceAndDice)
+    
+                    let Time = CTTC.GetEffect(0).GetAmount() * Spent
+                    SND.SetMaxDuration(SND.GetMaxDuration() + Time)
+                    SND.SetDuration(SND.GetDuration() + Time)
+                }
+
+                if (Player.HasAura(FastHands)) {
+                    let Pct = Spent * Player.GetAura(CutToTheChase).GetEffect(0).GetAmount()
+                    if (Player.RollChance(Pct)) {
+                        Player.ModifyCooldown(Shiv, -2000)
+                    }
+                }
+
+                if (Player.HasAura(Swashbuckling) && Spent >= 5) {
+                    Player.CastSpell(Player, SwashCDR, true)
                 }
             }
 
