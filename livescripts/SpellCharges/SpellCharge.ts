@@ -61,7 +61,9 @@ export class SpellChargeHandler {
     }
 
     public NewCharge(Player: TSPlayer, Spell: uint32) : CharacterSpellChargeInfo {
+        console.log(Spell, '\n')
         let Base = wSpellCharges[Spell]
+        console.log(Base, '\n')
         let Info = new CharacterSpellChargeInfo(Player, Spell, 0, Base.BaseCharges, Base.Cooldown)
         this.Calc(Player, Info)
         return Player.GetObject(`SpellCharge:${Spell}`, Info)
@@ -177,14 +179,16 @@ export function HandleSpellCharge(events: TSEvents) {
             if (SpellId == BrainFreeze)
                 ChargedSpell = Flurry
 
-            if (SpellId > 0) {
+            if (ChargedSpell > 0) {
                 let Caster = App.GetTarget().ToPlayer()
-                let ChargeInfo = Caster.GetObject(`SpellCharge:${SpellId}`, ChargeMgr.NewCharge(Caster, SpellId))
-                if (ChargeInfo.Current < ChargeInfo.Max) {
-                    ChargeInfo.Current += 1
-                    ChargeMgr.Save(Caster, ChargeInfo)
-                    let BaseChargeData = wSpellCharges[ChargedSpell]
-                    StartCD(Caster, BaseChargeData)
+                if (Caster.HasSpell(ChargedSpell)) {
+                    let ChargeInfo = Caster.GetObject(`SpellCharge:${ChargedSpell}`, ChargeMgr.NewCharge(Caster, ChargedSpell))
+                    if (ChargeInfo.Current < ChargeInfo.Max) {
+                        ChargeInfo.Current += 1
+                        ChargeMgr.Save(Caster, ChargeInfo)
+                        let BaseChargeData = wSpellCharges[ChargedSpell]
+                        StartCD(Caster, BaseChargeData)
+                    }
                 }
             }
         }
