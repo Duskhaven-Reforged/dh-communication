@@ -2,8 +2,8 @@ import { ClientCallbackOperations } from "../../shared/Messages"
 import { RequiresSoulShard, RequiresSoulShard2 } from "../../shared/Shared"
 
 let Soulfire = GetID(`Spell`, `dh-spells`, `warl-des-soulfire`)
-let SoulShard = GetID(`Spell`, `dh-spells`, `warl-gen-soul-shard-aura`)
-let SufferAndPerishBuff = GetID('Spell', 'dh-spells', 'warl-dem-suffer-and-perish-buff')
+let SoulShard = GetID(`Spell`, `dh-spells`, `warl-gen-soulshardaura`)
+let SufferAndPerishBuff = GetID('Spell', 'dh-spells', 'warl-dem-sufferandperishbuff')
 
 export function SoulShards(events: TSEvents) {
     events.Player.OnLogin((Player) => {
