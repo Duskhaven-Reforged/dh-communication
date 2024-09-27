@@ -9,8 +9,8 @@ export function ReloadBalDruidTree() {
     SetSpecAutolearn(CLASS, TAB, 16, GetID(`Spell`, `dh-spells`, `dru-bal-primalspellcaster`))
     SetSpecAutolearn(CLASS, TAB, 26, GetID(`Spell`, `dh-spells`, `dru-bal-childofelune`))
     SetSpecAutolearn(CLASS, TAB, 10, GetID(`Spell`, `dh-spells`, `dru-bal-astralempowerment`))
-    SetSpecAutolearn(CLASS, TAB, 10, GetID(`Spell`, `dh-spells`, `dru-bal-solareclipse`))
-    SetSpecAutolearn(CLASS, TAB, 10, GetID(`Spell`, `dh-spells`, `dru-bal-lunareclipse`))
+    SetSpecAutolearn(CLASS, TAB, 10, GetID(`Spell`, `dh-spells`, `dru-bal-mastery1`))
+    SetSpecAutolearn(CLASS, TAB, 10, GetID(`Spell`, `dh-spells`, `dru-bal-mastery2`))
 
     QueryWorld(`Delete from forge_talents where talentTabId = ${TAB}`)
     QueryWorld(`Delete from forge_talent_prereq where talentTabId = ${TAB}`)

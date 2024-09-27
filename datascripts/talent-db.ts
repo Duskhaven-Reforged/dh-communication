@@ -2,6 +2,65 @@ import { std } from "wow/wotlk";
 let RebuildWorld = true
 
 if (RebuildWorld) {
+
+    std.SQL.Databases.world_dest.writeEarly(`
+    SET @RANGE                 := 3;
+SET @SARONITE_GUID         := 2136907;
+SET @SARONITE_RICH_GUID    := @SARONITE_GUID + @RANGE;
+SET @TITANIUM_GUID         := @SARONITE_RICH_GUID + @RANGE;
+SET @POOL                  := 70000;
+SET @LASTGUID              := 9;
+SET @CHANCE1               := 75;
+SET @CHANCE2               := 15;
+SET @CHANCE3               := 10;
+SET @MOTHER                := 70100;
+SET @ACTIVE                := 2;  -- Max number of active spawns
+SET @TIMER                 := 7;  -- Respawn timer in seconds
+SET @SARONITE_ENTRY        := 189980;
+SET @SARONITE_RICH_ENTRY   := 189981;
+SET @TITANIUM_ENTRY        := 191133;
+
+DELETE FROM \`gameobject\` WHERE \`guid\` BETWEEN @SARONITE_GUID AND @SARONITE_GUID+@LASTGUID;
+INSERT INTO \`gameobject\` (\`guid\`, \`id\`, \`map\`, \`zoneId\`, \`areaId\`, \`spawnMask\`, \`phaseMask\`, \`position_x\`, \`position_y\`, \`position_z\`, \`orientation\`, \`rotation0\`, \`rotation1\`, \`rotation2\`, \`rotation3\`, \`spawntimesecs\`, \`animprogress\`, \`state\`, \`ScriptName\`, \`VerifiedBuild\`) VALUES
+(@SARONITE_GUID+0,@SARONITE_ENTRY,'13','0','0','1','1','-0.302505','-8.91162','-144.709','3.14247','-0','-0','-1','0.000438495',@TIMER,'255','1','','0'),
+(@SARONITE_RICH_GUID+0,@SARONITE_RICH_ENTRY,'13','0','0','1','1','-0.302505','-8.91162','-144.709','3.14247','-0','-0','-1','0.000438495',@TIMER,'255','1','','0'),
+(@TITANIUM_GUID+0,@TITANIUM_ENTRY,'13','0','0','1','1','-0.302505','-8.91162','-144.709','3.14247','-0','-0','-1','0.000438495',@TIMER,'255','1','','0'),
+(@SARONITE_GUID+1,@SARONITE_ENTRY,'13','0','0','1','1','-0.310905','0.666893','-144.709','3.14247','-0','-0','-1','0.000438495',@TIMER,'255','1','','0'),
+(@SARONITE_RICH_GUID+1,@SARONITE_RICH_ENTRY,'13','0','0','1','1','-0.310905','0.666893','-144.709','3.14247','-0','-0','-1','0.000438495',@TIMER,'255','1','','0'),
+(@TITANIUM_GUID+1,@TITANIUM_ENTRY,'13','0','0','1','1','-0.310905','0.666893','-144.709','3.14247','-0','-0','-1','0.000438495',@TIMER,'255','1','','0'),
+(@SARONITE_GUID+2,@SARONITE_ENTRY,'13','0','0','1','1','-0.318529','9.36089','-144.709','3.14247','-0','-0','-1','0.000438495',@TIMER,'255','1','','0'),
+(@SARONITE_RICH_GUID+2,@SARONITE_RICH_ENTRY,'13','0','0','1','1','-0.318529','9.36089','-144.709','3.14247','-0','-0','-1','0.000438495',@TIMER,'255','1','','0'),
+(@TITANIUM_GUID+2,@TITANIUM_ENTRY,'13','0','0','1','1','-0.318529','9.36089','-144.709','3.14247','-0','-0','-1','0.000438495',@TIMER,'255','1','','0');
+
+DELETE FROM \`pool_members\` WHERE \`spawnId\` BETWEEN @SARONITE_GUID+0 AND @SARONITE_GUID+@LASTGUID AND \`type\`=1;
+INSERT INTO \`pool_members\` (\`type\`, \`spawnId\`, \`poolSpawnId\`, \`chance\`,\`description\`) VALUES
+(1,@SARONITE_GUID+0,@POOL+0,@CHANCE1,'test'),
+(1,@SARONITE_RICH_GUID+0,@POOL+0,@CHANCE2,'test'),
+(1,@TITANIUM_GUID+0,@POOL+0,@CHANCE3,'test'),
+(1,@SARONITE_GUID+1,@POOL+1,@CHANCE1,'test'),
+(1,@SARONITE_RICH_GUID+1,@POOL+1,@CHANCE2,'test'),
+(1,@TITANIUM_GUID+1,@POOL+1,@CHANCE3,'test'),
+(1,@SARONITE_GUID+2,@POOL+2,@CHANCE1,'test'),
+(1,@SARONITE_RICH_GUID+2,@POOL+2,@CHANCE2,'test'),
+(1,@TITANIUM_GUID+2,@POOL+2,@CHANCE3,'test');
+
+DELETE FROM \`pool_template\` WHERE \`entry\` BETWEEN @POOL+0 AND @POOL+3;
+INSERT INTO \`pool_template\` (\`entry\`, \`max_limit\`, \`description\`) VALUES
+(@POOL+0,1,'test'),
+(@POOL+1,1,'test'),
+(@POOL+2,1,'test');
+
+DELETE FROM \`pool_template\` WHERE \`entry\`=@MOTHER;
+INSERT INTO \`pool_template\` (\`entry\`, \`max_limit\`, \`description\`) VALUES
+(@MOTHER,@ACTIVE,'test');
+
+DELETE FROM \`pool_members\` WHERE \`spawnId\` BETWEEN @POOL+0 AND @POOL+3 AND \`type\`=2;
+INSERT INTO \`pool_members\` (\`type\`, \`spawnId\`, \`poolSpawnId\`, \`chance\`,\`description\`) VALUES
+(2,@POOL+0,@MOTHER,0,'test'),
+(2,@POOL+1,@MOTHER,0,'test'),
+(2,@POOL+2,@MOTHER,0,'test');
+    `)
+
     std.SQL.Databases.world_dest.writeEarly(`
         DROP TABLE IF EXISTS \`forge_talent_tabs\`;
         CREATE TABLE IF NOT EXISTS \`forge_talent_tabs\` (
