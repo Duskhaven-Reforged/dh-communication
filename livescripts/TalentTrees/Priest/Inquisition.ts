@@ -1,6 +1,6 @@
 import { EmptyPrereqs, EmptySpellArray, SetChoiceNode, SetSpecAutolearn, SetTalentNode, SpecTabs } from "../TalentTreeLoader"
 
-export function ReloadHPriestTree() {
+export function ReloadInqPriestTree() {
     let TAB: uint32 = SpecTabs.INQU
     let CLASS = Class.PRIEST
 
