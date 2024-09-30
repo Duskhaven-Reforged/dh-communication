@@ -25,7 +25,7 @@ export function SoulShards(events: TSEvents) {
         }
     })
 
-    events.Spell.OnCheckCast(RequiresSoulShard, (Spell, Result) => {
+    events.Spell.OnCheckCast(RequiresSoulShard, (Spell, Result, CustomError) => {
         if (Spell.GetCaster() == null)
             return
         
@@ -33,8 +33,10 @@ export function SoulShards(events: TSEvents) {
             let Player = Spell.GetCaster().ToPlayer()
             if (Spell.GetEntry() === Soulfire && Player.HasAura(SufferAndPerishBuff))
                 Result.set(255)
-            else
+            else {
                 Result.set(Player.GetUInt(`SoulShards`, 0) > 0 ? 255 : 172)
+                CustomError.set(69)
+            }
         }    
     })
 
