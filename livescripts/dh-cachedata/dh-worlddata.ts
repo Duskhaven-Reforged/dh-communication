@@ -15,6 +15,11 @@ import { ReloadPalHolyTree } from "../TalentTrees/Paladin/Holy"
 import { ReloadPalProtTree } from "../TalentTrees/Paladin/Protection"
 import { ReloadPalRetTree } from "../TalentTrees/Paladin/Retribution"
 import { ReloadPalTree } from "../TalentTrees/Paladin/paladin"
+import { ReloadDiscPriestTree } from "../TalentTrees/Priest/Discipline"
+import { ReloadHPriestTree } from "../TalentTrees/Priest/Holy"
+import { ReloadInqPriestTree } from "../TalentTrees/Priest/Inquisition"
+import { ReloadShaPriestTree } from "../TalentTrees/Priest/Shadow"
+import { ReloadPriestTree } from "../TalentTrees/Priest/priest"
 import { ReloadRogueAssTree } from "../TalentTrees/Rogue/Assassination"
 import { ReloadRogueCorsairTree } from "../TalentTrees/Rogue/Corsair"
 import { ReloadRogueSubTree } from "../TalentTrees/Rogue/Subtlety"
@@ -105,7 +110,13 @@ export function RefillTrees(ClassMask: uint32) {
         ReloadRogueCorsairTree()
         ReloadRogueSubTree()
     }
-    if (ClassMask & (1 << Class.PRIEST)) {}
+    if (ClassMask & (1 << Class.PRIEST)) {
+        ReloadPriestTree()
+        ReloadDiscPriestTree()
+        ReloadHPriestTree()
+        ReloadInqPriestTree()
+        ReloadShaPriestTree()
+    }
     if (ClassMask & (1 << Class.DEATH_KNIGHT)) {
         ReloadDKTree()
         ReloadDKBloodTree()
