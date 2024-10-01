@@ -25,6 +25,7 @@ export let wSpellCharges : TSDictionary<uint32, SpellChargeInfo> = CreateDiction
     [GetID(`Spell`, `dh-spells`, `sha-gen-lavaburst`)]: new SpellChargeInfo(GetID(`Spell`, `dh-spells`, `sha-gen-lavaburst`), 0, 2, 8000),
     [GetID(`Spell`, `dh-spells`, `hun-gen-killcommand`)]: new SpellChargeInfo(GetID(`Spell`, `dh-spells`, `hun-gen-killcommand`), 0, 2, 10000),
     [GetID(`Spell`, `dh-spells`, `hun-bm-barbedshot`)]: new SpellChargeInfo(GetID(`Spell`, `dh-spells`, `hun-bm-barbedshot`), 0, 2, 8000),
+    [GetID(`Spell`, `dh-spells`, `hun-mm-trueshottechnique`)]: new SpellChargeInfo(GetID(`Spell`, `dh-spells`, `hun-mm-trueshottechnique`), 0, 2, 40000),
 })
 
 export class CharacterSpellChargeInfo extends TSClass {
@@ -121,6 +122,8 @@ export let ModChargeMax : TSArray<uint32> = TAG(`dh-spells`, 'modify-base-charge
 let BrainFreeze = GetID(`Spell`, `dh-spells`, `mag-fro-brainfreezeamp`)
 let Flurry = GetID(`Spell`, `dh-spells`, `mag-fro-flurry`)
 let SpellChargeDurationRefunds : TSArray<uint32> = TAG(`dh-spells`, `charge-duration-refund`)
+let KC = GetID(`Spell`, `dh-spells`, `hun-gen-killcommand`)
+let serialkiller = GetID(`Spell`, 'dh-spells', 'hun-bm-serialkiller')
 export function HandleSpellCharge(events: TSEvents) {
     events.Player.OnLogin((Player) => {
         if (!ChargeMgr.Load(Player)) {
@@ -259,6 +262,20 @@ export function HandleSpellCharge(events: TSEvents) {
                 ChargeMgr.Save(Player, ChargeInfo)
                 StartCD(Player, wSpellCharges[ChargeSpell])
             }
+        }
+    })
+
+    events.Player.OnCustomScriptedDamageDoneMod((Player, Against, SpellInfo, T, DoneTotal) => {
+        let Entry = SpellInfo.GetEntry()
+        let TotalBonus = 0
+        if (SpellsWithCharges.includes(Entry)) {
+            if (Entry == KC && Player.HasAura(serialkiller)) {
+                let ChargeInfo = Player.GetObject(`SpellCharge:${Entry}`, ChargeMgr.NewCharge(Player, Entry))
+                if (ChargeInfo.Current < ChargeInfo.Max)
+                    TotalBonus += Player.GetAura(serialkiller).GetEffect(0).GetAmount()
+            }
+
+            DoneTotal.set(DoneTotal.get() + (TotalBonus/100))
         }
     })
 }
