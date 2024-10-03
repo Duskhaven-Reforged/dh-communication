@@ -5,9 +5,38 @@ export function ReloadInqPriestTree() {
     let CLASS = Class.PRIEST
 
     QueryWorld(`delete from character_spec_autolearn where \`class\` = ${CLASS} and \`spec\` = ${TAB}`)
+    //SetSpecAutolearn(CLASS, TAB, 10, GetID(`Spell`, 'dh-spells', 'pri-inq-mastery'))
+    SetSpecAutolearn(CLASS, TAB, 10, GetID(`Spell`, 'dh-spells', 'pri-inq-wrathofthecrusade'))
+    SetSpecAutolearn(CLASS, TAB, 10, GetID(`Spell`, 'dh-spells', 'pri-inq-powerwordpunishment'))
+    SetSpecAutolearn(CLASS, TAB, 10, GetID(`Spell`, 'dh-spells', 'pri-inq-scarletwrath'))
+    SetSpecAutolearn(CLASS, TAB, 16, GetID(`Spell`, 'dh-spells', 'pri-inq-blindedbylight'))
 
     QueryWorld(`Delete from forge_talents where talentTabId = ${TAB}`)
     QueryWorld(`Delete from forge_talent_prereq where talentTabId = ${TAB}`)
     QueryWorld(`Delete from forge_talent_ranks where talentTabId = ${TAB}`)
     QueryWorld(`Delete from forge_talent_unlearn where talentTabId = ${TAB}`)
+
+    let Talent : uint32 = GetID(`Spell`, `dh-spells`, `pri-inq-zealotskin`)
+    SetTalentNode(Talent, TAB, 6, 1, 0, false, 2**(TAB-1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
+
+    Talent = GetID(`Spell`, `dh-spells`, `pri-inq-handoftheempyreal`)
+    SetTalentNode(Talent, TAB, 6, 2, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `pri-inq-zealotskin`)]: 1}), EmptySpellArray, EmptySpellArray)
+
+    Talent = GetID(`Spell`, `dh-spells`, `pri-inq-viciouscycle`)
+    SetTalentNode(Talent, TAB, 5, 3, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `pri-inq-handoftheempyreal`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, `dh-spells`, `pri-inq-scarletblaze`)
+    SetTalentNode(Talent, TAB, 6, 3, 0, false, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `pri-inq-handoftheempyreal`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, `dh-spells`, `pri-inq-sinnersflame`)
+    SetTalentNode(Talent, TAB, 7, 3, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `pri-inq-handoftheempyreal`)]: 1}), EmptySpellArray, EmptySpellArray)
+
+    Talent = GetID(`Spell`, `dh-spells`, `pri-inq-powerwordretribution`)
+    SetTalentNode(Talent, TAB, 3, 4, 0, false, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `pri-inq-zealotskin`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, `dh-spells`, `pri-inq-holyblaze`)
+    SetTalentNode(Talent, TAB, 5, 4, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `pri-inq-viciouscycle`)]: 1, [GetID(`Spell`, `dh-spells`, `pri-inq-scarletblaze`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, `dh-spells`, `pri-inq-embersremain`)
+    SetTalentNode(Talent, TAB, 6, 4, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `pri-inq-scarletblaze`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, `dh-spells`, `pri-inq-blindfaith`)
+    SetTalentNode(Talent, TAB, 7, 4, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `pri-inq-scarletblaze`)]: 1, [GetID(`Spell`, `dh-spells`, `pri-inq-sinnersflame`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, `dh-spells`, `pri-inq-punisher`)
+    SetTalentNode(Talent, TAB, 9, 4, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `pri-inq-zealotskin`)]: 1}), EmptySpellArray, EmptySpellArray)
 }
