@@ -320,7 +320,7 @@ class DefaultTalentStrings {
 
         let Specs: TSDictionary<uint32, TSArray<uint32>> = CreateDictionary<uint32, TSArray<uint32>>({
             51 : CreateArray<uint32>([1, 2, 3]),  52 : CreateArray<uint32>([4, 5, 6]),  53 : CreateArray<uint32>([7, 8, 9]),  54 : CreateArray<uint32>([10, 11, 12]), 
-            55 : CreateArray<uint32>([13, 14, 15]), 56 : CreateArray<uint32>([16, 17, 18]),  57 : CreateArray<uint32>([19, 20, 21, 32]),  58 : CreateArray<uint32>([22, 23, 24]), 
+            55 : CreateArray<uint32>([13, 14, 15, 33]), 56 : CreateArray<uint32>([16, 17, 18]), 57 : CreateArray<uint32>([19, 20, 21, 32]),  58 : CreateArray<uint32>([22, 23, 24]), 
             59 : CreateArray<uint32>([25, 26, 27]), 60 : CreateArray<uint32>([]),61 : CreateArray<uint32>([28, 29, 30, 31]), 62 : CreateArray<uint32>([]), 
             63 : CreateArray<uint32>([]), 64 : CreateArray<uint32>([])
         })

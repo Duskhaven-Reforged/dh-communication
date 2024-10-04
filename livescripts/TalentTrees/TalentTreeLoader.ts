@@ -7,7 +7,7 @@ export function SetTalentNode( id: uint32, Tab: uint8, Col: uint8, Row: uint8, P
         TalentType = 7
 
     let SpecTabs: TSArray<number> = [
-        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 38, 
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 33, 16, 17, 18, 38, 
         21, 32, 19, 20, 23, 24, 22, 25, 26, 27, 30, 31, 28, 29
     ]
     if (TalentType === 0 && !SpecTabs.includes(Tab)) {
@@ -51,7 +51,7 @@ export function SetChoiceNode( id: uint32, Tab: uint8, Col: uint8, Row: uint8, P
         TalentType = 7
 
     let SpecTabs: TSArray<number> = [
-        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 38, 
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 33, 16, 17, 18, 38, 
         21, 32, 19, 20, 23, 24, 22, 25, 26, 27, 30, 31, 28, 29
     ]
     if (TalentType === 0 && !SpecTabs.includes(Tab)) {
