@@ -23,6 +23,7 @@ export let wSpellCharges : TSDictionary<uint32, SpellChargeInfo> = CreateDiction
     [GetID(`Spell`, `dh-spells`, `warr-gen-shieldblock`)]: new SpellChargeInfo(GetID(`Spell`, `dh-spells`, `warr-gen-shieldblock`), 0, 1, 40000),
     [GetID(`Spell`, `dh-spells`, `pal-ret-divinestorm`)]: new SpellChargeInfo(GetID(`Spell`, `dh-spells`, `pal-ret-divinestorm`), 0, 1, 10000),
     [GetID(`Spell`, `dh-spells`, `pri-gen-mindblast`)]: new SpellChargeInfo(GetID(`Spell`, `dh-spells`, `pri-gen-mindblast`), 0, 2, 9000),
+    [GetID(`Spell`, `dh-spells`, `pri-gen-angelicfeathers`)]: new SpellChargeInfo(GetID(`Spell`, `dh-spells`, `pri-gen-angelicfeathers`), 0, 3, 20000),
     [GetID(`Spell`, `dh-spells`, `sha-gen-lavaburst`)]: new SpellChargeInfo(GetID(`Spell`, `dh-spells`, `sha-gen-lavaburst`), 0, 2, 8000),
     [GetID(`Spell`, `dh-spells`, `hun-gen-killcommand`)]: new SpellChargeInfo(GetID(`Spell`, `dh-spells`, `hun-gen-killcommand`), 0, 2, 10000),
     [GetID(`Spell`, `dh-spells`, `hun-bm-barbedshot`)]: new SpellChargeInfo(GetID(`Spell`, `dh-spells`, `hun-bm-barbedshot`), 0, 2, 8000),
