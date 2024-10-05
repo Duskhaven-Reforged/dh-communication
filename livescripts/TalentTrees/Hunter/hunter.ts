@@ -1,10 +1,74 @@
-import { EmptyPrereqs, EmptySpellArray, SetChoiceNode, SetTalentNode } from "../TalentTreeLoader"
+import { EmptyPrereqs, EmptySpellArray, SetChoiceNode, SetTalentNode, SpecTabs } from "../TalentTreeLoader"
 
 export function ReloadHunterTree() {
     let TAB = 53
+    let ALLMASK = 2**(SpecTabs.SVHU - 1) + 2**(SpecTabs.MMHU - 1) + 2**(SpecTabs.BMHU - 1)
 
     QueryWorld(`Delete from forge_talents where talentTabId = ${TAB}`)
     QueryWorld(`Delete from forge_talent_prereq where talentTabId = ${TAB}`)
     QueryWorld(`Delete from forge_talent_ranks where talentTabId = ${TAB}`)
     QueryWorld(`Delete from forge_talent_unlearn where talentTabId = ${TAB}`)
+
+    let Talent : uint32 = GetID(`Spell`, `dh-spells`, `hun-gen-killshot`)
+    SetTalentNode(Talent, TAB, 6, 1, 0, false, ALLMASK, CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
+
+    Talent = GetID(`Spell`, 'dh-spells', 'hun-gen-leadbyexample')
+    SetTalentNode(Talent, TAB, 5, 2, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `hun-gen-killshot`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, 'dh-spells', 'hun-gen-loveofthehunt')
+    SetTalentNode(Talent, TAB, 6, 2, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `hun-gen-killshot`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, 'dh-spells', 'hun-gen-razorsharp')
+    SetTalentNode(Talent, TAB, 7, 2, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `hun-gen-killshot`)]: 1}), EmptySpellArray, EmptySpellArray)
+ 
+    Talent = GetID(`Spell`, 'dh-spells', 'hun-gen-trailblazer')
+    SetTalentNode(Talent, TAB, 5, 3, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `hun-gen-leadbyexample`)]: 1, [GetID(`Spell`, `dh-spells`, `hun-gen-loveofthehunt`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, 'dh-spells', 'hun-gen-hydrasting')
+    SetTalentNode(Talent, TAB, 6, 3, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `hun-gen-loveofthehunt`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, 'dh-spells', 'hun-gen-practicedfocus')
+    SetTalentNode(Talent, TAB, 7, 3, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `hun-gen-loveofthehunt`)]: 1, [GetID(`Spell`, `dh-spells`, `hun-gen-razorsharp`)]: 1}), EmptySpellArray, EmptySpellArray)
+
+    Talent = GetID(`Spell`, 'dh-spells', 'hun-gen-trainedpredator')
+    SetTalentNode(Talent, TAB, 3, 4, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `hun-gen-leadbyexample`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, 'dh-spells', 'hun-gen-veterinarymedicine')
+    SetTalentNode(Talent, TAB, 5, 4, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `hun-gen-trailblazer`)]: 1, [GetID(`Spell`, `dh-spells`, `hun-gen-hydrasting`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, 'dh-spells', 'hun-gen-playingtothecrowd')
+    SetTalentNode(Talent, TAB, 7, 4, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `hun-gen-hydrasting`)]: 1, [GetID(`Spell`, `dh-spells`, `hun-gen-practicedfocus`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, 'dh-spells', 'hun-gen-glaivedanger')
+    SetTalentNode(Talent, TAB, 9, 4, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `hun-gen-razorsharp`)]: 1}), EmptySpellArray, EmptySpellArray)
+    
+    Talent = GetID(`Spell`, 'dh-spells', 'hun-gen-caninediscipline')
+    SetTalentNode(Talent, TAB, 3, 5, 8, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `hun-gen-trainedpredator`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, 'dh-spells', 'hun-gen-prideofthehunter')
+    SetTalentNode(Talent, TAB, 4, 5, 8, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `hun-gen-trainedpredator`)]: 1, [GetID(`Spell`, `dh-spells`, `hun-gen-veterinarymedicine`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, 'dh-spells', 'hun-gen-felineswiftness')
+    SetTalentNode(Talent, TAB, 5, 5, 8, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `hun-gen-veterinarymedicine`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, 'dh-spells', 'hun-gen-countershot')
+    SetTalentNode(Talent, TAB, 6, 5, 8, false, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `hun-gen-veterinarymedicine`)]: 1, [GetID(`Spell`, `dh-spells`, `hun-gen-hydrasting`)]: 1, [GetID(`Spell`, `dh-spells`, `hun-gen-playingtothecrowd`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, 'dh-spells', 'hun-gen-quicksetup')
+    SetTalentNode(Talent, TAB, 7, 5, 8, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `hun-gen-playingtothecrowd`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, 'dh-spells', 'hun-gen-likefishinabarrel')
+    SetTalentNode(Talent, TAB, 8, 5, 8, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `hun-gen-playingtothecrowd`)]: 1, [GetID(`Spell`, `dh-spells`, `hun-gen-glaivedanger`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, 'dh-spells', 'hun-gen-sentinelstechnique')
+    SetTalentNode(Talent, TAB, 9, 5, 8, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `hun-gen-glaivedanger`)]: 1}), EmptySpellArray, EmptySpellArray)
+
+    Talent = GetID(`Spell`, 'dh-spells', 'hun-gen-refocus')
+    SetTalentNode(Talent, TAB, 4, 6, 8, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `hun-gen-caninediscipline`)]: 1, [GetID(`Spell`, `dh-spells`, `hun-gen-prideofthehunter`)]: 1, [GetID(`Spell`, `dh-spells`, `hun-gen-felineswiftness`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, 'dh-spells', 'hun-gen-frostshot')
+    SetTalentNode(Talent, TAB, 5, 6, 8, false, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `hun-gen-felineswiftness`)]: 1, [GetID(`Spell`, `dh-spells`, `hun-gen-countershot`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, 'dh-spells', 'hun-gen-scattershot')
+    SetTalentNode(Talent, TAB, 6, 6, 8, false, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `hun-gen-countershot`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, 'dh-spells', 'hun-gen-lassoshot')
+    SetTalentNode(Talent, TAB, 7, 6, 8, false, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `hun-gen-countershot`)]: 1, [GetID(`Spell`, `dh-spells`, `hun-gen-quicksetup`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, 'dh-spells', 'hun-gen-onthehunt')
+    SetTalentNode(Talent, TAB, 8, 6, 8, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `hun-gen-quicksetup`)]: 1, [GetID(`Spell`, `dh-spells`, `hun-gen-likefishinabarrel`)]: 1, [GetID(`Spell`, `dh-spells`, `hun-gen-sentinelstechnique`)]: 1}), EmptySpellArray, EmptySpellArray)
+
+    Talent = GetID(`Spell`, 'dh-spells', 'hun-gen-trainingexpert1')
+    SetTalentNode(Talent, TAB, 3, 7, 8, true, 0, CreateArray<uint32>([Talent, GetID(`Spell`, 'dh-spells', 'hun-gen-trainingexpert2')]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `hun-gen-caninediscipline`)]: 1, [GetID(`Spell`, `dh-spells`, `hun-gen-refocus`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, 'dh-spells', 'hun-gen-swiftstrikes')
+    SetTalentNode(Talent, TAB, 4, 7, 8, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `hun-gen-refocus`)]: 1, [GetID(`Spell`, `dh-spells`, `hun-gen-frostshot`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, 'dh-spells', 'hun-gen-headshots')
+    SetTalentNode(Talent, TAB, 6, 7, 8, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `hun-gen-frostshot`)]: 1, [GetID(`Spell`, `dh-spells`, `hun-gen-scattershot`)]: 1, [GetID(`Spell`, `dh-spells`, `hun-gen-lassoshot`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, 'dh-spells', 'hun-gen-frugaltrapper')
+    SetTalentNode(Talent, TAB, 8, 7, 8, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `hun-gen-lassoshot`)]: 1, [GetID(`Spell`, `dh-spells`, `hun-gen-onthehunt`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, 'dh-spells', 'hun-gen-lethalcapture1')
+    SetTalentNode(Talent, TAB, 9, 7, 8, true, 0, CreateArray<uint32>([Talent, GetID(`Spell`, 'dh-spells', 'hun-gen-lethalcapture2')]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `hun-gen-onthehunt`)]: 1, [GetID(`Spell`, `dh-spells`, `hun-gen-sentinelstechnique`)]: 1}), EmptySpellArray, EmptySpellArray)
 }

@@ -7,6 +7,10 @@ import { ReloadFeralDruidTree } from "../TalentTrees/Druid/Feral"
 import { ReloadGuardDruidTree } from "../TalentTrees/Druid/Guardian"
 import { ReloadRestoDruidTree } from "../TalentTrees/Druid/Restoration"
 import { ReloadDruidTree } from "../TalentTrees/Druid/druid"
+import { ReloadBMTree } from "../TalentTrees/Hunter/BeastMastery"
+import { ReloadMMTree } from "../TalentTrees/Hunter/Marksman"
+import { ReloadSVTree } from "../TalentTrees/Hunter/Survival"
+import { ReloadHunterTree } from "../TalentTrees/Hunter/hunter"
 import { ReloadMageArcaneTree } from "../TalentTrees/Mage/Arcane"
 import { ReloadMageFireTree } from "../TalentTrees/Mage/Fire"
 import { ReloadMageFrostTree } from "../TalentTrees/Mage/Frost"
@@ -103,7 +107,12 @@ export function RefillTrees(ClassMask: uint32) {
         ReloadPalProtTree()
         ReloadPalRetTree()
     }
-    if (ClassMask & (1 << Class.HUNTER)) {}
+    if (ClassMask & (1 << Class.HUNTER)) {
+        ReloadHunterTree()
+        ReloadBMTree()
+        ReloadMMTree()
+        ReloadSVTree()
+    }
     if (ClassMask & (1 << Class.ROGUE)) {
         ReloadRogueTree()
         ReloadRogueAssTree()
