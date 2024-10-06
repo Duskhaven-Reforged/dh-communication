@@ -59,7 +59,6 @@ export class SpellChargeHandler {
             let Current: uint8 = res.GetUInt8(2)
             let Max: uint8 = res.GetUInt8(3)
             let CD: uint32 = res.GetUInt32(4)
-            console.log(`${Spell} ${Current} ${Max} ${CD}\n`)
 
             let Info = new CharacterSpellChargeInfo(Player, Spell, Current, Max, CD)
             Found = true
@@ -132,9 +131,11 @@ export function HandleSpellCharge(events: TSEvents) {
     events.Player.OnLogin((Player) => {
         if (!ChargeMgr.Load(Player)) {
             SpellsWithCharges.forEach((Spell) => {
-                let Base = wSpellCharges[Spell]
-                let Charge = new CharacterSpellChargeInfo(Player, Spell, 0, Base.BaseCharges, Base.Cooldown)
-                Player.SetObject(`SpellCharge:${Spell}`, Charge)
+                if (Player.HasSpell(Spell)) {
+                    let Base = wSpellCharges[Spell]
+                    let Charge = new CharacterSpellChargeInfo(Player, Spell, 0, Base.BaseCharges, Base.Cooldown)
+                    Player.SetObject(`SpellCharge:${Spell}`, Charge)
+                }
             })
         }
         SpellsWithCharges.forEach((Spell) => {
