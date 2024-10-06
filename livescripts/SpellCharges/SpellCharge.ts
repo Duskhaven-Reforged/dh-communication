@@ -58,6 +58,7 @@ export class SpellChargeHandler {
             let Current: uint8 = res.GetUInt8(2)
             let Max: uint8 = res.GetUInt8(3)
             let CD: uint32 = res.GetUInt32(4)
+            console.log(`${Spell} ${Current} ${Max} ${CD}\n`)
 
             let Info = new CharacterSpellChargeInfo(Player, Spell, Current, Max, CD)
             Found = true
