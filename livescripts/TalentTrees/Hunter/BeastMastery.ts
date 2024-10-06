@@ -81,4 +81,5 @@ export function ReloadBMTree() {
     SetTalentNode(Talent, TAB, 7, 7, 8, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `hun-bm-armyofthewild`)]: 1, [GetID(`Spell`, `dh-spells`, `hun-bm-killersetup`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, 'dh-spells', 'hun-bm-avatarofthefalcon')
     SetTalentNode(Talent, TAB, 10, 7, 8, false, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `hun-bm-seekprey`)]: 1, [GetID(`Spell`, `dh-spells`, `hun-bm-rendingclaws`)]: 1}), EmptySpellArray, EmptySpellArray)
+
 }
