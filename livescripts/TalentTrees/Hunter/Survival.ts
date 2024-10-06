@@ -5,7 +5,7 @@ export function ReloadSVTree() {
     let CLASS = Class.HUNTER
 
     QueryWorld(`delete from character_spec_autolearn where \`class\` = ${CLASS} and \`spec\` = ${TAB}`)
-    SetSpecAutolearn(CLASS, TAB, 10, GetID(`Spell`, 'dh-spells', 'hun-sur-wildhunt'))
+    SetSpecAutolearn(CLASS, TAB, 10, GetID(`Spell`, 'dh-spells', 'hun-mm-wildhunt'))
     SetSpecAutolearn(CLASS, TAB, 10, GetID(`Spell`, 'dh-spells', 'hun-sur-upcloseandpersonal'))
 
     QueryWorld(`Delete from forge_talents where talentTabId = ${TAB}`)
