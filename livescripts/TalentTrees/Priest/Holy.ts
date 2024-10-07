@@ -15,4 +15,28 @@ export function ReloadHPriestTree() {
     QueryWorld(`Delete from forge_talent_prereq where talentTabId = ${TAB}`)
     QueryWorld(`Delete from forge_talent_ranks where talentTabId = ${TAB}`)
     QueryWorld(`Delete from forge_talent_unlearn where talentTabId = ${TAB}`)
+
+    let Talent : uint32 = GetID(`Spell`, `dh-spells`, `pri-holy-holyform`)
+    SetTalentNode(Talent, TAB, 6, 1, 0, false, 2**(TAB-1), CreateArray<uint32>([Talent]), EmptyPrereqs, EmptySpellArray, EmptySpellArray)
+
+    Talent = GetID(`Spell`, `dh-spells`, `pri-holy-holywordsanctify`)
+    SetTalentNode(Talent, TAB, 5, 2, 0, false, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `pri-holy-holyform`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, `dh-spells`, `pri-holy-renew`)
+    SetTalentNode(Talent, TAB, 6, 2, 0, false, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `pri-holy-holyform`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, `dh-spells`, `pri-holy-holywordserenity`)
+    SetTalentNode(Talent, TAB, 7, 2, 0, false, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `pri-holy-holyform`)]: 1}), EmptySpellArray, EmptySpellArray)
+
+    Talent = GetID(`Spell`, `dh-spells`, `pri-holy-sanctifiedsalvation`)
+    SetTalentNode(Talent, TAB, 4, 3, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `pri-holy-holywordsanctify`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, `dh-spells`, `pri-holy-circleofhealing`)
+    SetTalentNode(Talent, TAB, 5, 3, 0, false, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `pri-holy-renew`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, `dh-spells`, `pri-holy-handoftheempyreal`)
+    SetTalentNode(Talent, TAB, 6, 3, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `pri-holy-renew`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, `dh-spells`, `pri-holy-renewedfaith`)
+    SetTalentNode(Talent, TAB, 7, 3, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `pri-holy-renew`)]: 1}), EmptySpellArray, EmptySpellArray)
+    Talent = GetID(`Spell`, `dh-spells`, `pri-holy-miraculoussalvation`)
+    SetTalentNode(Talent, TAB, 8, 3, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `pri-holy-holywordserenity`)]: 1}), EmptySpellArray, EmptySpellArray)
+    
+    Talent = GetID(`Spell`, `dh-spells`, `pri-holy-cosmicripple`)
+    SetTalentNode(Talent, TAB, 6, 4, 0, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `pri-holy-circleofhealing`)]: 1, [GetID(`Spell`, `dh-spells`, `pri-holy-handoftheempyreal`)]: 1, [GetID(`Spell`, `dh-spells`, `pri-holy-renewedfaith`)]: 1}), EmptySpellArray, EmptySpellArray)
 }
