@@ -474,6 +474,7 @@ export class DHCache {
                             let info = GetSpellInfo(spell)
                             for (let eff = SpellEffIndex.EFFECT_0; eff <= SpellEffIndex.EFFECT_2; eff++) {
                                 let effect = info.GetEffect(eff)
+
                                 if (effect.GetType() === SpellEffects.LEARN_SPELL) {
                                     player.RemoveSpell(effect.GetTriggerSpell(), false, false)
                                 }

@@ -374,8 +374,6 @@ class CustomTalentPrereqs {
             let TalentTabId = res.GetUInt32(3)
             let RequiredRank = res.GetUInt32(4)
 
-            console.log(`${Talent} REQUIRES ${ReqSpellId} RANK ${RequiredRank} IN ${ReqSpellTab}\n`)
-
             let prereq = new DHTalentPrereq(TalentTabId, Talent, count, RequiredRank)
             if (wTalentTrees.contains(ReqSpellTab)) {
                 if (wTalentTrees[ReqSpellTab].Talents.contains(ReqSpellId)) {
