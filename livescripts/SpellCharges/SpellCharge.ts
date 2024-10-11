@@ -30,6 +30,7 @@ export let wSpellCharges : TSDictionary<uint32, SpellChargeInfo> = CreateDiction
     [GetID(`Spell`, `dh-spells`, `hun-mm-trueshottechnique`)]: new SpellChargeInfo(GetID(`Spell`, `dh-spells`, `hun-mm-trueshottechnique`), 0, 2, 40000),
     [GetID(`Spell`, `dh-spells`, `pri-inq-destroyevil`)]: new SpellChargeInfo(GetID(`Spell`, `dh-spells`, `pri-inq-destroyevil`), 0, 3, 10000),
     [GetID(`Spell`, `dh-spells`, `pri-sha-shadowcrash`)]: new SpellChargeInfo(GetID(`Spell`, `dh-spells`, `pri-sha-shadowcrash`), 0, 2, 30000),
+    [GetID(`Spell`, `dh-spells`, `pri-disc-painsuppression`)]: new SpellChargeInfo(GetID(`Spell`, `dh-spells`, `pri-disc-painsuppression`), 0, 2, 120000),
 })
 
 export class CharacterSpellChargeInfo extends TSClass {
