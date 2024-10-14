@@ -69,9 +69,7 @@ export class SpellChargeHandler {
     }
 
     public NewCharge(Player: TSPlayer, Spell: uint32) : CharacterSpellChargeInfo {
-        console.log(Spell, '\n')
         let Base = wSpellCharges[Spell]
-        console.log(Base, '\n')
         let Info = new CharacterSpellChargeInfo(Player, Spell, 0, Base.BaseCharges, Base.Cooldown)
         this.Calc(Player, Info)
         return Player.GetObject(`SpellCharge:${Spell}`, Info)
@@ -91,7 +89,6 @@ export class SpellChargeHandler {
     public Calc(Player: TSPlayer, Charge: CharacterSpellChargeInfo) {
         Charge.EffectiveCD = wSpellCharges[Charge.SpellId].Cooldown
         Charge.Max = wSpellCharges[Charge.SpellId].BaseCharges
-        console.log(Charge.SpellId, ' Learned with Charges \n')
         ModChargeCD.forEach((Spell) => {
             if (Player.HasAura(Spell)) {
                 let Info = GetSpellInfo(Spell).GetEffect(0).GetTriggerSpell()

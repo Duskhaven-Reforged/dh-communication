@@ -77,4 +77,5 @@ export function ReloadBalDruidTree() {
     SetTalentNode(Talent, TAB, 7, 7, 8, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `dru-bal-faerieflare`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, 'dh-spells', 'dru-bal-thornybristles')
     SetTalentNode(Talent, TAB, 8, 7, 8, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `dru-bal-faerieflare`)]: 1, [GetID(`Spell`, `dh-spells`, `dru-bal-earthmothersheart`)]: 1}), EmptySpellArray, EmptySpellArray)
+
 }

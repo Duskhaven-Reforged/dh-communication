@@ -56,7 +56,7 @@ export function ReloadRestoDruidTree() {
     Talent = GetID(`Spell`, 'dh-spells', 'dru-res-ironbark')
     SetTalentNode(Talent, TAB, 5, 6, 8, false, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `dru-res-abundance`)]: 1, [GetID(`Spell`, `dh-spells`, `dru-res-flourish`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, 'dh-spells', 'dru-res-childofthegrove')
-    SetTalentNode(Talent, TAB, 6, 6, 8, false, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `dru-res-flourish`)]: 1}), EmptySpellArray, EmptySpellArray)
+    SetTalentNode(Talent, TAB, 6, 6, 8, true, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `dru-res-flourish`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, 'dh-spells', 'dru-res-naturesswiftness')
     SetTalentNode(Talent, TAB, 7, 6, 8, false, 0, CreateArray<uint32>([Talent]), CreateDictionary<uint32, uint8>({[GetID(`Spell`, `dh-spells`, `dru-res-flourish`)]: 1, [GetID(`Spell`, `dh-spells`, `dru-res-harmoniousblooming`)]: 1}), EmptySpellArray, EmptySpellArray)
     Talent = GetID(`Spell`, 'dh-spells', 'dru-res-rampantgrowth')
